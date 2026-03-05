@@ -1,6 +1,5 @@
 import Image from "next/image";
 import Link from "next/link";
-import { notFound } from "next/navigation";
 import { properties } from "@/lib/properties";
 
 export const runtime = "nodejs";
@@ -16,35 +15,35 @@ function norm(input: unknown) {
   }
 }
 
-export default async function PropertyPage({
+export default function PropertyPage({
   params,
 }: {
-  // ✅ handle both sync + async params
-  params: { slug?: string } | Promise<{ slug?: string }>;
+  params: { slug?: string };
 }) {
-  const resolvedParams = await Promise.resolve(params);
-  const slug = resolvedParams?.slug;
-
-  const wanted = norm(slug);
+  const wanted = norm(params?.slug);
 
   const property = properties.find((p) => norm(p.slug) === wanted);
 
-  if (!slug || !property) {
-    // ✅ show helpful debug (temporary)
+  // ✅ TEMP: Never 404. Show debug page if mismatch.
+  if (!property) {
     return (
       <main className="mx-auto max-w-4xl px-4 py-12">
         <h1 className="text-2xl font-extrabold text-[var(--color-text-main)]">
-          Property not found
+          Property not found (debug)
         </h1>
 
         <p className="mt-3 text-sm text-gray-600">
           Requested slug:{" "}
-          <span className="font-semibold text-black">{String(slug)}</span>
+          <span className="font-semibold text-black">
+            {params?.slug ?? "(missing)"}
+          </span>
         </p>
 
         <p className="mt-2 text-sm text-gray-600">
           Normalized slug:{" "}
-          <span className="font-semibold text-black">{wanted || "(empty)"}</span>
+          <span className="font-semibold text-black">
+            {wanted || "(empty)"}
+          </span>
         </p>
 
         <div className="mt-6 rounded-2xl border border-[var(--color-border)] bg-white p-5">
@@ -57,7 +56,7 @@ export default async function PropertyPage({
               <li key={p.id}>
                 <Link
                   className="text-[var(--color-primary-dark)] underline"
-                  href={`/property/${p.slug}`}
+                  href={`/property/${encodeURIComponent(p.slug)}`}
                 >
                   {p.slug}
                 </Link>
@@ -66,20 +65,13 @@ export default async function PropertyPage({
           </ul>
         </div>
 
-        <div className="mt-6 flex gap-3">
+        <div className="mt-6">
           <Link
             href="/"
             className="inline-flex rounded-xl bg-[var(--color-primary-dark)] px-5 py-3 text-sm font-semibold text-white"
           >
             Back to Home
           </Link>
-
-          <button
-            onClick={() => history.back()}
-            className="rounded-xl border border-[var(--color-border)] px-5 py-3 text-sm font-semibold"
-          >
-            Go Back
-          </button>
         </div>
       </main>
     );
