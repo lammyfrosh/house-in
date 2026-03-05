@@ -32,15 +32,43 @@ export type Property = {
   bathrooms: number;
 
   state: State;
-  area: string;
+  area: string; // Area / LGA
   city: string;
 
   imageUrl: string;
   listedAtText: string;
 };
 
+/**
+ * Normalize any slug coming from URL params or user input:
+ * - decode URL encoding
+ * - trim spaces
+ * - lowercase
+ */
+export function normalizeSlug(input: string) {
+  try {
+    return decodeURIComponent(input).trim().toLowerCase();
+  } catch {
+    return input.trim().toLowerCase();
+  }
+}
+
+/**
+ * Guaranteed slug lookup used by /property/[slug]
+ */
+export function getPropertyBySlug(slug: string) {
+  const s = normalizeSlug(slug);
+  return properties.find((p) => normalizeSlug(p.slug) === s);
+}
+
+/**
+ * Useful for generateStaticParams()
+ */
+export function getAllPropertySlugs() {
+  return properties.map((p) => ({ slug: p.slug }));
+}
+
 export const properties: Property[] = [
-  // 1
   {
     id: "p1",
     slug: "2-bedroom-apartment-lekki-phase-1",
@@ -57,8 +85,6 @@ export const properties: Property[] = [
       "https://images.unsplash.com/photo-1568605114967-8130f3a36994?auto=format&fit=crop&w=1600&q=80",
     listedAtText: "Updated today",
   },
-
-  // 2
   {
     id: "p2",
     slug: "3-bedroom-duplex-ajah",
@@ -75,8 +101,6 @@ export const properties: Property[] = [
       "https://images.unsplash.com/photo-1502005229762-cf1b2da7c5d6?auto=format&fit=crop&w=1600&q=80",
     listedAtText: "2 days ago",
   },
-
-  // 3
   {
     id: "p3",
     slug: "shortlet-1-bedroom-victoria-island",
@@ -93,8 +117,6 @@ export const properties: Property[] = [
       "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=1600&q=80",
     listedAtText: "Updated today",
   },
-
-  // 4
   {
     id: "p4",
     slug: "4-bedroom-terrace-ikoyi",
@@ -111,8 +133,6 @@ export const properties: Property[] = [
       "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1600&q=80",
     listedAtText: "5 days ago",
   },
-
-  // 5
   {
     id: "p5",
     slug: "3-bedroom-bungalow-gra-port-harcourt",
@@ -129,8 +149,6 @@ export const properties: Property[] = [
       "https://images.unsplash.com/photo-1580587771525-78b9dba3b914?auto=format&fit=crop&w=1600&q=80",
     listedAtText: "1 week ago",
   },
-
-  // 6
   {
     id: "p6",
     slug: "land-plot-ikeja-cofo",
@@ -147,8 +165,6 @@ export const properties: Property[] = [
       "https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=1600&q=80",
     listedAtText: "3 days ago",
   },
-
-  // 7
   {
     id: "p7",
     slug: "2-bedroom-apartment-wuse-2",
@@ -165,8 +181,6 @@ export const properties: Property[] = [
       "https://images.unsplash.com/photo-1493809842364-78817add7ffb?auto=format&fit=crop&w=1600&q=80",
     listedAtText: "Updated today",
   },
-
-  // 8
   {
     id: "p8",
     slug: "shortlet-studio-garki",
@@ -183,8 +197,6 @@ export const properties: Property[] = [
       "https://images.unsplash.com/photo-1505691938895-1758d7feb511?auto=format&fit=crop&w=1600&q=80",
     listedAtText: "2 days ago",
   },
-
-  // 9
   {
     id: "p9",
     slug: "4-bedroom-duplex-lekki",
@@ -201,8 +213,6 @@ export const properties: Property[] = [
       "https://images.unsplash.com/photo-1600585152220-90363fe7e115?auto=format&fit=crop&w=1600&q=80",
     listedAtText: "Updated today",
   },
-
-  // 10
   {
     id: "p10",
     slug: "2-bedroom-apartment-ikeja-alausa",
@@ -219,8 +229,6 @@ export const properties: Property[] = [
       "https://images.unsplash.com/photo-1512918728675-ed5a9ecdebfd?auto=format&fit=crop&w=1600&q=80",
     listedAtText: "3 days ago",
   },
-
-  // 11
   {
     id: "p11",
     slug: "3-bedroom-terrace-chevron-lekki",
@@ -237,8 +245,6 @@ export const properties: Property[] = [
       "https://images.unsplash.com/photo-1600047509807-ba8f99d2cdde?auto=format&fit=crop&w=1600&q=80",
     listedAtText: "1 week ago",
   },
-
-  // 12
   {
     id: "p12",
     slug: "shortlet-2-bedroom-lekki-phase-1",
@@ -252,7 +258,7 @@ export const properties: Property[] = [
     area: "Lekki Phase 1",
     city: "Lagos",
     imageUrl:
-      "https://images.unsplash.com/photo-1549187774-b4e9b0445b41?auto=format&fit=crop&w=1600&q=80",
+      "https://images.unsplash.com/photo-1549187774-b4e9b0445b41?auto=format&fit=crop&w=1600&q=1600&q=80",
     listedAtText: "Updated today",
   },
 ];

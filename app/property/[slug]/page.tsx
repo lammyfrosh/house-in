@@ -1,13 +1,12 @@
 import Image from "next/image";
 import { notFound } from "next/navigation";
-import { properties } from "@/lib/properties";
+import { getAllPropertySlugs, getPropertyBySlug } from "@/lib/properties";
 
 export const dynamicParams = true;
 
+// ✅ Next needs this to know valid slugs (helps production)
 export function generateStaticParams() {
-  return properties.map((p) => ({
-    slug: p.slug,
-  }));
+  return getAllPropertySlugs();
 }
 
 export default function PropertyPage({
@@ -15,7 +14,7 @@ export default function PropertyPage({
 }: {
   params: { slug: string };
 }) {
-  const property = properties.find((p) => p.slug === params.slug);
+  const property = getPropertyBySlug(params.slug);
 
   if (!property) {
     return notFound();
@@ -31,13 +30,13 @@ export default function PropertyPage({
   return (
     <main className="mx-auto max-w-6xl px-4 py-10">
       <div className="grid gap-8 lg:grid-cols-2">
-
         {/* Image */}
-        <div className="relative aspect-[16/10] w-full overflow-hidden rounded-2xl">
+        <div className="relative aspect-[16/10] w-full overflow-hidden rounded-2xl border border-[var(--color-border)] bg-white">
           <Image
             src={property.imageUrl}
             alt={property.title}
             fill
+            priority
             unoptimized
             className="object-cover"
           />
@@ -57,7 +56,7 @@ export default function PropertyPage({
             {property.area}, {property.city}, {property.state}
           </p>
 
-          <p className="mt-4 text-2xl font-bold">
+          <p className="mt-4 text-2xl font-bold text-[var(--color-text-main)]">
             ₦{property.price.toLocaleString()}
           </p>
 
