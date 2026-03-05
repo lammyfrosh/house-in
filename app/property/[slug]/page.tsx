@@ -1,15 +1,89 @@
 import Image from "next/image";
+import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getPropertyBySlug } from "@/lib/properties";
+import { properties } from "@/lib/properties";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
-export default function PropertyPage({ params }: { params: { slug: string } }) {
-  const property = getPropertyBySlug(params.slug);
+function norm(input: unknown) {
+  const s = typeof input === "string" ? input : "";
+  try {
+    return decodeURIComponent(s).trim().toLowerCase();
+  } catch {
+    return s.trim().toLowerCase();
+  }
+}
 
-  if (!property) return notFound();
+export default async function PropertyPage({
+  params,
+}: {
+  // ✅ handle both sync + async params
+  params: { slug?: string } | Promise<{ slug?: string }>;
+}) {
+  const resolvedParams = await Promise.resolve(params);
+  const slug = resolvedParams?.slug;
+
+  const wanted = norm(slug);
+
+  const property = properties.find((p) => norm(p.slug) === wanted);
+
+  if (!slug || !property) {
+    // ✅ show helpful debug (temporary)
+    return (
+      <main className="mx-auto max-w-4xl px-4 py-12">
+        <h1 className="text-2xl font-extrabold text-[var(--color-text-main)]">
+          Property not found
+        </h1>
+
+        <p className="mt-3 text-sm text-gray-600">
+          Requested slug:{" "}
+          <span className="font-semibold text-black">{String(slug)}</span>
+        </p>
+
+        <p className="mt-2 text-sm text-gray-600">
+          Normalized slug:{" "}
+          <span className="font-semibold text-black">{wanted || "(empty)"}</span>
+        </p>
+
+        <div className="mt-6 rounded-2xl border border-[var(--color-border)] bg-white p-5">
+          <p className="text-sm font-semibold text-[var(--color-text-main)]">
+            Slugs available in this deployment ({properties.length}):
+          </p>
+
+          <ul className="mt-3 list-disc pl-5 text-sm text-gray-700">
+            {properties.map((p) => (
+              <li key={p.id}>
+                <Link
+                  className="text-[var(--color-primary-dark)] underline"
+                  href={`/property/${p.slug}`}
+                >
+                  {p.slug}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        <div className="mt-6 flex gap-3">
+          <Link
+            href="/"
+            className="inline-flex rounded-xl bg-[var(--color-primary-dark)] px-5 py-3 text-sm font-semibold text-white"
+          >
+            Back to Home
+          </Link>
+
+          <button
+            onClick={() => history.back()}
+            className="rounded-xl border border-[var(--color-border)] px-5 py-3 text-sm font-semibold"
+          >
+            Go Back
+          </button>
+        </div>
+      </main>
+    );
+  }
 
   const badge =
     property.purpose === "rent"
@@ -33,7 +107,7 @@ export default function PropertyPage({ params }: { params: { slug: string } }) {
         </div>
 
         <div>
-          <span className="inline-block rounded-full bg-[var(--color-primary-dark)] px-4 py-1 text-xs font-bold text-white">
+          <span className="inline-flex h-8 items-center justify-center rounded-full bg-[var(--color-primary-dark)] px-4 text-xs font-extrabold uppercase tracking-widest text-white">
             {badge}
           </span>
 
