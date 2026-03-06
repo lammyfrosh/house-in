@@ -16,11 +16,27 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: {
-    default: "House-In",
+    default: "House-In | Property for Sale, Rent & Shortlet in Nigeria",
     template: "%s | House-In",
   },
   description:
-    "House-In helps you find houses and apartments for rent and sale in Nigeria.",
+    "Find verified properties for sale, rent and shortlet across Lagos, Abuja, Rivers and other Nigerian states.",
+  keywords: [
+    "Nigeria property",
+    "houses for sale Nigeria",
+    "apartments for rent Lagos",
+    "shortlet Lagos",
+    "real estate Nigeria",
+    "property website Nigeria",
+  ],
+  openGraph: {
+    title: "House-In | Property for Sale, Rent & Shortlet in Nigeria",
+    description:
+      "Search verified houses, apartments, land and shortlet properties across Nigeria.",
+    url: "https://house-in.online",
+    siteName: "House-In",
+    type: "website",
+  },
 };
 
 export default function RootLayout({
@@ -30,15 +46,15 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-     <body
-  className={`${geistSans.variable} ${geistMono.variable} antialiased`}
->
-  <div className="flex min-h-screen flex-col">
-    <Header />
-    <main className="flex-1">{children}</main>
-    <Footer />
-  </div>
-</body>
+      <body
+        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+      >
+        <div className="flex min-h-screen flex-col">
+          <Header />
+          <main className="flex-1">{children}</main>
+          <Footer />
+        </div>
+      </body>
     </html>
   );
 }
