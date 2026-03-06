@@ -1,5 +1,4 @@
 import Image from "next/image";
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getPropertyBySlug } from "@/lib/properties";
 import { formatNaira } from "@/lib/money";
@@ -9,18 +8,16 @@ export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
 export default async function PropertyPage({
-  searchParams,
+  params,
 }: {
-  searchParams: Promise<Record<string, string | string[] | undefined>>;
+  params: Promise<{ slug: string }>;
 }) {
-  const sp = await searchParams;
-  const rawSlug = Array.isArray(sp.slug) ? sp.slug[0] : sp.slug;
+  const { slug } = await params;
+  const property = getPropertyBySlug(slug);
 
-  if (!rawSlug) return notFound();
-
-  const property = getPropertyBySlug(rawSlug);
-
-  if (!property) return notFound();
+  if (!property) {
+    return notFound();
+  }
 
   const badge =
     property.purpose === "rent"
@@ -68,15 +65,6 @@ export default async function PropertyPage({
           <p className="mt-6 text-sm text-gray-500">
             Listed {property.listedAtText}
           </p>
-
-          <div className="mt-6">
-            <Link
-              href="/search"
-              className="inline-flex rounded-xl border border-[var(--color-border)] px-4 py-2 text-sm font-semibold hover:bg-gray-50"
-            >
-              Back to Listings
-            </Link>
-          </div>
         </div>
       </div>
     </main>
