@@ -1,66 +1,74 @@
 import Image from "next/image";
-import Link from "next/link";
-import type { Property } from "@/lib/properties";
+import { notFound } from "next/navigation";
+import { getPropertyBySlug } from "@/lib/properties";
 import { formatNaira } from "@/lib/money";
 
-export default function PropertyCard({ p }: { p: Property }) {
+export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
+export default async function PropertyPage({
+  params,
+}: {
+  params: Promise<{ slug: string[] }>;
+}) {
+  const { slug } = await params;
+
+  const rawSlug = Array.isArray(slug) ? slug.join("/") : "";
+  const property = getPropertyBySlug(rawSlug);
+
+  if (!property) {
+    return notFound();
+  }
+
   const badge =
-    p.purpose === "rent"
-      ? "For Rent"
-      : p.purpose === "sale"
-      ? "For Sale"
-      : "Shortlet";
+    property.purpose === "rent"
+      ? "FOR RENT"
+      : property.purpose === "sale"
+      ? "FOR SALE"
+      : "SHORTLET";
 
   return (
-    <Link
-      href={`/property/${encodeURIComponent(p.slug)}`}
-      className="group overflow-hidden rounded-2xl border border-[var(--color-border)] bg-white transition hover:border-[var(--color-primary)] hover:shadow-md"
-    >
-      <div className="relative aspect-[16/10] w-full overflow-hidden">
-        <Image
-          src={p.imageUrl}
-          alt={`${p.title} in ${p.area}, ${p.city}`}
-          fill
-          unoptimized
-          className="object-cover transition-transform duration-300 group-hover:scale-[1.02]"
-          sizes="(max-width: 768px) 100vw, 33vw"
-        />
-      </div>
+    <main className="mx-auto max-w-6xl px-4 py-10">
+      <div className="grid gap-8 lg:grid-cols-2">
+        <div className="relative aspect-[16/10] w-full overflow-hidden rounded-2xl border border-[var(--color-border)] bg-white">
+          <Image
+            src={property.imageUrl}
+            alt={property.title}
+            fill
+            priority
+            unoptimized
+            className="object-cover"
+          />
+        </div>
 
-      <div className="p-4">
-        <div className="flex items-start justify-between gap-3">
-          <div className="min-w-0">
-            <p className="text-lg font-semibold">{formatNaira(p.price)}</p>
-            <p className="mt-1 line-clamp-1 font-medium">{p.title}</p>
-            <p className="mt-1 text-sm text-gray-600">
-              {p.area}, {p.city}, {p.state}
-            </p>
-          </div>
-
-          <span
-            className="
-              shrink-0 self-start
-              inline-flex items-center justify-center
-              h-8 min-w-[92px]
-              rounded-full
-              bg-[var(--color-primary-dark)]
-              px-3
-              text-[11px] font-extrabold uppercase tracking-widest
-              text-white
-              shadow-sm
-            "
-          >
+        <div>
+          <span className="inline-flex h-8 items-center justify-center rounded-full bg-[var(--color-primary-dark)] px-4 text-xs font-extrabold uppercase tracking-widest text-white">
             {badge}
           </span>
-        </div>
 
-        <div className="mt-3 flex items-center justify-between text-sm text-gray-700">
-          <p>
-            {p.bedrooms} bed • {p.bathrooms} bath
+          <h1 className="mt-4 text-3xl font-bold text-[var(--color-text-main)]">
+            {property.title}
+          </h1>
+
+          <p className="mt-2 text-gray-600">
+            {property.area}, {property.city}, {property.state}
           </p>
-          <p className="text-xs text-gray-500">{p.listedAtText}</p>
+
+          <p className="mt-4 text-2xl font-bold text-[var(--color-text-main)]">
+            {formatNaira(property.price)}
+          </p>
+
+          <div className="mt-6 flex gap-6 text-sm text-gray-600">
+            <span>{property.bedrooms} bed</span>
+            <span>{property.bathrooms} bath</span>
+          </div>
+
+          <p className="mt-6 text-sm text-gray-500">
+            Listed {property.listedAtText}
+          </p>
         </div>
       </div>
-    </Link>
+    </main>
   );
 }
