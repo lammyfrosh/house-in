@@ -107,7 +107,7 @@ export default function Footer() {
         <div className="mt-12 border-t border-gray-800 pt-6 text-sm text-gray-500 sm:flex sm:items-center sm:justify-between">
           <p>© {new Date().getFullYear()} House-In. All rights reserved.</p>
           <p className="text-xs">
-            Built for Nigeria • Admin approval system coming next
+            Built for Nigeria
           </p>
         </div>
       </div>
