@@ -16,26 +16,26 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: {
-    default: "House-In | Property for Sale, Rent & Shortlet in Nigeria",
+    default: "House-In | Property Search Platform",
     template: "%s | House-In",
   },
   description:
-    "Find verified properties for sale, rent and shortlet across Lagos, Abuja, Rivers and other Nigerian states.",
+    "House-In helps you find houses, apartments, land, and shortlet properties across Nigeria with a simple and reliable property search experience.",
   keywords: [
-    "Nigeria property",
-    "houses for sale Nigeria",
-    "apartments for rent Lagos",
-    "shortlet Lagos",
+    "houses for rent Nigeria",
+    "property for sale Nigeria",
+    "shortlet Nigeria",
     "real estate Nigeria",
-    "property website Nigeria",
+    "apartments Nigeria",
+    "Nigeria property platform",
   ],
   openGraph: {
-    title: "House-In | Property for Sale, Rent & Shortlet in Nigeria",
+    title: "House-In Property Platform",
     description:
-      "Search verified houses, apartments, land and shortlet properties across Nigeria.",
+      "Search houses, apartments, land, and shortlet listings across Nigeria.",
+    type: "website",
     url: "https://house-in.online",
     siteName: "House-In",
-    type: "website",
   },
 };
 

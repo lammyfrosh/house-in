@@ -14,7 +14,7 @@ export default function PropertyCard({ p }: { p: Property }) {
   return (
     <Link
       href={`/property/${encodeURIComponent(p.slug)}`}
-      className="group overflow-hidden rounded-2xl border border-[var(--color-border)] bg-white transition hover:border-[var(--color-primary)] hover:shadow-md"
+      className="group overflow-hidden rounded-2xl border border-[var(--color-border)] bg-white transition duration-300 hover:-translate-y-1 hover:border-[var(--color-primary)] hover:shadow-lg"
     >
       <div className="relative aspect-[16/10] w-full overflow-hidden">
         <Image
