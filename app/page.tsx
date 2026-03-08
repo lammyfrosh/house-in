@@ -1,5 +1,14 @@
 import Image from "next/image";
 import Link from "next/link";
+import {
+  Search,
+  MapPin,
+  ShieldCheck,
+  Building2,
+  House,
+  BadgeCheck,
+  ArrowRight,
+} from "lucide-react";
 import { properties } from "../lib/properties";
 import PropertyCard from "../components/PropertyCard";
 
@@ -16,12 +25,30 @@ const STATES = [
 ];
 
 const stateLinks = [
-  { name: "Lagos", href: "/search?state=Lagos" },
-  { name: "Abuja", href: "/search?state=Abuja" },
-  { name: "Rivers", href: "/search?state=Rivers" },
-  { name: "Edo", href: "/search?state=Edo" },
-  { name: "Delta", href: "/search?state=Delta" },
-  { name: "Enugu", href: "/search?state=Enugu" },
+  { name: "Lagos", href: "/search?state=Lagos", icon: MapPin },
+  { name: "Abuja", href: "/search?state=Abuja", icon: Building2 },
+  { name: "Rivers", href: "/search?state=Rivers", icon: House },
+  { name: "Edo", href: "/search?state=Edo", icon: MapPin },
+  { name: "Delta", href: "/search?state=Delta", icon: Building2 },
+  { name: "Enugu", href: "/search?state=Enugu", icon: House },
+];
+
+const trustItems = [
+  {
+    title: "Easy Search Experience",
+    text: "Clear filters, focused navigation, and better listing discovery make searching feel easier and faster.",
+    icon: Search,
+  },
+  {
+    title: "Professional Presentation",
+    text: "Listings are displayed in a cleaner and more organised way that helps users feel more confident.",
+    icon: BadgeCheck,
+  },
+  {
+    title: "Built for Growth",
+    text: "House-In is designed to grow into a stronger property ecosystem for agents, landlords, and users.",
+    icon: ShieldCheck,
+  },
 ];
 
 export default function Home() {
@@ -34,7 +61,7 @@ export default function Home() {
   return (
     <main>
       {/* HERO */}
-      <section className="relative h-[78vh] min-h-[560px] w-full overflow-hidden">
+      <section className="relative h-[82vh] min-h-[600px] w-full overflow-hidden">
         <Image
           src="/hero-v2.jpg"
           alt="Organised residential estate view"
@@ -43,28 +70,29 @@ export default function Home() {
           className="object-cover"
         />
 
-        <div className="absolute inset-0 bg-gradient-to-r from-black/65 via-black/45 to-black/25" />
-        <div className="absolute inset-0 bg-[var(--color-primary)]/30" />
+        <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/50 to-black/25" />
+        <div className="absolute inset-0 bg-[var(--color-primary)]/20" />
 
         <div className="relative z-10 mx-auto flex h-full max-w-6xl flex-col justify-center px-4">
           <div className="max-w-3xl">
-            <p className="inline-flex rounded-full bg-white/15 px-3 py-1 text-xs font-medium text-white backdrop-blur">
+            <p className="inline-flex items-center gap-2 rounded-full bg-white/15 px-4 py-1.5 text-xs font-medium text-white backdrop-blur">
+              <ShieldCheck size={14} />
               SEARCH BY STATE & AREA • RENT • SALE • SHORTLET
             </p>
 
-            <h1 className="mt-4 text-3xl font-semibold leading-tight text-white drop-shadow-sm md:text-5xl">
+            <h1 className="mt-5 text-3xl font-semibold leading-tight text-white drop-shadow-sm md:text-5xl">
               Find Property the Smarter Way in Nigeria
             </h1>
 
-            <p className="mt-3 max-w-2xl text-base text-white/90 drop-shadow md:text-lg">
+            <p className="mt-4 max-w-2xl text-base text-white/90 drop-shadow md:text-lg">
               Discover houses, apartments, land, and shortlet listings across
               selected states in Nigeria — with a platform designed to make your
               search easier, faster, and more reliable.
             </p>
           </div>
 
-          {/* SEARCH */}
-          <div className="mt-7 rounded-2xl bg-white p-4 shadow-md md:p-5">
+          {/* Search box */}
+          <div className="mt-8 rounded-3xl bg-white p-4 shadow-xl md:p-5">
             <form action="/search" className="grid gap-3 md:grid-cols-12">
               <select
                 name="state"
@@ -199,6 +227,22 @@ export default function Home() {
               </div>
             </form>
           </div>
+
+          {/* mini stats */}
+          <div className="mt-6 grid max-w-3xl grid-cols-3 gap-3">
+            <div className="rounded-2xl bg-white/10 px-4 py-3 text-white backdrop-blur">
+              <p className="text-lg font-bold">Sale</p>
+              <p className="text-xs text-white/80">Curated property options</p>
+            </div>
+            <div className="rounded-2xl bg-white/10 px-4 py-3 text-white backdrop-blur">
+              <p className="text-lg font-bold">Rent</p>
+              <p className="text-xs text-white/80">Better search clarity</p>
+            </div>
+            <div className="rounded-2xl bg-white/10 px-4 py-3 text-white backdrop-blur">
+              <p className="text-lg font-bold">Shortlet</p>
+              <p className="text-xs text-white/80">Flexible stay options</p>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -216,9 +260,9 @@ export default function Home() {
 
           <Link
             href="/search"
-            className="text-sm font-medium text-[var(--color-primary-dark)] hover:underline"
+            className="inline-flex items-center gap-1 text-sm font-medium text-[var(--color-primary-dark)] hover:underline"
           >
-            View all
+            View all <ArrowRight size={16} />
           </Link>
         </div>
 
@@ -242,25 +286,35 @@ export default function Home() {
           </div>
 
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {stateLinks.map((state) => (
-              <Link
-                key={state.name}
-                href={state.href}
-                className="rounded-2xl border border-[var(--color-border)] bg-white p-5 transition hover:border-[var(--color-primary)] hover:shadow-sm"
-              >
-                <p className="text-lg font-semibold text-[var(--color-text-main)]">
-                  {state.name}
-                </p>
-                <p className="mt-1 text-sm text-[var(--color-text-muted)]">
-                  View listings in {state.name}
-                </p>
-              </Link>
-            ))}
+            {stateLinks.map((state) => {
+              const Icon = state.icon;
+              return (
+                <Link
+                  key={state.name}
+                  href={state.href}
+                  className="group rounded-2xl border border-[var(--color-border)] bg-white p-5 transition hover:border-[var(--color-primary)] hover:shadow-sm"
+                >
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <p className="text-lg font-semibold text-[var(--color-text-main)]">
+                        {state.name}
+                      </p>
+                      <p className="mt-1 text-sm text-[var(--color-text-muted)]">
+                        View listings in {state.name}
+                      </p>
+                    </div>
+                    <div className="rounded-xl bg-[var(--color-primary)]/30 p-2 text-[var(--color-primary-dark)]">
+                      <Icon size={18} />
+                    </div>
+                  </div>
+                </Link>
+              );
+            })}
           </div>
         </div>
       </section>
 
-      {/* ABOUT US */}
+      {/* ABOUT */}
       <section className="bg-[var(--color-primary)]/20">
         <div className="mx-auto max-w-6xl px-4 py-14">
           <div className="grid gap-10 lg:grid-cols-[1.1fr_0.9fr]">
@@ -298,37 +352,52 @@ export default function Home() {
               </div>
             </div>
 
-            <div className="rounded-3xl border border-[var(--color-border)] bg-white p-6 md:p-8">
+            <div className="rounded-3xl border border-[var(--color-border)] bg-white p-6 md:p-8 shadow-sm">
               <p className="text-xs font-extrabold uppercase tracking-widest text-[var(--color-primary-dark)]">
                 Our Promise
               </p>
 
               <div className="mt-5 space-y-5">
-                <div>
-                  <h3 className="text-lg font-semibold text-[var(--color-text-main)]">
-                    Clarity
-                  </h3>
-                  <p className="mt-1 text-sm text-[var(--color-text-muted)]">
-                    Search tools and property information presented in a way people can understand quickly.
-                  </p>
+                <div className="flex gap-3">
+                  <div className="mt-1 rounded-xl bg-[var(--color-primary)]/30 p-2 text-[var(--color-primary-dark)]">
+                    <Search size={18} />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-semibold text-[var(--color-text-main)]">
+                      Clarity
+                    </h3>
+                    <p className="mt-1 text-sm text-[var(--color-text-muted)]">
+                      Search tools and property information presented in a way people can understand quickly.
+                    </p>
+                  </div>
                 </div>
 
-                <div>
-                  <h3 className="text-lg font-semibold text-[var(--color-text-main)]">
-                    Confidence
-                  </h3>
-                  <p className="mt-1 text-sm text-[var(--color-text-muted)]">
-                    A platform experience that feels organised, intentional, and trustworthy.
-                  </p>
+                <div className="flex gap-3">
+                  <div className="mt-1 rounded-xl bg-[var(--color-primary)]/30 p-2 text-[var(--color-primary-dark)]">
+                    <ShieldCheck size={18} />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-semibold text-[var(--color-text-main)]">
+                      Confidence
+                    </h3>
+                    <p className="mt-1 text-sm text-[var(--color-text-muted)]">
+                      A platform experience that feels organised, intentional, and trustworthy.
+                    </p>
+                  </div>
                 </div>
 
-                <div>
-                  <h3 className="text-lg font-semibold text-[var(--color-text-main)]">
-                    Convenience
-                  </h3>
-                  <p className="mt-1 text-sm text-[var(--color-text-muted)]">
-                    From search to enquiry, every step is being designed to feel smoother and smarter.
-                  </p>
+                <div className="flex gap-3">
+                  <div className="mt-1 rounded-xl bg-[var(--color-primary)]/30 p-2 text-[var(--color-primary-dark)]">
+                    <BadgeCheck size={18} />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-semibold text-[var(--color-text-main)]">
+                      Convenience
+                    </h3>
+                    <p className="mt-1 text-sm text-[var(--color-text-muted)]">
+                      From search to enquiry, every step is being designed to feel smoother and smarter.
+                    </p>
+                  </div>
                 </div>
               </div>
             </div>
@@ -349,37 +418,25 @@ export default function Home() {
           </div>
 
           <div className="grid gap-4 md:grid-cols-3">
-            <div className="rounded-2xl border border-[var(--color-border)] bg-white p-6">
-              <h3 className="text-lg font-semibold text-[var(--color-text-main)]">
-                Easy Search Experience
-              </h3>
-              <p className="mt-2 text-sm leading-6 text-[var(--color-text-muted)]">
-                Clear filters, straightforward navigation, and focused property
-                discovery make the platform easy to use for both first-time and
-                experienced users.
-              </p>
-            </div>
-
-            <div className="rounded-2xl border border-[var(--color-border)] bg-white p-6">
-              <h3 className="text-lg font-semibold text-[var(--color-text-main)]">
-                Professional Presentation
-              </h3>
-              <p className="mt-2 text-sm leading-6 text-[var(--color-text-muted)]">
-                The layout, property cards, and information flow are designed to
-                give users confidence and make listings feel valuable.
-              </p>
-            </div>
-
-            <div className="rounded-2xl border border-[var(--color-border)] bg-white p-6">
-              <h3 className="text-lg font-semibold text-[var(--color-text-main)]">
-                Built for Growth
-              </h3>
-              <p className="mt-2 text-sm leading-6 text-[var(--color-text-muted)]">
-                House-In is being structured not just for today’s listings, but
-                for a stronger property ecosystem as more agents, landlords, and
-                users come onboard.
-              </p>
-            </div>
+            {trustItems.map((item) => {
+              const Icon = item.icon;
+              return (
+                <div
+                  key={item.title}
+                  className="rounded-2xl border border-[var(--color-border)] bg-white p-6 shadow-sm"
+                >
+                  <div className="mb-4 inline-flex rounded-xl bg-[var(--color-primary)]/30 p-3 text-[var(--color-primary-dark)]">
+                    <Icon size={20} />
+                  </div>
+                  <h3 className="text-lg font-semibold text-[var(--color-text-main)]">
+                    {item.title}
+                  </h3>
+                  <p className="mt-2 text-sm leading-6 text-[var(--color-text-muted)]">
+                    {item.text}
+                  </p>
+                </div>
+              );
+            })}
           </div>
         </div>
       </section>
