@@ -10,23 +10,21 @@ import {
   Mail,
 } from "lucide-react";
 
-import { properties } from "@/lib/properties";
+import { getPropertyBySlug, properties } from "@/lib/properties";
 import PropertyCard from "@/components/PropertyCard";
 
-export const dynamicParams = true;
+export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
-export function generateStaticParams() {
-  return properties.map((p) => ({
-    slug: p.slug,
-  }));
-}
-
-export default function PropertyPage({
+export default async function PropertyPage({
   params,
 }: {
-  params: { slug: string };
+  params: Promise<{ slug: string[] }>;
 }) {
-  const property = properties.find((p) => p.slug === params.slug);
+  const { slug } = await params;
+  const rawSlug = Array.isArray(slug) ? slug.join("/") : "";
+  const property = getPropertyBySlug(rawSlug);
 
   if (!property) {
     return notFound();
@@ -58,6 +56,7 @@ export default function PropertyPage({
           fill
           className="object-cover"
           unoptimized
+          priority
         />
 
         <div className="absolute inset-0 bg-black/35" />
