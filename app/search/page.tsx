@@ -1,5 +1,5 @@
+import SearchResultsMapClient from "@/components/SearchResultsMapClient";
 import { properties } from "../../lib/properties";
-import SearchResultsMapClient from "../../components/SearchResultsMapClient";
 
 type SortMode = "newest" | "price_low" | "price_high";
 
@@ -17,17 +17,17 @@ function norm(s: string) {
 }
 
 const AREA_COORDS: Record<string, { lat: number; lng: number }> = {
-  "lekki": { lat: 6.4698, lng: 3.5852 },
+  lekki: { lat: 6.4698, lng: 3.5852 },
   "lekki phase 1": { lat: 6.4474, lng: 3.4721 },
-  "ajah": { lat: 6.4654, lng: 3.6015 },
+  ajah: { lat: 6.4654, lng: 3.6015 },
   "victoria island": { lat: 6.4281, lng: 3.4219 },
-  "ikoyi": { lat: 6.4549, lng: 3.4356 },
-  "ikeja": { lat: 6.6018, lng: 3.3515 },
-  "alausa": { lat: 6.6213, lng: 3.3581 },
-  "chevron": { lat: 6.4412, lng: 3.5353 },
+  ikoyi: { lat: 6.4549, lng: 3.4356 },
+  ikeja: { lat: 6.6018, lng: 3.3515 },
+  alausa: { lat: 6.6213, lng: 3.3581 },
+  chevron: { lat: 6.4412, lng: 3.5353 },
   "wuse 2": { lat: 9.0765, lng: 7.4767 },
-  "garki": { lat: 9.0369, lng: 7.4937 },
-  "gra": { lat: 4.8156, lng: 7.0498 },
+  garki: { lat: 9.0369, lng: 7.4937 },
+  gra: { lat: 4.8156, lng: 7.0498 },
   "port harcourt": { lat: 4.8156, lng: 7.0498 },
 };
 
@@ -41,11 +41,6 @@ const STATE_CENTERS: Record<string, { lat: number; lng: number }> = {
   Enugu: { lat: 6.5244, lng: 7.5086 },
   Imo: { lat: 5.572, lng: 7.0588 },
   Abia: { lat: 5.4527, lng: 7.5248 },
-};
-
-export type SearchMapProperty = (typeof properties)[number] & {
-  lat: number;
-  lng: number;
 };
 
 function getCoords(area: string, city: string, state: string) {
@@ -121,7 +116,7 @@ export default async function SearchPage({
     return 0;
   });
 
-  const mappedResults: SearchMapProperty[] = results.map((p) => {
+  const mappedResults = results.map((p) => {
     const coords = getCoords(p.area, p.city, p.state);
     return {
       ...p,
@@ -150,7 +145,6 @@ export default async function SearchPage({
         baths: bathsStr,
         minPrice,
         maxPrice,
-        sort,
       }}
     />
   );

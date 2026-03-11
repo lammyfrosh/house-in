@@ -60,7 +60,6 @@ export default function Home() {
 
   return (
     <main>
-      {/* HERO */}
       <section className="relative h-[82vh] min-h-[600px] w-full overflow-hidden">
         <Image
           src="/hero-v2.jpg"
@@ -91,7 +90,6 @@ export default function Home() {
             </p>
           </div>
 
-          {/* Search box */}
           <div className="mt-8 rounded-3xl bg-white p-4 shadow-xl md:p-5">
             <form action="/search" className="grid gap-3 md:grid-cols-12">
               <select
@@ -116,8 +114,9 @@ export default function Home() {
               <select
                 name="purpose"
                 className="h-11 rounded-xl border border-[var(--color-border)] px-3 md:col-span-2"
-                defaultValue="rent"
+                defaultValue=""
               >
+                <option value="">Purpose</option>
                 <option value="rent">For Rent</option>
                 <option value="sale">For Sale</option>
                 <option value="shortlet">Shortlet</option>
@@ -228,7 +227,6 @@ export default function Home() {
             </form>
           </div>
 
-          {/* mini stats */}
           <div className="mt-6 grid max-w-3xl grid-cols-3 gap-3">
             <div className="rounded-2xl bg-white/10 px-4 py-3 text-white backdrop-blur">
               <p className="text-lg font-bold">Sale</p>
@@ -246,7 +244,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* FEATURED */}
       <section className="mx-auto max-w-6xl px-4 py-14">
         <div className="mb-5 flex items-center justify-between">
           <div>
@@ -273,7 +270,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* BROWSE BY STATE */}
       <section className="bg-white">
         <div className="mx-auto max-w-6xl px-4 py-14">
           <div className="mb-6">
@@ -314,7 +310,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ABOUT */}
       <section className="bg-[var(--color-primary)]/20">
         <div className="mx-auto max-w-6xl px-4 py-14">
           <div className="grid gap-10 lg:grid-cols-[1.1fr_0.9fr]">
@@ -405,7 +400,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* WHY CHOOSE */}
       <section>
         <div className="mx-auto max-w-6xl px-4 py-14">
           <div className="mb-6">
