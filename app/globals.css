@@ -2,20 +2,28 @@
 
 :root {
   --background: #ffffff;
-  --foreground: #171717;
-}
+  --foreground: #1f2937;
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  /* Mint theme */
+  --color-primary: #bdede5;
+  --color-primary-dark: #0f766e;
+
+  --color-text-main: #1f2937;
+  --color-text-muted: #6b7280;
+
+  --color-border: #e5e7eb;
+  --color-bg: #ffffff;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
     --background: #0a0a0a;
     --foreground: #ededed;
+
+    --color-bg: #0a0a0a;
+    --color-text-main: #ededed;
+    --color-text-muted: #cbd5e1;
+    --color-border: #334155;
   }
 }
 
@@ -23,14 +31,4 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
-}
-:root {
-  --color-primary: #BDEDE5;
-  --color-primary-dark: #0F766E;
-
-  --color-text-main: #1F2937;
-  --color-text-muted: #6B7280;
-
-  --color-border: #E5E7EB;
-  --color-bg: #FFFFFF;
 }
