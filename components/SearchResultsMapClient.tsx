@@ -42,6 +42,7 @@ type SearchSummary = {
   baths: string;
   minPrice: number;
   maxPrice: number;
+  sort?: string;
 };
 
 const markerIcon = new L.Icon({
@@ -108,6 +109,7 @@ export default function SearchResultsMapClient({
   return (
     <main className="h-[calc(100vh-72px)] overflow-hidden bg-[#fafafa]">
       <div className="grid h-full lg:grid-cols-[1.15fr_0.95fr]">
+
         <section className="relative hidden h-full border-r border-[var(--color-border)] bg-white lg:block">
           <div className="absolute left-4 top-4 z-[500] rounded-2xl bg-white/95 px-4 py-3 shadow-lg backdrop-blur">
             <p className="text-xs font-extrabold uppercase tracking-widest text-[var(--color-primary-dark)]">
@@ -181,6 +183,7 @@ export default function SearchResultsMapClient({
                 >
                   Back Home
                 </Link>
+
                 <Link
                   href="/search"
                   className="rounded-xl bg-[var(--color-primary-dark)] px-4 py-2 text-sm font-semibold text-white hover:opacity-90"
@@ -214,23 +217,27 @@ export default function SearchResultsMapClient({
           </div>
 
           <div className="flex-1 overflow-y-auto px-4 py-5 sm:px-5">
+
             {results.length === 0 ? (
               <div className="rounded-2xl border border-[var(--color-border)] bg-white p-10 text-center">
                 <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-[var(--color-primary)]/20 text-[var(--color-primary-dark)]">
                   <SearchX size={24} />
                 </div>
+
                 <h2 className="mt-4 text-xl font-bold text-[var(--color-text-main)]">
                   No properties found
                 </h2>
+
                 <p className="mx-auto mt-2 max-w-md text-sm text-[var(--color-text-muted)]">
-                  Try broadening your search area, changing the property type, or
-                  adjusting the price range.
+                  Try broadening your search area, changing the property type, or adjusting the price range.
                 </p>
               </div>
             ) : (
               <div className="space-y-4">
                 {results.map((property) => {
+
                   const active = property.id === selectedProperty?.id;
+
                   const badge =
                     property.purpose === "rent"
                       ? "For Rent"
@@ -250,6 +257,7 @@ export default function SearchResultsMapClient({
                       }`}
                     >
                       <div className="grid md:grid-cols-[240px_1fr]">
+
                         <div className="relative min-h-[210px] overflow-hidden">
                           <Image
                             src={property.imageUrl}
@@ -261,40 +269,52 @@ export default function SearchResultsMapClient({
                         </div>
 
                         <div className="p-5">
+
                           <div className="flex flex-wrap items-start justify-between gap-3">
+
                             <div className="min-w-0">
+
                               <p className="text-2xl font-bold text-[var(--color-text-main)]">
                                 {formatNaira(property.price)}
                               </p>
+
                               <h3 className="mt-2 line-clamp-2 text-lg font-semibold text-[var(--color-text-main)]">
                                 {property.title}
                               </h3>
+
                               <p className="mt-2 flex items-center gap-2 text-sm text-[var(--color-text-muted)]">
                                 <MapPin size={16} />
                                 {property.area}, {property.city}, {property.state}
                               </p>
+
                             </div>
 
                             <span className="inline-flex h-8 items-center justify-center rounded-full bg-[var(--color-primary-dark)] px-4 text-xs font-extrabold uppercase tracking-widest text-white">
                               {badge}
                             </span>
+
                           </div>
 
                           <div className="mt-5 flex flex-wrap items-center gap-5 text-sm text-gray-700">
+
                             <span className="inline-flex items-center gap-2">
                               <BedDouble size={16} />
                               {property.bedrooms} bed
                             </span>
+
                             <span className="inline-flex items-center gap-2">
                               <Bath size={16} />
                               {property.bathrooms} bath
                             </span>
+
                             <span className="text-xs text-gray-500">
                               {property.listedAtText}
                             </span>
+
                           </div>
 
                           <div className="mt-5 flex items-center justify-between">
+
                             <p className="text-sm text-[var(--color-primary-dark)]">
                               {active ? "Highlighted on map" : "Hover to show on map"}
                             </p>
@@ -302,7 +322,9 @@ export default function SearchResultsMapClient({
                             <span className="text-sm font-semibold text-[var(--color-primary-dark)]">
                               View Property →
                             </span>
+
                           </div>
+
                         </div>
                       </div>
                     </Link>
@@ -310,8 +332,10 @@ export default function SearchResultsMapClient({
                 })}
               </div>
             )}
+
           </div>
         </section>
+
       </div>
     </main>
   );
