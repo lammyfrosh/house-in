@@ -42,7 +42,6 @@ type SearchSummary = {
   baths: string;
   minPrice: number;
   maxPrice: number;
-  sort?: string;
 };
 
 const markerIcon = new L.Icon({
@@ -107,61 +106,64 @@ export default function SearchResultsMapClient({
   ].filter(Boolean);
 
   return (
-    <main className="h-[calc(100vh-72px)] overflow-hidden bg-[#fafafa]">
-      <div className="grid h-full lg:grid-cols-[1.15fr_0.95fr]">
+    <main className="bg-[#fafafa]">
+      <div className="grid lg:grid-cols-[1.05fr_0.95fr]">
+        {/* MAP SIDE */}
+        <section className="hidden lg:block">
+          <div className="sticky top-[72px] h-[calc(100vh-72px)] border-r border-[var(--color-border)] bg-white">
+            <div className="absolute left-4 top-4 z-[500] rounded-2xl bg-white/95 px-4 py-3 shadow-lg backdrop-blur">
+              <p className="text-xs font-extrabold uppercase tracking-widest text-[var(--color-primary-dark)]">
+                Search Map View
+              </p>
+              <p className="mt-1 text-sm font-semibold text-[var(--color-text-main)]">
+                {results.length} listing{results.length === 1 ? "" : "s"} found
+              </p>
+            </div>
 
-        <section className="relative hidden h-full border-r border-[var(--color-border)] bg-white lg:block">
-          <div className="absolute left-4 top-4 z-[500] rounded-2xl bg-white/95 px-4 py-3 shadow-lg backdrop-blur">
-            <p className="text-xs font-extrabold uppercase tracking-widest text-[var(--color-primary-dark)]">
-              Search Map View
-            </p>
-            <p className="mt-1 text-sm font-semibold text-[var(--color-text-main)]">
-              {results.length} listing{results.length === 1 ? "" : "s"} found
-            </p>
+            <MapContainer
+              center={[defaultCenter.lat, defaultCenter.lng]}
+              zoom={11}
+              scrollWheelZoom
+              className="h-full w-full"
+            >
+              <TileLayer
+                {...({
+                  url: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+                  attribution:
+                    '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+                } as any)}
+              />
+
+              {selectedProperty && (
+                <FlyToSelected lat={selectedProperty.lat} lng={selectedProperty.lng} />
+              )}
+
+              {results.map((property) => (
+                <Marker
+                  key={property.id}
+                  position={[property.lat, property.lng]}
+                  icon={markerIcon}
+                  eventHandlers={{
+                    click: () => setSelectedId(property.id),
+                  }}
+                >
+                  <Popup>
+                    <div className="min-w-[180px]">
+                      <p className="font-semibold">{property.title}</p>
+                      <p className="mt-1 text-sm text-gray-600">
+                        {property.area}, {property.city}, {property.state}
+                      </p>
+                      <p className="mt-2 font-bold">{formatNaira(property.price)}</p>
+                    </div>
+                  </Popup>
+                </Marker>
+              ))}
+            </MapContainer>
           </div>
-
-          <MapContainer
-            center={[defaultCenter.lat, defaultCenter.lng]}
-            zoom={11}
-            scrollWheelZoom
-            className="h-full w-full"
-          >
-            <TileLayer
-              {...({
-                url: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
-                attribution:
-                  '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
-              } as any)}
-            />
-
-            {selectedProperty && (
-              <FlyToSelected lat={selectedProperty.lat} lng={selectedProperty.lng} />
-            )}
-
-            {results.map((property) => (
-              <Marker
-                key={property.id}
-                position={[property.lat, property.lng]}
-                icon={markerIcon}
-                eventHandlers={{
-                  click: () => setSelectedId(property.id),
-                }}
-              >
-                <Popup>
-                  <div className="min-w-[180px]">
-                    <p className="font-semibold">{property.title}</p>
-                    <p className="mt-1 text-sm text-gray-600">
-                      {property.area}, {property.city}, {property.state}
-                    </p>
-                    <p className="mt-2 font-bold">{formatNaira(property.price)}</p>
-                  </div>
-                </Popup>
-              </Marker>
-            ))}
-          </MapContainer>
         </section>
 
-        <section className="flex h-full flex-col">
+        {/* RESULTS SIDE */}
+        <section className="min-h-screen">
           <div className="border-b border-[var(--color-border)] bg-white px-4 py-4 sm:px-5">
             <div className="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
               <div>
@@ -172,7 +174,7 @@ export default function SearchResultsMapClient({
                   Results for Your Search
                 </h1>
                 <p className="mt-1 text-sm text-[var(--color-text-muted)]">
-                  Hover a property card to highlight its approximate location on the map.
+                  Browse all matching listings and highlight approximate locations on the map.
                 </p>
               </div>
 
@@ -183,12 +185,11 @@ export default function SearchResultsMapClient({
                 >
                   Back Home
                 </Link>
-
                 <Link
                   href="/search"
                   className="rounded-xl bg-[var(--color-primary-dark)] px-4 py-2 text-sm font-semibold text-white hover:opacity-90"
                 >
-                  Clear Filters
+                  View All
                 </Link>
               </div>
             </div>
@@ -216,126 +217,117 @@ export default function SearchResultsMapClient({
             </div>
           </div>
 
-          <div className="flex-1 overflow-y-auto px-4 py-5 sm:px-5">
-
+          <div className="px-4 py-5 sm:px-5">
             {results.length === 0 ? (
               <div className="rounded-2xl border border-[var(--color-border)] bg-white p-10 text-center">
                 <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-[var(--color-primary)]/20 text-[var(--color-primary-dark)]">
                   <SearchX size={24} />
                 </div>
-
                 <h2 className="mt-4 text-xl font-bold text-[var(--color-text-main)]">
                   No properties found
                 </h2>
-
                 <p className="mx-auto mt-2 max-w-md text-sm text-[var(--color-text-muted)]">
-                  Try broadening your search area, changing the property type, or adjusting the price range.
+                  Try broadening your search area, changing the property type, or
+                  adjusting the price range.
                 </p>
               </div>
             ) : (
-              <div className="space-y-4">
-                {results.map((property) => {
+              <>
+                <div className="mb-4 rounded-2xl border border-[var(--color-border)] bg-white px-4 py-3">
+                  <p className="text-sm font-semibold text-[var(--color-text-main)]">
+                    Showing {results.length} propert{results.length === 1 ? "y" : "ies"}
+                  </p>
+                </div>
 
-                  const active = property.id === selectedProperty?.id;
+                <div className="space-y-4">
+                  {results.map((property) => {
+                    const active = property.id === selectedProperty?.id;
+                    const badge =
+                      property.purpose === "rent"
+                        ? "For Rent"
+                        : property.purpose === "sale"
+                        ? "For Sale"
+                        : "Shortlet";
 
-                  const badge =
-                    property.purpose === "rent"
-                      ? "For Rent"
-                      : property.purpose === "sale"
-                      ? "For Sale"
-                      : "Shortlet";
+                    return (
+                      <Link
+                        key={property.id}
+                        href={`/property/${encodeURIComponent(property.slug)}`}
+                        onMouseEnter={() => setSelectedId(property.id)}
+                        className={`block overflow-hidden rounded-2xl border bg-white transition duration-300 hover:shadow-lg ${
+                          active
+                            ? "border-[var(--color-primary-dark)] shadow-md"
+                            : "border-[var(--color-border)]"
+                        }`}
+                      >
+                        <div className="grid md:grid-cols-[260px_1fr]">
+                          <div className="relative min-h-[220px] overflow-hidden">
+                            <Image
+                              src={property.imageUrl}
+                              alt={property.title}
+                              fill
+                              unoptimized
+                              className="object-cover"
+                            />
+                          </div>
 
-                  return (
-                    <Link
-                      key={property.id}
-                      href={`/property/${encodeURIComponent(property.slug)}`}
-                      onMouseEnter={() => setSelectedId(property.id)}
-                      className={`block overflow-hidden rounded-2xl border bg-white transition duration-300 hover:shadow-lg ${
-                        active
-                          ? "border-[var(--color-primary-dark)] shadow-md"
-                          : "border-[var(--color-border)]"
-                      }`}
-                    >
-                      <div className="grid md:grid-cols-[240px_1fr]">
+                          <div className="p-5">
+                            <div className="flex flex-wrap items-start justify-between gap-3">
+                              <div className="min-w-0">
+                                <p className="text-2xl font-bold text-[var(--color-text-main)]">
+                                  {formatNaira(property.price)}
+                                </p>
 
-                        <div className="relative min-h-[210px] overflow-hidden">
-                          <Image
-                            src={property.imageUrl}
-                            alt={property.title}
-                            fill
-                            unoptimized
-                            className="object-cover"
-                          />
-                        </div>
+                                <h3 className="mt-2 line-clamp-2 text-lg font-semibold text-[var(--color-text-main)]">
+                                  {property.title}
+                                </h3>
 
-                        <div className="p-5">
+                                <p className="mt-2 flex items-center gap-2 text-sm text-[var(--color-text-muted)]">
+                                  <MapPin size={16} />
+                                  {property.area}, {property.city}, {property.state}
+                                </p>
+                              </div>
 
-                          <div className="flex flex-wrap items-start justify-between gap-3">
-
-                            <div className="min-w-0">
-
-                              <p className="text-2xl font-bold text-[var(--color-text-main)]">
-                                {formatNaira(property.price)}
-                              </p>
-
-                              <h3 className="mt-2 line-clamp-2 text-lg font-semibold text-[var(--color-text-main)]">
-                                {property.title}
-                              </h3>
-
-                              <p className="mt-2 flex items-center gap-2 text-sm text-[var(--color-text-muted)]">
-                                <MapPin size={16} />
-                                {property.area}, {property.city}, {property.state}
-                              </p>
-
+                              <span className="inline-flex h-8 items-center justify-center rounded-full bg-[var(--color-primary-dark)] px-4 text-xs font-extrabold uppercase tracking-widest text-white">
+                                {badge}
+                              </span>
                             </div>
 
-                            <span className="inline-flex h-8 items-center justify-center rounded-full bg-[var(--color-primary-dark)] px-4 text-xs font-extrabold uppercase tracking-widest text-white">
-                              {badge}
-                            </span>
+                            <div className="mt-5 flex flex-wrap items-center gap-5 text-sm text-gray-700">
+                              <span className="inline-flex items-center gap-2">
+                                <BedDouble size={16} />
+                                {property.bedrooms} bed
+                              </span>
 
+                              <span className="inline-flex items-center gap-2">
+                                <Bath size={16} />
+                                {property.bathrooms} bath
+                              </span>
+
+                              <span className="text-xs text-gray-500">
+                                {property.listedAtText}
+                              </span>
+                            </div>
+
+                            <div className="mt-5 flex items-center justify-between">
+                              <p className="text-sm text-[var(--color-primary-dark)]">
+                                {active ? "Highlighted on map" : "Hover to show on map"}
+                              </p>
+
+                              <span className="text-sm font-semibold text-[var(--color-primary-dark)]">
+                                View Property →
+                              </span>
+                            </div>
                           </div>
-
-                          <div className="mt-5 flex flex-wrap items-center gap-5 text-sm text-gray-700">
-
-                            <span className="inline-flex items-center gap-2">
-                              <BedDouble size={16} />
-                              {property.bedrooms} bed
-                            </span>
-
-                            <span className="inline-flex items-center gap-2">
-                              <Bath size={16} />
-                              {property.bathrooms} bath
-                            </span>
-
-                            <span className="text-xs text-gray-500">
-                              {property.listedAtText}
-                            </span>
-
-                          </div>
-
-                          <div className="mt-5 flex items-center justify-between">
-
-                            <p className="text-sm text-[var(--color-primary-dark)]">
-                              {active ? "Highlighted on map" : "Hover to show on map"}
-                            </p>
-
-                            <span className="text-sm font-semibold text-[var(--color-primary-dark)]">
-                              View Property →
-                            </span>
-
-                          </div>
-
                         </div>
-                      </div>
-                    </Link>
-                  );
-                })}
-              </div>
+                      </Link>
+                    );
+                  })}
+                </div>
+              </>
             )}
-
           </div>
         </section>
-
       </div>
     </main>
   );
