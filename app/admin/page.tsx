@@ -18,7 +18,8 @@ export default function AdminPage() {
   const [message, setMessage] = useState("Checking session...");
   const [loading, setLoading] = useState(true);
 
-  const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
+  const API_BASE_URL =
+  process.env.NEXT_PUBLIC_API_BASE_URL || "https://api.house-in.online";
 
   useEffect(() => {
     async function checkAuth() {
