@@ -34,6 +34,11 @@ export default function ManageAdminsPage() {
   const [password, setPassword] = useState("");
   const [role, setRole] = useState("admin");
 
+  function isSuperAdmin(roleValue: string) {
+    const normalized = String(roleValue || "").toLowerCase().trim();
+    return normalized === "super_admin" || normalized === "superadmin";
+  }
+
   async function loadAdmins(token: string) {
     const res = await fetch(`${API_BASE_URL}/api/auth/admins`, {
       headers: {
@@ -75,7 +80,7 @@ export default function ManageAdminsPage() {
           return;
         }
 
-        if (meData.user?.role !== "super_admin") {
+        if (!isSuperAdmin(meData.user?.role)) {
           router.push("/admin");
           return;
         }
