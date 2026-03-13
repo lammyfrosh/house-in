@@ -45,6 +45,7 @@ export default function AdminPropertiesPage() {
   const [properties, setProperties] = useState<Property[]>([]);
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState("");
+  const [messageType, setMessageType] = useState<"success" | "error" | "">("");
   const [actionId, setActionId] = useState<number | null>(null);
 
   async function loadProperties(token: string) {
@@ -93,6 +94,7 @@ export default function AdminPropertiesPage() {
       } catch (error) {
         console.error(error);
         setMessage("Could not load properties");
+        setMessageType("error");
       } finally {
         setLoading(false);
       }
@@ -108,6 +110,7 @@ export default function AdminPropertiesPage() {
 
     setActionId(id);
     setMessage("");
+    setMessageType("");
 
     try {
       const res = await fetch(`${API}/api/properties/${id}/status`, {
@@ -123,18 +126,26 @@ export default function AdminPropertiesPage() {
 
       if (!res.ok) {
         setMessage(data.message || "Update failed");
-        setActionId(null);
+        setMessageType("error");
         return;
       }
 
-      setProperties((prev) =>
-        prev.map((p) => (p.id === id ? { ...p, status } : p))
-      );
+      if (data.property) {
+        setProperties((prev) =>
+          prev.map((p) => (p.id === id ? { ...p, ...data.property } : p))
+        );
+      } else {
+        setProperties((prev) =>
+          prev.map((p) => (p.id === id ? { ...p, status } : p))
+        );
+      }
 
       setMessage(`Property ${status} successfully.`);
+      setMessageType("success");
     } catch (error) {
       console.error(error);
       setMessage("Could not update property status");
+      setMessageType("error");
     } finally {
       setActionId(null);
     }
@@ -148,6 +159,7 @@ export default function AdminPropertiesPage() {
 
     setActionId(id);
     setMessage("");
+    setMessageType("");
 
     try {
       const res = await fetch(`${API}/api/properties/${id}`, {
@@ -161,15 +173,17 @@ export default function AdminPropertiesPage() {
 
       if (!res.ok) {
         setMessage(data.message || "Delete failed");
-        setActionId(null);
+        setMessageType("error");
         return;
       }
 
       setProperties((prev) => prev.filter((p) => p.id !== id));
       setMessage("Property deleted successfully.");
+      setMessageType("success");
     } catch (error) {
       console.error(error);
       setMessage("Could not delete property");
+      setMessageType("error");
     } finally {
       setActionId(null);
     }
@@ -229,7 +243,7 @@ export default function AdminPropertiesPage() {
       {message && (
         <div
           className={`mt-5 rounded-xl px-4 py-3 text-sm ${
-            message.toLowerCase().includes("success")
+            messageType === "success"
               ? "bg-green-50 text-green-700"
               : "bg-red-50 text-red-700"
           }`}
@@ -337,37 +351,43 @@ export default function AdminPropertiesPage() {
                       )}
                     </div>
 
-                    <div className="flex w-full flex-col gap-2 xl:w-40">
-                      <button
-                        onClick={() => updateStatus(property.id, "approved")}
-                        disabled={actionId === property.id}
-                        className="rounded-lg bg-green-600 px-4 py-2 text-sm font-semibold text-white hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-70"
-                      >
-                        Approve
-                      </button>
+                    <div className="flex w-full flex-col gap-2 xl:w-44">
+                      {property.status !== "approved" && (
+                        <button
+                          onClick={() => updateStatus(property.id, "approved")}
+                          disabled={actionId === property.id}
+                          className="rounded-lg bg-green-600 px-4 py-2 text-sm font-semibold text-white hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-70"
+                        >
+                          {actionId === property.id ? "Processing..." : "Approve"}
+                        </button>
+                      )}
 
-                      <button
-                        onClick={() => updateStatus(property.id, "rejected")}
-                        disabled={actionId === property.id}
-                        className="rounded-lg bg-red-600 px-4 py-2 text-sm font-semibold text-white hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-70"
-                      >
-                        Reject
-                      </button>
+                      {property.status !== "rejected" && (
+                        <button
+                          onClick={() => updateStatus(property.id, "rejected")}
+                          disabled={actionId === property.id}
+                          className="rounded-lg bg-red-600 px-4 py-2 text-sm font-semibold text-white hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-70"
+                        >
+                          {actionId === property.id ? "Processing..." : "Reject"}
+                        </button>
+                      )}
 
-                      <button
-                        onClick={() => updateStatus(property.id, "pending")}
-                        disabled={actionId === property.id}
-                        className="rounded-lg bg-yellow-500 px-4 py-2 text-sm font-semibold text-white hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-70"
-                      >
-                        Pending
-                      </button>
+                      {property.status !== "pending" && (
+                        <button
+                          onClick={() => updateStatus(property.id, "pending")}
+                          disabled={actionId === property.id}
+                          className="rounded-lg bg-yellow-500 px-4 py-2 text-sm font-semibold text-white hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-70"
+                        >
+                          {actionId === property.id ? "Processing..." : "Mark Pending"}
+                        </button>
+                      )}
 
                       <button
                         onClick={() => deleteProperty(property.id)}
                         disabled={actionId === property.id}
                         className="rounded-lg border border-[var(--color-border)] px-4 py-2 text-sm font-semibold text-[var(--color-text-main)] hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-70"
                       >
-                        Delete
+                        {actionId === property.id ? "Processing..." : "Delete"}
                       </button>
                     </div>
                   </div>
