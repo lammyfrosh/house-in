@@ -34,11 +34,13 @@ export default function AddPropertyPage() {
   const [description, setDescription] = useState("");
   const [featured, setFeatured] = useState(false);
 
-  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [mainImageFile, setMainImageFile] = useState<File | null>(null);
+  const [galleryFiles, setGalleryFiles] = useState<File[]>([]);
   const [videoFile, setVideoFile] = useState<File | null>(null);
 
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
+  const [messageType, setMessageType] = useState<"success" | "error" | "">("");
 
   useEffect(() => {
     async function checkAuth() {
@@ -69,6 +71,7 @@ export default function AddPropertyPage() {
       } catch (error) {
         console.error(error);
         setMessage("Could not connect to backend");
+        setMessageType("error");
       } finally {
         setCheckingAuth(false);
       }
@@ -92,17 +95,16 @@ export default function AddPropertyPage() {
     setCity("");
     setDescription("");
     setFeatured(false);
-    setImageFile(null);
+    setMainImageFile(null);
+    setGalleryFiles([]);
     setVideoFile(null);
 
-    const imageInput = document.getElementById(
-      "image"
-    ) as HTMLInputElement | null;
-    const videoInput = document.getElementById(
-      "video"
-    ) as HTMLInputElement | null;
+    const imageInput = document.getElementById("image") as HTMLInputElement | null;
+    const imagesInput = document.getElementById("images") as HTMLInputElement | null;
+    const videoInput = document.getElementById("video") as HTMLInputElement | null;
 
     if (imageInput) imageInput.value = "";
+    if (imagesInput) imagesInput.value = "";
     if (videoInput) videoInput.value = "";
   }
 
@@ -126,21 +128,25 @@ export default function AddPropertyPage() {
       !city.trim()
     ) {
       setMessage("Please fill all required fields.");
+      setMessageType("error");
       return;
     }
 
-    if (!imageFile) {
-      setMessage("Please upload a property image.");
+    if (!mainImageFile && galleryFiles.length === 0) {
+      setMessage("Please upload at least one property image.");
+      setMessageType("error");
       return;
     }
 
     if (videoFile && videoFile.size > 50 * 1024 * 1024) {
       setMessage("Video file must not be more than 50MB.");
+      setMessageType("error");
       return;
     }
 
     setLoading(true);
     setMessage("");
+    setMessageType("");
 
     try {
       const formData = new FormData();
@@ -159,7 +165,14 @@ export default function AddPropertyPage() {
       formData.append("city", city.trim());
       formData.append("description", description.trim());
       formData.append("featured", String(featured));
-      formData.append("image", imageFile);
+
+      if (mainImageFile) {
+        formData.append("image", mainImageFile);
+      }
+
+      galleryFiles.forEach((file) => {
+        formData.append("images", file);
+      });
 
       if (videoFile) {
         formData.append("video", videoFile);
@@ -177,11 +190,13 @@ export default function AddPropertyPage() {
 
       if (!res.ok) {
         setMessage(data.message || "Could not create property.");
+        setMessageType("error");
         setLoading(false);
         return;
       }
 
       setMessage("Property created successfully.");
+      setMessageType("success");
       resetForm();
       setLoading(false);
 
@@ -191,6 +206,7 @@ export default function AddPropertyPage() {
     } catch (error) {
       console.error("Create property error:", error);
       setMessage("Could not connect to backend");
+      setMessageType("error");
       setLoading(false);
     }
   }
@@ -214,7 +230,7 @@ export default function AddPropertyPage() {
             Add Property
           </h1>
           <p className="mt-2 text-sm text-[var(--color-text-muted)]">
-            Create a new property listing with image and optional short video.
+            Create a new property listing with multiple images and optional short video.
           </p>
         </div>
 
@@ -414,7 +430,7 @@ export default function AddPropertyPage() {
                 htmlFor="image"
                 className="text-xs font-bold uppercase tracking-widest text-[var(--color-text-main)]"
               >
-                Property Image *
+                Main Property Image
               </label>
               <input
                 id="image"
@@ -422,10 +438,36 @@ export default function AddPropertyPage() {
                 accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp"
                 onChange={(e) => {
                   const file = e.target.files?.[0] || null;
-                  setImageFile(file);
+                  setMainImageFile(file);
                 }}
                 className="mt-2 block w-full rounded-xl border border-[var(--color-border)] px-3 py-2 text-sm"
               />
+              <p className="mt-2 text-xs text-[var(--color-text-muted)]">
+                Optional if you upload gallery images below. The first available image becomes the main image.
+              </p>
+            </div>
+
+            <div>
+              <label
+                htmlFor="images"
+                className="text-xs font-bold uppercase tracking-widest text-[var(--color-text-main)]"
+              >
+                Gallery Images
+              </label>
+              <input
+                id="images"
+                type="file"
+                multiple
+                accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp"
+                onChange={(e) => {
+                  const files = Array.from(e.target.files || []);
+                  setGalleryFiles(files);
+                }}
+                className="mt-2 block w-full rounded-xl border border-[var(--color-border)] px-3 py-2 text-sm"
+              />
+              <p className="mt-2 text-xs text-[var(--color-text-muted)]">
+                Upload multiple property pictures here.
+              </p>
             </div>
 
             <div>
@@ -451,6 +493,22 @@ export default function AddPropertyPage() {
             </div>
           </div>
 
+          {(mainImageFile || galleryFiles.length > 0 || videoFile) && (
+            <div className="rounded-xl border border-[var(--color-border)] bg-gray-50 p-4">
+              <p className="text-sm font-semibold text-[var(--color-text-main)]">
+                Selected media
+              </p>
+
+              <div className="mt-3 space-y-2 text-sm text-[var(--color-text-muted)]">
+                {mainImageFile && <p>Main image: {mainImageFile.name}</p>}
+                {galleryFiles.length > 0 && (
+                  <p>Gallery images selected: {galleryFiles.length}</p>
+                )}
+                {videoFile && <p>Video: {videoFile.name}</p>}
+              </div>
+            </div>
+          )}
+
           <div>
             <label className="text-xs font-bold uppercase tracking-widest text-[var(--color-text-main)]">
               Description
@@ -467,7 +525,7 @@ export default function AddPropertyPage() {
           {message && (
             <div
               className={`rounded-xl px-4 py-3 text-sm ${
-                message.toLowerCase().includes("success")
+                messageType === "success"
                   ? "bg-green-50 text-green-700"
                   : "bg-red-50 text-red-700"
               }`}
