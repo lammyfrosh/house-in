@@ -1,8 +1,20 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import {
+  Sparkles,
+  Users,
+  ShieldCheck,
+  CheckCircle2,
+  PlusSquare,
+  Building2,
+  Globe,
+  ArrowRight,
+  Layers3,
+  BadgeCheck,
+} from "lucide-react";
 
 type User = {
   id: number;
@@ -19,7 +31,7 @@ export default function AdminPage() {
   const [loading, setLoading] = useState(true);
 
   const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_BASE_URL || "https://api.house-in.online";
+    process.env.NEXT_PUBLIC_API_BASE_URL || "https://api.house-in.online";
 
   useEffect(() => {
     async function checkAuth() {
@@ -47,11 +59,11 @@ export default function AdminPage() {
         }
 
         setUser(data.user);
-        setMessage("Welcome to the super admin portal.");
-        setLoading(false);
+        setMessage("Your admin workspace is active and ready.");
       } catch (error) {
         console.error(error);
         setMessage("Could not connect to backend");
+      } finally {
         setLoading(false);
       }
     }
@@ -59,122 +71,295 @@ export default function AdminPage() {
     checkAuth();
   }, [API_BASE_URL, router]);
 
-  function handleLogout() {
-    localStorage.removeItem("housein_token");
-    localStorage.removeItem("housein_user");
-    router.push("/signin");
-  }
+  const roleLabel = useMemo(() => {
+    const role = String(user?.role || "").toLowerCase().trim();
+
+    if (role === "superadmin" || role === "super_admin") {
+      return "Super Admin";
+    }
+
+    if (role === "admin") {
+      return "Admin";
+    }
+
+    return user?.role || "User";
+  }, [user]);
+
+  const quickModules = [
+    {
+      title: "Add Property",
+      text: "Create a fresh property listing with images and optional video.",
+      href: "/add-property",
+      icon: PlusSquare,
+      badge: "Fast action",
+    },
+    {
+      title: "Property Listings",
+      text: "View all uploaded properties and manage listing status.",
+      href: "/admin/properties",
+      icon: Building2,
+      badge: "Core module",
+    },
+    {
+      title: "Manage Admins",
+      text: "Create and manage admin access for trusted team members.",
+      href: "/admin/admins",
+      icon: Users,
+      badge: "Access control",
+    },
+    {
+      title: "View Website",
+      text: "Open the public website and review the client-facing experience.",
+      href: "/",
+      icon: Globe,
+      badge: "Public site",
+    },
+  ];
 
   return (
-    <main className="mx-auto max-w-6xl px-4 py-10">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-        <div>
-          <p className="text-xs font-extrabold uppercase tracking-widest text-[var(--color-primary-dark)]">
-            Super Admin Portal
-          </p>
-          <h1 className="mt-2 text-3xl font-bold text-[var(--color-text-main)]">
-            House-In Admin Dashboard
-          </h1>
-          <p className="mt-2 text-sm text-[var(--color-text-muted)]">
-            Manage listings, approvals, and admin users from one place.
-          </p>
+    <div className="space-y-6">
+      <section className="overflow-hidden rounded-[28px] border border-slate-200 bg-white shadow-sm">
+        <div className="relative">
+          <div className="absolute inset-0 bg-gradient-to-r from-[#0f766e] via-[#0f766e] to-[#14b8a6]" />
+          <div className="relative z-10 p-6 sm:p-8 lg:p-10">
+            <div className="flex flex-col gap-6 xl:flex-row xl:items-end xl:justify-between">
+              <div className="max-w-3xl">
+                <div className="inline-flex items-center gap-2 rounded-full bg-white/15 px-4 py-1.5 text-xs font-bold uppercase tracking-[0.18em] text-white backdrop-blur">
+                  <Sparkles size={14} />
+                  Premium Admin Workspace
+                </div>
+
+                <h2 className="mt-4 text-3xl font-bold leading-tight text-white sm:text-4xl">
+                  {loading
+                    ? "Loading dashboard..."
+                    : `Welcome, ${user?.full_name?.split(" ")[0] || "Admin"}`}
+                </h2>
+
+                <p className="mt-3 max-w-2xl text-sm leading-6 text-white/85 sm:text-base">
+                  Manage listings, team access, and platform operations from one simple and professional control center.
+                </p>
+              </div>
+
+              <div className="grid gap-3 sm:grid-cols-2">
+                <Link
+                  href="/add-property"
+                  className="inline-flex items-center justify-center gap-2 rounded-2xl bg-white px-5 py-3 text-sm font-semibold text-[#0f766e] transition hover:opacity-90"
+                >
+                  Add Property
+                  <ArrowRight size={16} />
+                </Link>
+
+                <Link
+                  href="/admin/properties"
+                  className="inline-flex items-center justify-center gap-2 rounded-2xl border border-white/20 bg-white/10 px-5 py-3 text-sm font-semibold text-white backdrop-blur transition hover:bg-white/15"
+                >
+                  Open Listings
+                  <ArrowRight size={16} />
+                </Link>
+              </div>
+            </div>
+          </div>
         </div>
+      </section>
 
-        <button
-          onClick={handleLogout}
-          className="rounded-xl border border-[var(--color-border)] px-4 py-2 text-sm font-semibold text-[var(--color-text-main)] hover:bg-gray-50"
-        >
-          Logout
-        </button>
-      </div>
+      <section className="grid gap-4 md:grid-cols-3">
+        <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
+          <div className="flex items-center justify-between">
+            <p className="text-xs font-extrabold uppercase tracking-[0.18em] text-slate-500">
+              Logged In User
+            </p>
+            <div className="rounded-2xl bg-teal-50 p-2 text-[#0f766e]">
+              <Users size={18} />
+            </div>
+          </div>
 
-      <div className="mt-8 grid gap-6 md:grid-cols-3">
-        <div className="rounded-2xl border border-[var(--color-border)] bg-white p-5">
-          <p className="text-xs font-extrabold uppercase tracking-widest text-gray-500">
-            Logged In User
-          </p>
-          <p className="mt-2 text-lg font-semibold text-[var(--color-text-main)]">
+          <p className="mt-4 text-xl font-bold text-slate-900">
             {loading ? "Loading..." : user?.full_name || "Unknown"}
           </p>
-          <p className="mt-1 text-sm text-[var(--color-text-muted)]">
-            {loading ? "" : user?.email}
+
+          <p className="mt-1 text-sm text-slate-500">
+            {loading ? "Checking..." : user?.email || "No email found"}
           </p>
         </div>
 
-        <div className="rounded-2xl border border-[var(--color-border)] bg-white p-5">
-          <p className="text-xs font-extrabold uppercase tracking-widest text-gray-500">
-            Role
+        <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
+          <div className="flex items-center justify-between">
+            <p className="text-xs font-extrabold uppercase tracking-[0.18em] text-slate-500">
+              Access Level
+            </p>
+            <div className="rounded-2xl bg-teal-50 p-2 text-[#0f766e]">
+              <ShieldCheck size={18} />
+            </div>
+          </div>
+
+          <p className="mt-4 text-xl font-bold text-slate-900">
+            {loading ? "Loading..." : roleLabel}
           </p>
-          <p className="mt-2 text-lg font-semibold text-[var(--color-text-main)]">
-            {loading ? "Loading..." : user?.role || "Unknown"}
-          </p>
-          <p className="mt-1 text-sm text-[var(--color-text-muted)]">
-            Full property and admin control
+
+          <p className="mt-1 text-sm text-slate-500">
+            Property and admin management access
           </p>
         </div>
 
-        <div className="rounded-2xl border border-[var(--color-border)] bg-white p-5">
-          <p className="text-xs font-extrabold uppercase tracking-widest text-gray-500">
-            Status
-          </p>
-          <p className="mt-2 text-lg font-semibold text-[var(--color-text-main)]">
+        <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
+          <div className="flex items-center justify-between">
+            <p className="text-xs font-extrabold uppercase tracking-[0.18em] text-slate-500">
+              Session Status
+            </p>
+            <div className="rounded-2xl bg-green-50 p-2 text-green-700">
+              <CheckCircle2 size={18} />
+            </div>
+          </div>
+
+          <p className="mt-4 text-xl font-bold text-slate-900">
             {loading ? "Checking..." : "Active"}
           </p>
-          <p className="mt-1 text-sm text-[var(--color-text-muted)]">
-            {message}
-          </p>
+
+          <p className="mt-1 text-sm text-slate-500">{message}</p>
         </div>
-      </div>
+      </section>
 
-      <div className="mt-8 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-        <Link
-          href="/add-property"
-          className="rounded-2xl border border-[var(--color-border)] bg-white p-5 transition hover:shadow-sm"
-        >
-          <h2 className="text-lg font-semibold text-[var(--color-text-main)]">
-            Add Property
-          </h2>
-          <p className="mt-2 text-sm text-[var(--color-text-muted)]">
-            Post a new property listing directly to the system.
-          </p>
-        </Link>
+      <section className="rounded-[28px] border border-slate-200 bg-white p-6 shadow-sm">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <p className="text-xs font-extrabold uppercase tracking-[0.18em] text-[#0f766e]">
+              Main Modules
+            </p>
+            <h3 className="mt-2 text-2xl font-bold text-slate-900">
+              Everything important in one place
+            </h3>
+            <p className="mt-2 text-sm leading-6 text-slate-500">
+              Use these modules to manage the platform quickly and confidently.
+            </p>
+          </div>
 
-        <Link
-          href="/admin/properties"
-          className="rounded-2xl border border-[var(--color-border)] bg-white p-5 transition hover:shadow-sm"
-        >
-          <h2 className="text-lg font-semibold text-[var(--color-text-main)]">
-            Manage Listings
-          </h2>
-          <p className="mt-2 text-sm text-[var(--color-text-muted)]">
-            Approve, reject, or delete submitted properties.
-          </p>
-        </Link>
+          <div className="inline-flex items-center gap-2 rounded-2xl bg-slate-50 px-4 py-2 text-sm font-medium text-slate-600">
+            <Layers3 size={16} />
+            Owner-friendly interface
+          </div>
+        </div>
 
-        <Link
-          href="/admin/admins"
-          className="rounded-2xl border border-[var(--color-border)] bg-white p-5 transition hover:shadow-sm"
-        >
-          <h2 className="text-lg font-semibold text-[var(--color-text-main)]">
-            Manage Admins
-          </h2>
-          <p className="mt-2 text-sm text-[var(--color-text-muted)]">
-            Create and remove admin accounts.
-          </p>
-        </Link>
+        <div className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+          {quickModules.map((card) => {
+            const Icon = card.icon;
 
-        <Link
-          href="/"
-          className="rounded-2xl border border-[var(--color-border)] bg-white p-5 transition hover:shadow-sm"
-        >
-          <h2 className="text-lg font-semibold text-[var(--color-text-main)]">
-            View Website
-          </h2>
-          <p className="mt-2 text-sm text-[var(--color-text-muted)]">
-            Return to the public-facing property site.
+            return (
+              <Link
+                key={card.href}
+                href={card.href}
+                className="group rounded-3xl border border-slate-200 bg-white p-5 transition hover:-translate-y-0.5 hover:shadow-md"
+              >
+                <div className="flex items-start justify-between">
+                  <div className="rounded-2xl bg-teal-50 p-3 text-[#0f766e]">
+                    <Icon size={22} />
+                  </div>
+
+                  <span className="rounded-full bg-slate-100 px-3 py-1 text-[11px] font-bold uppercase tracking-wide text-slate-600">
+                    {card.badge}
+                  </span>
+                </div>
+
+                <h4 className="mt-5 text-lg font-semibold text-slate-900">
+                  {card.title}
+                </h4>
+
+                <p className="mt-2 text-sm leading-6 text-slate-500">
+                  {card.text}
+                </p>
+
+                <div className="mt-5 inline-flex items-center gap-2 text-sm font-semibold text-[#0f766e]">
+                  Open module
+                  <ArrowRight
+                    size={16}
+                    className="transition group-hover:translate-x-1"
+                  />
+                </div>
+              </Link>
+            );
+          })}
+        </div>
+      </section>
+
+      <section className="grid gap-4 lg:grid-cols-[1.15fr_0.85fr]">
+        <div className="rounded-[28px] border border-slate-200 bg-white p-6 shadow-sm">
+          <p className="text-xs font-extrabold uppercase tracking-[0.18em] text-[#0f766e]">
+            Why this works
           </p>
-        </Link>
-      </div>
-    </main>
+
+          <h3 className="mt-3 text-2xl font-bold text-slate-900">
+            Premium, but still easy to understand
+          </h3>
+
+          <div className="mt-4 space-y-3 text-sm leading-6 text-slate-500">
+            <p>
+              This dashboard is designed to feel modern and expensive without confusing non-technical users.
+            </p>
+            <p>
+              The major actions are clearly visible, the labels are easy to understand, and the navigation is always available.
+            </p>
+            <p>
+              That means the owner can move around confidently while still feeling like they are using a serious professional system.
+            </p>
+          </div>
+        </div>
+
+        <div className="rounded-[28px] border border-slate-200 bg-white p-6 shadow-sm">
+          <p className="text-xs font-extrabold uppercase tracking-[0.18em] text-[#0f766e]">
+            Quick Actions
+          </p>
+
+          <div className="mt-4 space-y-3">
+            <Link
+              href="/add-property"
+              className="flex items-center justify-between rounded-2xl border border-slate-200 px-4 py-4 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+            >
+              <span>Add a new property listing</span>
+              <ArrowRight size={16} />
+            </Link>
+
+            <Link
+              href="/admin/properties"
+              className="flex items-center justify-between rounded-2xl border border-slate-200 px-4 py-4 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+            >
+              <span>Open property listings</span>
+              <ArrowRight size={16} />
+            </Link>
+
+            <Link
+              href="/admin/admins"
+              className="flex items-center justify-between rounded-2xl border border-slate-200 px-4 py-4 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+            >
+              <span>Manage admin accounts</span>
+              <ArrowRight size={16} />
+            </Link>
+
+            <Link
+              href="/"
+              className="flex items-center justify-between rounded-2xl border border-slate-200 px-4 py-4 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+            >
+              <span>Open public website</span>
+              <ArrowRight size={16} />
+            </Link>
+          </div>
+
+          <div className="mt-5 rounded-2xl bg-teal-50 p-4">
+            <div className="flex items-start gap-3">
+              <div className="rounded-xl bg-white p-2 text-[#0f766e] shadow-sm">
+                <BadgeCheck size={18} />
+              </div>
+
+              <div>
+                <p className="text-sm font-semibold text-slate-900">
+                  Ready for the next phase
+                </p>
+                <p className="mt-1 text-sm leading-6 text-slate-600">
+                  After this dashboard, we move into premium property management, admin control, and owner-requested UI refinements.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
   );
 }
