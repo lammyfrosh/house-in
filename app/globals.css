@@ -1,34 +1,28 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #1f2937;
-
-  /* Mint theme */
-  --color-primary: #bdede5;
-  --color-primary-dark: #0f766e;
-
-  --color-text-main: #1f2937;
-  --color-text-muted: #6b7280;
-
-  --color-border: #e5e7eb;
-  --color-bg: #ffffff;
+  --z-blue: #90d4f9;
+  --z-dark: #1e3a5f;
+  --z-bg: #f6fafd;
+  --z-text: #0f172a;
+  --z-white: #ffffff;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-
-    --color-bg: #0a0a0a;
-    --color-text-main: #ededed;
-    --color-text-muted: #cbd5e1;
-    --color-border: #334155;
-  }
+html {
+  scroll-behavior: smooth;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
+  margin: 0;
+  background: var(--z-bg);
+  color: var(--z-text);
   font-family: Arial, Helvetica, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+a {
+  text-decoration: none;
 }

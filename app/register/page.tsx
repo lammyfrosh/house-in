@@ -8,7 +8,7 @@ export default function RegisterPage() {
           Register
         </h1>
         <p className="mt-1 text-sm text-[var(--color-text-muted)]">
-          Create an account to save listings and post requests.
+          Create an account to save listings and post requests. 
         </p>
 
         <div className="mt-6 rounded-2xl border border-[var(--color-border)] bg-white p-5">

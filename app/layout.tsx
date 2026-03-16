@@ -1,8 +1,11 @@
+"use client";
+
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
+import { usePathname } from "next/navigation";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -20,39 +23,30 @@ export const metadata: Metadata = {
     template: "%s | House-In",
   },
   description:
-    "House-In helps you find houses, apartments, land, and shortlet properties across Nigeria with a simple and reliable property search experience.",
-  keywords: [
-    "houses for rent Nigeria",
-    "property for sale Nigeria",
-    "shortlet Nigeria",
-    "real estate Nigeria",
-    "apartments Nigeria",
-    "Nigeria property platform",
-  ],
-  openGraph: {
-    title: "House-In Property Platform",
-    description:
-      "Search houses, apartments, land, and shortlet listings across Nigeria.",
-    type: "website",
-    url: "https://house-in.online",
-    siteName: "House-In",
-  },
+    "House-In helps you find houses, apartments, land, and shortlet properties across Nigeria.",
 };
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
+  const pathname = usePathname();
+
+  const isAdminRoute =
+    pathname.startsWith("/admin") || pathname.startsWith("/add-property");
+
   return (
     <html lang="en">
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <div className="flex min-h-screen flex-col">
-          <Header />
+          {!isAdminRoute && <Header />}
+
           <main className="flex-1">{children}</main>
-          <Footer />
+
+          {!isAdminRoute && <Footer />}
         </div>
       </body>
     </html>
