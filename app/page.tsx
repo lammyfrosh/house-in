@@ -24,6 +24,33 @@ const STATES = [
   "Abia",
 ];
 
+const stateLinks = [
+  { name: "Lagos", href: "/search?state=Lagos", icon: MapPin },
+  { name: "Abuja", href: "/search?state=Abuja", icon: Building2 },
+  { name: "Rivers", href: "/search?state=Rivers", icon: House },
+  { name: "Edo", href: "/search?state=Edo", icon: MapPin },
+  { name: "Delta", href: "/search?state=Delta", icon: Building2 },
+  { name: "Enugu", href: "/search?state=Enugu", icon: House },
+];
+
+const trustItems = [
+  {
+    title: "Easy Search Experience",
+    text: "Clear filters, focused navigation, and better listing discovery make searching feel easier and faster.",
+    icon: Search,
+  },
+  {
+    title: "Professional Presentation",
+    text: "Listings are displayed in a cleaner and more organised way that helps users feel more confident.",
+    icon: BadgeCheck,
+  },
+  {
+    title: "Built for Growth",
+    text: "House-In is designed to grow into a stronger property ecosystem for agents, landlords, and users.",
+    icon: ShieldCheck,
+  },
+];
+
 export default function Home() {
   const featured = [
     ...properties.filter((p) => p.purpose === "rent").slice(0, 2),
@@ -33,7 +60,6 @@ export default function Home() {
 
   return (
     <main>
-      {/* HERO */}
       <section className="relative h-[82vh] min-h-[600px] w-full overflow-hidden">
         <Image
           src="/hero-v2.jpg"
@@ -43,11 +69,9 @@ export default function Home() {
           className="object-cover"
         />
 
-        {/* FIXED OVERLAY */}
-        <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/60 to-black/30 z-[1]" />
-        <div className="absolute inset-0 bg-[var(--color-primary-dark)]/20 z-[1]" />
+        <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/50 to-black/25" />
+        <div className="absolute inset-0 bg-[var(--color-primary)]/20" />
 
-        {/* CONTENT */}
         <div className="relative z-10 mx-auto flex h-full max-w-6xl flex-col justify-center px-4">
           <div className="max-w-3xl">
             <p className="inline-flex items-center gap-2 rounded-full bg-white/15 px-4 py-1.5 text-xs font-medium text-white backdrop-blur">
@@ -66,28 +90,31 @@ export default function Home() {
             </p>
           </div>
 
-          {/* SEARCH BOX */}
           <div className="mt-8 rounded-3xl bg-white p-4 shadow-xl md:p-5">
             <form action="/search" className="grid gap-3 md:grid-cols-12">
               <select
                 name="state"
                 className="h-11 rounded-xl border border-[var(--color-border)] px-3 md:col-span-3"
+                defaultValue=""
               >
                 <option value="">Select State</option>
                 {STATES.map((s) => (
-                  <option key={s}>{s}</option>
+                  <option key={s} value={s}>
+                    {s}
+                  </option>
                 ))}
               </select>
 
               <input
                 name="area"
                 className="h-11 rounded-xl border border-[var(--color-border)] px-3 md:col-span-4"
-                placeholder="Area (e.g. Jakande, Lekki)"
+                placeholder="Area / LGA (e.g. Lekki, Ikeja, Wuse)"
               />
 
               <select
                 name="purpose"
                 className="h-11 rounded-xl border border-[var(--color-border)] px-3 md:col-span-2"
+                defaultValue=""
               >
                 <option value="">Purpose</option>
                 <option value="rent">For Rent</option>
@@ -98,33 +125,313 @@ export default function Home() {
               <select
                 name="propertyType"
                 className="h-11 rounded-xl border border-[var(--color-border)] px-3 md:col-span-2"
+                defaultValue=""
               >
                 <option value="">Property Type</option>
-                <option value="apartment">Apartment</option>
+                <option value="apartment">Flat / Apartment</option>
                 <option value="duplex">Duplex</option>
                 <option value="terrace">Terrace</option>
                 <option value="bungalow">Bungalow</option>
                 <option value="land">Land</option>
               </select>
 
-              <button className="h-11 rounded-xl bg-[var(--color-primary-dark)] text-white md:col-span-1">
+              <button
+                type="submit"
+                className="h-11 rounded-xl bg-[var(--color-primary-dark)] font-semibold text-white hover:opacity-90 md:col-span-1"
+              >
                 Search
               </button>
+
+              <div className="grid gap-3 md:col-span-12 md:grid-cols-12">
+                <select
+                  name="beds"
+                  className="h-11 rounded-xl border border-[var(--color-border)] px-3 md:col-span-2"
+                  defaultValue=""
+                >
+                  <option value="">Beds</option>
+                  <option value="1">1+</option>
+                  <option value="2">2+</option>
+                  <option value="3">3+</option>
+                  <option value="4">4+</option>
+                  <option value="5">5+</option>
+                </select>
+
+                <select
+                  name="baths"
+                  className="h-11 rounded-xl border border-[var(--color-border)] px-3 md:col-span-2"
+                  defaultValue=""
+                >
+                  <option value="">Baths</option>
+                  <option value="1">1+</option>
+                  <option value="2">2+</option>
+                  <option value="3">3+</option>
+                  <option value="4">4+</option>
+                </select>
+
+                <select
+                  name="minPrice"
+                  className="h-11 rounded-xl border border-[var(--color-border)] px-3 md:col-span-4"
+                  defaultValue=""
+                >
+                  <option value="">Min Price</option>
+                  <option value="500000">₦500k</option>
+                  <option value="1000000">₦1m</option>
+                  <option value="2000000">₦2m</option>
+                  <option value="5000000">₦5m</option>
+                  <option value="10000000">₦10m</option>
+                  <option value="50000000">₦50m</option>
+                  <option value="100000000">₦100m</option>
+                </select>
+
+                <select
+                  name="maxPrice"
+                  className="h-11 rounded-xl border border-[var(--color-border)] px-3 md:col-span-4"
+                  defaultValue=""
+                >
+                  <option value="">Max Price</option>
+                  <option value="1000000">₦1m</option>
+                  <option value="2000000">₦2m</option>
+                  <option value="5000000">₦5m</option>
+                  <option value="10000000">₦10m</option>
+                  <option value="50000000">₦50m</option>
+                  <option value="100000000">₦100m</option>
+                  <option value="500000000">₦500m</option>
+                </select>
+              </div>
+
+              <div className="md:col-span-12">
+                <div className="mt-2 flex flex-wrap items-center gap-3 text-xs text-gray-600">
+                  <span className="font-medium text-[var(--color-text-main)]">
+                    Popular:
+                  </span>
+                  <Link
+                    href="/search?state=Lagos&area=Lekki&purpose=rent"
+                    className="hover:underline"
+                  >
+                    Lekki (Rent)
+                  </Link>
+                  <Link
+                    href="/search?state=Abuja&area=Wuse&purpose=sale"
+                    className="hover:underline"
+                  >
+                    Abuja (Sale)
+                  </Link>
+                  <Link
+                    href="/search?state=Lagos&area=Victoria%20Island&purpose=shortlet"
+                    className="hover:underline"
+                  >
+                    VI (Shortlet)
+                  </Link>
+                </div>
+              </div>
             </form>
+          </div>
+
+          <div className="mt-6 grid max-w-3xl grid-cols-3 gap-3">
+            <div className="rounded-2xl bg-white/10 px-4 py-3 text-white backdrop-blur">
+              <p className="text-lg font-bold">Sale</p>
+              <p className="text-xs text-white/80">Curated property options</p>
+            </div>
+            <div className="rounded-2xl bg-white/10 px-4 py-3 text-white backdrop-blur">
+              <p className="text-lg font-bold">Rent</p>
+              <p className="text-xs text-white/80">Better search clarity</p>
+            </div>
+            <div className="rounded-2xl bg-white/10 px-4 py-3 text-white backdrop-blur">
+              <p className="text-lg font-bold">Shortlet</p>
+              <p className="text-xs text-white/80">Flexible stay options</p>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* FEATURED */}
       <section className="mx-auto max-w-6xl px-4 py-14">
-        <h2 className="text-2xl font-semibold text-[var(--color-text-main)]">
-          Featured Properties
-        </h2>
+        <div className="mb-5 flex items-center justify-between">
+          <div>
+            <h2 className="text-2xl font-semibold text-[var(--color-text-main)]">
+              Featured Properties
+            </h2>
+            <p className="mt-1 text-sm text-[var(--color-text-muted)]">
+              A handpicked mix of sale, rent, and shortlet listings across key locations.
+            </p>
+          </div>
 
-        <div className="mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+          <Link
+            href="/search"
+            className="inline-flex items-center gap-1 text-sm font-medium text-[var(--color-primary-dark)] hover:underline"
+          >
+            View all <ArrowRight size={16} />
+          </Link>
+        </div>
+
+        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {featured.map((p) => (
             <PropertyCard key={p.id} p={p} />
           ))}
+        </div>
+      </section>
+
+      <section className="bg-white">
+        <div className="mx-auto max-w-6xl px-4 py-14">
+          <div className="mb-6">
+            <h2 className="text-2xl font-semibold text-[var(--color-text-main)]">
+              Browse by State
+            </h2>
+            <p className="mt-1 text-sm text-[var(--color-text-muted)]">
+              Explore property opportunities in some of Nigeria’s most active locations.
+            </p>
+          </div>
+
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {stateLinks.map((state) => {
+              const Icon = state.icon;
+              return (
+                <Link
+                  key={state.name}
+                  href={state.href}
+                  className="group rounded-2xl border border-[var(--color-border)] bg-white p-5 transition hover:border-[var(--color-primary)] hover:shadow-sm"
+                >
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <p className="text-lg font-semibold text-[var(--color-text-main)]">
+                        {state.name}
+                      </p>
+                      <p className="mt-1 text-sm text-[var(--color-text-muted)]">
+                        View listings in {state.name}
+                      </p>
+                    </div>
+                    <div className="rounded-xl bg-[var(--color-primary)]/30 p-2 text-[var(--color-primary-dark)]">
+                      <Icon size={18} />
+                    </div>
+                  </div>
+                </Link>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
+      <section className="bg-[var(--color-primary)]/20">
+        <div className="mx-auto max-w-6xl px-4 py-14">
+          <div className="grid gap-10 lg:grid-cols-[1.1fr_0.9fr]">
+            <div>
+              <p className="text-xs font-extrabold uppercase tracking-widest text-[var(--color-primary-dark)]">
+                About House-In
+              </p>
+
+              <h2 className="mt-3 text-3xl font-bold text-[var(--color-text-main)]">
+                A More Trustworthy Way to Search for Property
+              </h2>
+
+              <div className="mt-5 space-y-4 text-sm leading-7 text-[var(--color-text-muted)] md:text-base">
+                <p>
+                  House-In was built with one clear goal: to make property search
+                  in Nigeria feel easier, clearer, and more dependable. Instead
+                  of overwhelming users with clutter, confusion, or inconsistent
+                  information, we aim to present listings in a way that feels
+                  simple, organised, and worth trusting.
+                </p>
+
+                <p>
+                  Whether someone is searching for a home to rent, a property to
+                  buy, a shortlet for convenience, or land for opportunity,
+                  House-In is designed to help them move from interest to
+                  decision with more confidence.
+                </p>
+
+                <p>
+                  We believe a good property platform should do more than just
+                  display listings — it should inspire trust, save time, and
+                  make people feel they are in the right place from the very
+                  first click.
+                </p>
+              </div>
+            </div>
+
+            <div className="rounded-3xl border border-[var(--color-border)] bg-white p-6 md:p-8 shadow-sm">
+              <p className="text-xs font-extrabold uppercase tracking-widest text-[var(--color-primary-dark)]">
+                Our Promise
+              </p>
+
+              <div className="mt-5 space-y-5">
+                <div className="flex gap-3">
+                  <div className="mt-1 rounded-xl bg-[var(--color-primary)]/30 p-2 text-[var(--color-primary-dark)]">
+                    <Search size={18} />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-semibold text-[var(--color-text-main)]">
+                      Clarity
+                    </h3>
+                    <p className="mt-1 text-sm text-[var(--color-text-muted)]">
+                      Search tools and property information presented in a way people can understand quickly.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex gap-3">
+                  <div className="mt-1 rounded-xl bg-[var(--color-primary)]/30 p-2 text-[var(--color-primary-dark)]">
+                    <ShieldCheck size={18} />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-semibold text-[var(--color-text-main)]">
+                      Confidence
+                    </h3>
+                    <p className="mt-1 text-sm text-[var(--color-text-muted)]">
+                      A platform experience that feels organised, intentional, and trustworthy.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex gap-3">
+                  <div className="mt-1 rounded-xl bg-[var(--color-primary)]/30 p-2 text-[var(--color-primary-dark)]">
+                    <BadgeCheck size={18} />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-semibold text-[var(--color-text-main)]">
+                      Convenience
+                    </h3>
+                    <p className="mt-1 text-sm text-[var(--color-text-muted)]">
+                      From search to enquiry, every step is being designed to feel smoother and smarter.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <div className="mx-auto max-w-6xl px-4 py-14">
+          <div className="mb-6">
+            <h2 className="text-2xl font-semibold text-[var(--color-text-main)]">
+              Why People Will Love Using House-In
+            </h2>
+            <p className="mt-1 text-sm text-[var(--color-text-muted)]">
+              Built to feel simple, attractive, and useful from the very first visit.
+            </p>
+          </div>
+
+          <div className="grid gap-4 md:grid-cols-3">
+            {trustItems.map((item) => {
+              const Icon = item.icon;
+              return (
+                <div
+                  key={item.title}
+                  className="rounded-2xl border border-[var(--color-border)] bg-white p-6 shadow-sm"
+                >
+                  <div className="mb-4 inline-flex rounded-xl bg-[var(--color-primary)]/30 p-3 text-[var(--color-primary-dark)]">
+                    <Icon size={20} />
+                  </div>
+                  <h3 className="text-lg font-semibold text-[var(--color-text-main)]">
+                    {item.title}
+                  </h3>
+                  <p className="mt-2 text-sm leading-6 text-[var(--color-text-muted)]">
+                    {item.text}
+                  </p>
+                </div>
+              );
+            })}
+          </div>
         </div>
       </section>
     </main>
