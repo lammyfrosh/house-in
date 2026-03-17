@@ -222,7 +222,7 @@ export default function AdminPropertiesPage() {
           </h1>
 
           <p className="mt-2 max-w-2xl text-sm leading-6 text-[var(--color-text-muted)]">
-            Review all listings, manage approval status, and remove unwanted properties.
+            Review all listings, manage approval status, edit property details, and remove unwanted properties.
           </p>
         </div>
 
@@ -351,7 +351,23 @@ export default function AdminPropertiesPage() {
                       )}
                     </div>
 
-                    <div className="flex w-full flex-col gap-2 xl:w-44">
+                    <div className="flex w-full flex-col gap-2 xl:w-48">
+                      <button
+                        onClick={() =>
+                          router.push(`/admin/properties/${property.id}/edit`)
+                        }
+                        className="rounded-lg bg-[var(--color-primary-dark)] px-4 py-2 text-sm font-semibold text-white hover:opacity-90"
+                      >
+                        Edit Property
+                      </button>
+
+                      <button
+                        onClick={() => router.push(`/property/${property.slug}`)}
+                        className="rounded-lg border border-[var(--color-border)] px-4 py-2 text-sm font-semibold text-[var(--color-text-main)] hover:bg-gray-50"
+                      >
+                        View Listing
+                      </button>
+
                       {property.status !== "approved" && (
                         <button
                           onClick={() => updateStatus(property.id, "approved")}
@@ -385,7 +401,7 @@ export default function AdminPropertiesPage() {
                       <button
                         onClick={() => deleteProperty(property.id)}
                         disabled={actionId === property.id}
-                        className="rounded-lg border border-[var(--color-border)] px-4 py-2 text-sm font-semibold text-[var(--color-text-main)] hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-70"
+                        className="mt-2 rounded-lg border border-red-200 px-4 py-2 text-sm font-semibold text-red-600 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-70"
                       >
                         {actionId === property.id ? "Processing..." : "Delete"}
                       </button>
