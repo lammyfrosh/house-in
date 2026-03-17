@@ -23,6 +23,7 @@ type Property = {
   description: string;
   image_url?: string;
   video_url?: string;
+  gallery_images?: string[];
   featured?: number | boolean;
   status: PropertyStatus;
   created_by_name?: string;
@@ -79,15 +80,24 @@ export default function EditPropertyPage() {
   const [message, setMessage] = useState("");
   const [messageType, setMessageType] = useState<"success" | "error" | "">("");
 
-  const [selectedImage, setSelectedImage] = useState<File | null>(null);
+  const [selectedImages, setSelectedImages] = useState<File[]>([]);
   const [selectedVideo, setSelectedVideo] = useState<File | null>(null);
-  const [imagePreview, setImagePreview] = useState("");
+  const [imagePreviews, setImagePreviews] = useState<string[]>([]);
   const [videoPreview, setVideoPreview] = useState("");
 
-  const existingImage = useMemo(() => {
-    if (imagePreview) return imagePreview;
-    return property?.image_url || "";
-  }, [imagePreview, property?.image_url]);
+  const existingImages = useMemo(() => {
+    if (imagePreviews.length > 0) return imagePreviews;
+
+    if (property?.gallery_images && property.gallery_images.length > 0) {
+      return property.gallery_images;
+    }
+
+    if (property?.image_url) {
+      return [property.image_url];
+    }
+
+    return [];
+  }, [imagePreviews, property?.gallery_images, property?.image_url]);
 
   const existingVideo = useMemo(() => {
     if (videoPreview) return videoPreview;
@@ -137,7 +147,6 @@ export default function EditPropertyPage() {
         }
 
         const loadedProperty: Property = data.property || data;
-
         setProperty(loadedProperty);
 
         setForm({
@@ -172,16 +181,18 @@ export default function EditPropertyPage() {
   }, [API, propertyId, router]);
 
   useEffect(() => {
-    if (!selectedImage) {
-      setImagePreview("");
+    if (selectedImages.length === 0) {
+      setImagePreviews([]);
       return;
     }
 
-    const objectUrl = URL.createObjectURL(selectedImage);
-    setImagePreview(objectUrl);
+    const urls = selectedImages.map((file) => URL.createObjectURL(file));
+    setImagePreviews(urls);
 
-    return () => URL.revokeObjectURL(objectUrl);
-  }, [selectedImage]);
+    return () => {
+      urls.forEach((url) => URL.revokeObjectURL(url));
+    };
+  }, [selectedImages]);
 
   useEffect(() => {
     if (!selectedVideo) {
@@ -214,14 +225,18 @@ export default function EditPropertyPage() {
     }));
   }
 
-  function handleImageChange(e: ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0] || null;
-    setSelectedImage(file);
+  function handleImagesChange(e: ChangeEvent<HTMLInputElement>) {
+    const files = Array.from(e.target.files || []);
+    setSelectedImages(files);
   }
 
   function handleVideoChange(e: ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0] || null;
     setSelectedVideo(file);
+  }
+
+  function removeSelectedImage(index: number) {
+    setSelectedImages((prev) => prev.filter((_, i) => i !== index));
   }
 
   async function handleSubmit(e: FormEvent) {
@@ -247,7 +262,6 @@ export default function EditPropertyPage() {
     try {
       const formData = new FormData();
 
-      // MUST match backend updateProperty field names exactly
       formData.append("title", form.title.trim());
       formData.append("purpose", form.purpose);
       formData.append("property_type", form.property_type.trim());
@@ -264,8 +278,14 @@ export default function EditPropertyPage() {
       formData.append("featured", String(form.featured ? 1 : 0));
       formData.append("status", form.status);
 
-      if (selectedImage) {
-        formData.append("image", selectedImage);
+      if (selectedImages[0]) {
+        formData.append("image", selectedImages[0]);
+      }
+
+      if (selectedImages.length > 1) {
+        selectedImages.slice(1).forEach((file) => {
+          formData.append("images", file);
+        });
       }
 
       if (selectedVideo) {
@@ -289,13 +309,11 @@ export default function EditPropertyPage() {
       const updatedProperty: Property = data.property || {
         ...(property as Property),
         ...form,
-        image_url: selectedImage ? imagePreview : property?.image_url,
-        video_url: selectedVideo ? videoPreview : property?.video_url,
         featured: form.featured ? 1 : 0,
       };
 
       setProperty(updatedProperty);
-      setSelectedImage(null);
+      setSelectedImages([]);
       setSelectedVideo(null);
 
       setMessage("Property updated successfully.");
@@ -327,8 +345,8 @@ export default function EditPropertyPage() {
               Edit Property
             </h1>
             <p className="mt-2 max-w-2xl text-sm leading-6 text-[var(--color-text-muted)]">
-              Update listing details, replace the main image or video, and keep
-              the property presentation sharp and production-ready.
+              Update listing details, replace the image gallery or video, and
+              keep the property presentation polished and production-ready.
             </p>
           </div>
 
@@ -632,39 +650,83 @@ export default function EditPropertyPage() {
                   </label>
 
                   <div className="rounded-2xl bg-gray-50 p-4 text-xs text-[var(--color-text-muted)]">
-                    This edit flow currently replaces the main image and video only.
-                    Full gallery editing can be added later without breaking this flow.
+                    If you upload new images here, the current gallery will be
+                    replaced with the new selection. The first uploaded image
+                    becomes the primary listing image.
                   </div>
                 </div>
               </div>
 
               <div className="rounded-3xl border border-[var(--color-border)] bg-white p-5 shadow-sm sm:p-6">
                 <h2 className="text-lg font-semibold text-[var(--color-text-main)]">
-                  Main Property Image
+                  Property Image Gallery
                 </h2>
 
                 <div className="mt-5">
-                  {existingImage ? (
-                    <img
-                      src={existingImage}
-                      alt={form.title || "Property preview"}
-                      className="h-56 w-full rounded-2xl border border-[var(--color-border)] object-cover"
-                    />
+                  {existingImages.length > 0 ? (
+                    <div className="grid grid-cols-2 gap-3">
+                      {existingImages.map((img, index) => (
+                        <div
+                          key={`${img}-${index}`}
+                          className="overflow-hidden rounded-2xl border border-[var(--color-border)]"
+                        >
+                          <img
+                            src={img}
+                            alt={`Property image ${index + 1}`}
+                            className="h-36 w-full object-cover"
+                          />
+                          <div className="bg-white px-3 py-2 text-xs font-semibold text-[var(--color-text-main)]">
+                            {index === 0 ? "Primary image" : `Image ${index + 1}`}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
                   ) : (
                     <div className="flex h-56 items-center justify-center rounded-2xl border border-dashed border-[var(--color-border)] text-sm text-[var(--color-text-muted)]">
                       No image selected
                     </div>
                   )}
 
+                  {imagePreviews.length > 0 && (
+                    <div className="mt-4 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-xs text-amber-700">
+                      New images selected. Saving this form will replace the
+                      current image gallery.
+                    </div>
+                  )}
+
                   <label className="mt-4 block text-sm font-semibold text-[var(--color-text-main)]">
-                    Replace Main Image
+                    Replace Image Gallery
                   </label>
                   <input
                     type="file"
                     accept="image/*"
-                    onChange={handleImageChange}
+                    multiple
+                    onChange={handleImagesChange}
                     className="mt-2 block w-full rounded-xl border border-[var(--color-border)] px-3 py-2 text-sm"
                   />
+
+                  {selectedImages.length > 0 && (
+                    <div className="mt-4 space-y-2">
+                      {selectedImages.map((file, index) => (
+                        <div
+                          key={`${file.name}-${index}`}
+                          className="flex items-center justify-between rounded-xl border border-[var(--color-border)] px-3 py-2 text-sm"
+                        >
+                          <span className="truncate">
+                            {index === 0 ? "Primary: " : ""}
+                            {file.name}
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() => removeSelectedImage(index)}
+                            className="font-semibold text-red-600"
+                          >
+                            Remove
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               </div>
 
