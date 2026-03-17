@@ -4,7 +4,6 @@ import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
-  Sparkles,
   Users,
   ShieldCheck,
   CheckCircle2,
@@ -59,10 +58,10 @@ export default function AdminPage() {
         }
 
         setUser(data.user);
-        setMessage("Your admin workspace is active and ready.");
+        setMessage("Your admin session is active.");
       } catch (error) {
         console.error(error);
-        setMessage("Could not connect to backend");
+        setMessage("Could not connect to backend.");
       } finally {
         setLoading(false);
       }
@@ -88,31 +87,31 @@ export default function AdminPage() {
   const quickModules = [
     {
       title: "Add Property",
-      text: "Create a fresh property listing with images and optional video.",
+      text: "Create a new property listing with images and optional video.",
       href: "/add-property",
       icon: PlusSquare,
-      badge: "Fast action",
+      badge: "Create",
     },
     {
       title: "Property Listings",
-      text: "View all uploaded properties and manage listing status.",
+      text: "View, edit, approve, reject, or remove property listings.",
       href: "/admin/properties",
       icon: Building2,
-      badge: "Core module",
+      badge: "Manage",
     },
     {
       title: "Manage Admins",
-      text: "Create and manage admin access for trusted team members.",
+      text: "Control admin access and manage trusted team members.",
       href: "/admin/admins",
       icon: Users,
-      badge: "Access control",
+      badge: "Access",
     },
     {
       title: "View Website",
-      text: "Open the public website and review the client-facing experience.",
+      text: "Open the public website and review the live experience.",
       href: "/",
       icon: Globe,
-      badge: "Public site",
+      badge: "Live Site",
     },
   ];
 
@@ -124,9 +123,8 @@ export default function AdminPage() {
           <div className="relative z-10 p-6 sm:p-8 lg:p-10">
             <div className="flex flex-col gap-6 xl:flex-row xl:items-end xl:justify-between">
               <div className="max-w-3xl">
-                <div className="inline-flex items-center gap-2 rounded-full bg-white/15 px-4 py-1.5 text-xs font-bold uppercase tracking-[0.18em] text-white backdrop-blur">
-                  <Sparkles size={14} />
-                  Premium Admin Workspace
+                <div className="inline-flex items-center rounded-full bg-white/15 px-4 py-1.5 text-xs font-bold uppercase tracking-[0.18em] text-white backdrop-blur">
+                  Admin Dashboard
                 </div>
 
                 <h2 className="mt-4 text-3xl font-bold leading-tight text-white sm:text-4xl">
@@ -136,7 +134,7 @@ export default function AdminPage() {
                 </h2>
 
                 <p className="mt-3 max-w-2xl text-sm leading-6 text-white/85 sm:text-base">
-                  Manage listings, team access, and platform operations from one simple and professional control center.
+                  Manage listings, admin access, and key platform operations from one central dashboard.
                 </p>
               </div>
 
@@ -235,7 +233,7 @@ export default function AdminPage() {
 
           <div className="inline-flex items-center gap-2 rounded-2xl bg-slate-50 px-4 py-2 text-sm font-medium text-slate-600">
             <Layers3 size={16} />
-            Owner-friendly interface
+            Clean and simple interface
           </div>
         </div>
 
@@ -283,22 +281,22 @@ export default function AdminPage() {
       <section className="grid gap-4 lg:grid-cols-[1.15fr_0.85fr]">
         <div className="rounded-[28px] border border-slate-200 bg-white p-6 shadow-sm">
           <p className="text-xs font-extrabold uppercase tracking-[0.18em] text-[#0f766e]">
-            Why this works
+            Overview
           </p>
 
           <h3 className="mt-3 text-2xl font-bold text-slate-900">
-            Premium, but still easy to understand
+            Built for daily admin work
           </h3>
 
           <div className="mt-4 space-y-3 text-sm leading-6 text-slate-500">
             <p>
-              This dashboard is designed to feel modern and expensive without confusing non-technical users.
+              This dashboard is designed to help admins manage listings and platform access without unnecessary complexity.
             </p>
             <p>
-              The major actions are clearly visible, the labels are easy to understand, and the navigation is always available.
+              The most important actions are easy to find, the layout is clear, and the navigation stays straightforward.
             </p>
             <p>
-              That means the owner can move around confidently while still feeling like they are using a serious professional system.
+              That makes it easier to move quickly and keep the platform properly managed.
             </p>
           </div>
         </div>
@@ -350,10 +348,10 @@ export default function AdminPage() {
 
               <div>
                 <p className="text-sm font-semibold text-slate-900">
-                  Ready for the next phase
+                  Admin tools ready
                 </p>
                 <p className="mt-1 text-sm leading-6 text-slate-600">
-                  After this dashboard, we move into premium property management, admin control, and owner-requested UI refinements.
+                  Property management, admin control, and core navigation are all available from this dashboard.
                 </p>
               </div>
             </div>
