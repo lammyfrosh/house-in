@@ -9,8 +9,8 @@ import {
   BadgeCheck,
   ArrowRight,
 } from "lucide-react";
-import { properties } from "../lib/properties";
-import PropertyCard from "../components/PropertyCard";
+import { getApprovedProperties } from "@/lib/api";
+import PropertyCard from "@/components/PropertyCard";
 
 const STATES = [
   "Lagos",
@@ -51,12 +51,14 @@ const trustItems = [
   },
 ];
 
-export default function Home() {
+export default async function Home() {
+  const properties = await getApprovedProperties();
+
   const featured = [
     ...properties.filter((p) => p.purpose === "rent").slice(0, 2),
     ...properties.filter((p) => p.purpose === "sale").slice(0, 2),
     ...properties.filter((p) => p.purpose === "shortlet").slice(0, 2),
-  ];
+  ].slice(0, 6);
 
   return (
     <main>
@@ -128,11 +130,11 @@ export default function Home() {
                 defaultValue=""
               >
                 <option value="">Property Type</option>
-                <option value="apartment">Flat / Apartment</option>
-                <option value="duplex">Duplex</option>
-                <option value="terrace">Terrace</option>
-                <option value="bungalow">Bungalow</option>
-                <option value="land">Land</option>
+                <option value="Apartment">Flat / Apartment</option>
+                <option value="Duplex">Duplex</option>
+                <option value="Terrace">Terrace</option>
+                <option value="Bungalow">Bungalow</option>
+                <option value="Land">Land</option>
               </select>
 
               <button
@@ -347,7 +349,7 @@ export default function Home() {
               </div>
             </div>
 
-            <div className="rounded-3xl border border-[var(--color-border)] bg-white p-6 md:p-8 shadow-sm">
+            <div className="rounded-3xl border border-[var(--color-border)] bg-white p-6 shadow-sm md:p-8">
               <p className="text-xs font-extrabold uppercase tracking-widest text-[var(--color-primary-dark)]">
                 Our Promise
               </p>

@@ -15,7 +15,7 @@ import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { formatNaira } from "@/lib/money";
 
-type MapProperty = {
+export type MapProperty = {
   id: string;
   slug: string;
   title: string;
@@ -108,7 +108,6 @@ export default function SearchResultsMapClient({
   return (
     <main className="bg-[#fafafa]">
       <div className="grid lg:grid-cols-[1.05fr_0.95fr]">
-        {/* MAP SIDE */}
         <section className="hidden lg:block">
           <div className="sticky top-[72px] h-[calc(100vh-72px)] border-r border-[var(--color-border)] bg-white">
             <div className="absolute left-4 top-4 z-[500] rounded-2xl bg-white/95 px-4 py-3 shadow-lg backdrop-blur">
@@ -135,7 +134,10 @@ export default function SearchResultsMapClient({
               />
 
               {selectedProperty && (
-                <FlyToSelected lat={selectedProperty.lat} lng={selectedProperty.lng} />
+                <FlyToSelected
+                  lat={selectedProperty.lat}
+                  lng={selectedProperty.lng}
+                />
               )}
 
               {results.map((property) => (
@@ -153,7 +155,9 @@ export default function SearchResultsMapClient({
                       <p className="mt-1 text-sm text-gray-600">
                         {property.area}, {property.city}, {property.state}
                       </p>
-                      <p className="mt-2 font-bold">{formatNaira(property.price)}</p>
+                      <p className="mt-2 font-bold">
+                        {formatNaira(property.price)}
+                      </p>
                     </div>
                   </Popup>
                 </Marker>
@@ -162,7 +166,6 @@ export default function SearchResultsMapClient({
           </div>
         </section>
 
-        {/* RESULTS SIDE */}
         <section className="min-h-screen">
           <div className="border-b border-[var(--color-border)] bg-white px-4 py-4 sm:px-5">
             <div className="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
@@ -174,7 +177,8 @@ export default function SearchResultsMapClient({
                   Results for Your Search
                 </h1>
                 <p className="mt-1 text-sm text-[var(--color-text-muted)]">
-                  Browse all matching listings and highlight approximate locations on the map.
+                  Browse all matching listings and highlight approximate
+                  locations on the map.
                 </p>
               </div>
 
@@ -235,7 +239,8 @@ export default function SearchResultsMapClient({
               <>
                 <div className="mb-4 rounded-2xl border border-[var(--color-border)] bg-white px-4 py-3">
                   <p className="text-sm font-semibold text-[var(--color-text-main)]">
-                    Showing {results.length} propert{results.length === 1 ? "y" : "ies"}
+                    Showing {results.length} propert
+                    {results.length === 1 ? "y" : "ies"}
                   </p>
                 </div>
 
@@ -284,7 +289,8 @@ export default function SearchResultsMapClient({
 
                                 <p className="mt-2 flex items-center gap-2 text-sm text-[var(--color-text-muted)]">
                                   <MapPin size={16} />
-                                  {property.area}, {property.city}, {property.state}
+                                  {property.area}, {property.city},{" "}
+                                  {property.state}
                                 </p>
                               </div>
 
@@ -311,7 +317,9 @@ export default function SearchResultsMapClient({
 
                             <div className="mt-5 flex items-center justify-between">
                               <p className="text-sm text-[var(--color-primary-dark)]">
-                                {active ? "Highlighted on map" : "Hover to show on map"}
+                                {active
+                                  ? "Highlighted on map"
+                                  : "Hover to show on map"}
                               </p>
 
                               <span className="text-sm font-semibold text-[var(--color-primary-dark)]">

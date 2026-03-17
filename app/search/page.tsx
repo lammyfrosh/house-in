@@ -1,5 +1,7 @@
-import SearchResultsMapClient from "@/components/SearchResultsMapClient";
-import { properties } from "../../lib/properties";
+import SearchResultsMapClient, {
+  type MapProperty,
+} from "@/components/SearchResultsMapClient";
+import { getApprovedProperties } from "@/lib/api";
 
 type SortMode = "newest" | "price_low" | "price_high";
 
@@ -71,7 +73,7 @@ export default async function SearchPage({
   const maxPrice = toNumber(asString(sp.maxPrice));
   const sort = (asString(sp.sort) || "newest") as SortMode;
 
-  let results = properties.slice();
+  let results = await getApprovedProperties();
 
   if (purpose === "rent" || purpose === "sale" || purpose === "shortlet") {
     results = results.filter((p) => p.purpose === purpose);
@@ -89,37 +91,59 @@ export default async function SearchPage({
   }
 
   if (propertyType) {
-    results = results.filter((p) => p.propertyType === propertyType);
+    const normalizedPropertyType = norm(propertyType);
+    results = results.filter(
+      (p) =>
+        norm(p.property_type || p.propertyType || "") ===
+        normalizedPropertyType
+    );
   }
 
   if (bedsStr) {
     const minBeds = toNumber(bedsStr);
-    if (minBeds > 0) results = results.filter((p) => p.bedrooms >= minBeds);
+    if (minBeds > 0) {
+      results = results.filter((p) => Number(p.bedrooms) >= minBeds);
+    }
   }
 
   if (bathsStr) {
     const minBaths = toNumber(bathsStr);
-    if (minBaths > 0) results = results.filter((p) => p.bathrooms >= minBaths);
+    if (minBaths > 0) {
+      results = results.filter((p) => Number(p.bathrooms) >= minBaths);
+    }
   }
 
   if (minPrice > 0) {
-    results = results.filter((p) => p.price >= minPrice);
+    results = results.filter((p) => Number(p.price) >= minPrice);
   }
 
   if (maxPrice > 0) {
-    results = results.filter((p) => p.price <= maxPrice);
+    results = results.filter((p) => Number(p.price) <= maxPrice);
   }
 
   results.sort((a, b) => {
-    if (sort === "price_low") return a.price - b.price;
-    if (sort === "price_high") return b.price - a.price;
-    return 0;
+    if (sort === "price_low") return Number(a.price) - Number(b.price);
+    if (sort === "price_high") return Number(b.price) - Number(a.price);
+    return Number(b.id) - Number(a.id);
   });
 
-  const mappedResults = results.map((p) => {
+  const mappedResults: MapProperty[] = results.map((p) => {
     const coords = getCoords(p.area, p.city, p.state);
+
     return {
-      ...p,
+      id: String(p.id),
+      slug: p.slug,
+      title: p.title,
+      purpose: p.purpose as "rent" | "sale" | "shortlet",
+      propertyType: p.property_type || p.propertyType || "",
+      price: Number(p.price),
+      bedrooms: Number(p.bedrooms || 0),
+      bathrooms: Number(p.bathrooms || 0),
+      state: p.state,
+      area: p.area,
+      city: p.city,
+      imageUrl: p.image_url || p.imageUrl || "/placeholder-property.jpg",
+      listedAtText: p.listedAtText || "Live listing",
       lat: coords.lat,
       lng: coords.lng,
     };

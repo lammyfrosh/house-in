@@ -8,50 +8,58 @@ import {
   BadgeDollarSign,
   Phone,
   Mail,
+  Car,
+  Ruler,
+  Toilet,
 } from "lucide-react";
-
-import { getPropertyBySlug, properties } from "@/lib/properties";
-import PropertyCard from "@/components/PropertyCard";
+import {
+  getApprovedProperties,
+  getApprovedPropertyBySlug,
+} from "@/lib/api";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
+
+function getPurposeBadge(purpose: string) {
+  if (purpose === "rent") return "FOR RENT";
+  if (purpose === "sale") return "FOR SALE";
+  return "SHORTLET";
+}
 
 export default async function PropertyPage({
   params,
 }: {
   params: Promise<{ slug: string[] }>;
 }) {
-  const { slug } = await params;
-  const rawSlug = Array.isArray(slug) ? slug.join("/") : "";
-  const property = getPropertyBySlug(rawSlug);
+  const resolvedParams = await params;
+  const slugParts = resolvedParams?.slug || [];
+  const rawSlug = Array.isArray(slugParts) ? slugParts.join("/") : slugParts;
 
-  if (!property) {
-    return notFound();
-  }
+  if (!rawSlug) notFound();
 
-  const similar = properties
+  const property = await getApprovedPropertyBySlug(rawSlug);
+
+  if (!property) notFound();
+
+  const allProperties = await getApprovedProperties();
+
+  const similar = allProperties
     .filter(
       (p) =>
         p.id !== property.id &&
-        p.state === property.state &&
-        p.purpose === property.purpose
+        p.state?.toLowerCase() === property.state?.toLowerCase() &&
+        p.purpose?.toLowerCase() === property.purpose?.toLowerCase()
     )
     .slice(0, 3);
 
-  const badge =
-    property.purpose === "rent"
-      ? "FOR RENT"
-      : property.purpose === "sale"
-      ? "FOR SALE"
-      : "SHORTLET";
+  const badge = getPurposeBadge(property.purpose);
 
   return (
-    <main className="bg-[#fcfcfc]">
-      {/* Hero image */}
+    <main className="bg-[#f7f9fc]">
       <section className="relative h-[420px] w-full overflow-hidden">
         <Image
-          src={property.imageUrl}
+          src={property.image_url || "/placeholder-property.jpg"}
           alt={property.title}
           fill
           className="object-cover"
@@ -59,74 +67,98 @@ export default async function PropertyPage({
           priority
         />
 
-        <div className="absolute inset-0 bg-black/35" />
+        <div className="absolute inset-0 bg-black/45" />
 
         <div className="absolute bottom-6 left-1/2 w-full max-w-6xl -translate-x-1/2 px-4 text-white">
           <span className="rounded-full bg-[var(--color-primary-dark)] px-4 py-1 text-xs font-bold">
             {badge}
           </span>
 
-          <h1 className="mt-3 text-3xl font-bold">{property.title}</h1>
+          <h1 className="mt-3 text-3xl font-bold sm:text-4xl">
+            {property.title}
+          </h1>
 
-          <p className="mt-1 flex items-center gap-2 text-sm text-white/90">
+          <p className="mt-2 flex items-center gap-2 text-sm text-white/90">
             <MapPin size={16} />
             {property.area}, {property.city}, {property.state}
           </p>
         </div>
       </section>
 
-      {/* Main section */}
       <section className="mx-auto grid max-w-6xl gap-8 px-4 py-10 lg:grid-cols-[1fr_360px]">
-        {/* Left content */}
         <div>
-          {/* Price */}
-          <div className="rounded-2xl border border-[var(--color-border)] bg-white p-6">
+          <div className="rounded-3xl border border-[var(--color-border)] bg-white p-6 shadow-sm">
             <p className="flex items-center gap-2 text-xs font-extrabold uppercase tracking-widest text-gray-500">
               <BadgeDollarSign size={14} />
               Price
             </p>
 
             <p className="mt-2 text-3xl font-bold text-[var(--color-text-main)]">
-              ₦{property.price.toLocaleString()}
+              ₦{Number(property.price || 0).toLocaleString()}
             </p>
 
-            <div className="mt-6 flex flex-wrap gap-6 text-sm text-gray-700">
+            <div className="mt-6 grid gap-4 text-sm text-gray-700 sm:grid-cols-2 lg:grid-cols-3">
               <span className="flex items-center gap-2">
                 <BedDouble size={18} />
-                {property.bedrooms} Bedrooms
+                {property.bedrooms ?? 0} Bedrooms
               </span>
 
               <span className="flex items-center gap-2">
                 <Bath size={18} />
-                {property.bathrooms} Bathrooms
+                {property.bathrooms ?? 0} Bathrooms
+              </span>
+
+              <span className="flex items-center gap-2">
+                <Toilet size={18} />
+                {property.toilets ?? 0} Toilets
+              </span>
+
+              <span className="flex items-center gap-2">
+                <Car size={18} />
+                {property.parking_spaces ?? 0} Parking Spaces
+              </span>
+
+              <span className="flex items-center gap-2">
+                <Ruler size={18} />
+                {property.size || "N/A"}
+              </span>
+
+              <span className="flex items-center gap-2">
+                <BadgeDollarSign size={18} />
+                {property.property_type}
               </span>
             </div>
           </div>
 
-          {/* Description */}
-          <div className="mt-6 rounded-2xl border border-[var(--color-border)] bg-white p-6">
+          <div className="mt-6 rounded-3xl border border-[var(--color-border)] bg-white p-6 shadow-sm">
             <h2 className="text-lg font-bold text-[var(--color-text-main)]">
               Property Description
             </h2>
 
-            <p className="mt-3 text-sm leading-7 text-[var(--color-text-muted)]">
-              This property is located in a well organised area within{" "}
-              {property.city}, offering convenient access to major roads,
-              essential services, and everyday amenities. It is designed to
-              provide a comfortable living experience with well planned spaces
-              and a functional layout suitable for modern lifestyles.
-            </p>
-
-            <p className="mt-3 text-sm leading-7 text-[var(--color-text-muted)]">
-              Whether you are looking for a new home, an investment opportunity,
-              or a flexible stay option, this listing represents a practical and
-              appealing choice in today’s property market.
+            <p className="mt-3 whitespace-pre-line text-sm leading-7 text-[var(--color-text-muted)]">
+              {property.description ||
+                "No description available for this property yet."}
             </p>
           </div>
+
+          {property.video_url && (
+            <div className="mt-6 rounded-3xl border border-[var(--color-border)] bg-white p-6 shadow-sm">
+              <h2 className="text-lg font-bold text-[var(--color-text-main)]">
+                Property Video
+              </h2>
+
+              <video
+                controls
+                className="mt-4 w-full rounded-2xl border border-[var(--color-border)] bg-black"
+              >
+                <source src={property.video_url} />
+                Your browser does not support the video tag.
+              </video>
+            </div>
+          )}
         </div>
 
-        {/* Contact card */}
-        <aside className="h-fit rounded-2xl border border-[var(--color-border)] bg-white p-6">
+        <aside className="h-fit rounded-3xl border border-[var(--color-border)] bg-white p-6 shadow-sm">
           <h2 className="text-lg font-bold text-[var(--color-text-main)]">
             Contact Agent
           </h2>
@@ -137,15 +169,23 @@ export default async function PropertyPage({
           </p>
 
           <div className="mt-6 space-y-3">
-            <button className="flex w-full items-center justify-center gap-2 rounded-xl bg-[var(--color-primary-dark)] px-4 py-3 text-sm font-semibold text-white hover:opacity-90">
+            <a
+              href="tel:+2340000000000"
+              className="flex w-full items-center justify-center gap-2 rounded-xl bg-[var(--color-primary-dark)] px-4 py-3 text-sm font-semibold text-white hover:opacity-90"
+            >
               <Phone size={16} />
               Call Agent
-            </button>
+            </a>
 
-            <button className="flex w-full items-center justify-center gap-2 rounded-xl border border-[var(--color-border)] px-4 py-3 text-sm font-semibold text-[var(--color-text-main)] hover:bg-gray-50">
+            <a
+              href={`mailto:info@house-in.online?subject=${encodeURIComponent(
+                `Inquiry about ${property.title}`
+              )}`}
+              className="flex w-full items-center justify-center gap-2 rounded-xl border border-[var(--color-border)] px-4 py-3 text-sm font-semibold text-[var(--color-text-main)] hover:bg-gray-50"
+            >
               <Mail size={16} />
               Send Message
-            </button>
+            </a>
           </div>
 
           <div className="mt-6 rounded-xl bg-gray-50 p-4 text-xs text-gray-600">
@@ -155,7 +195,6 @@ export default async function PropertyPage({
         </aside>
       </section>
 
-      {/* Similar listings */}
       {similar.length > 0 && (
         <section className="mx-auto max-w-6xl px-4 pb-16">
           <div className="mb-5 flex items-center justify-between">
@@ -173,7 +212,39 @@ export default async function PropertyPage({
 
           <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
             {similar.map((p) => (
-              <PropertyCard key={p.id} p={p} />
+              <Link
+                key={p.id}
+                href={`/property/${p.slug}`}
+                className="overflow-hidden rounded-3xl border border-[var(--color-border)] bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-md"
+              >
+                <div className="relative h-56 w-full">
+                  <Image
+                    src={p.image_url || "/placeholder-property.jpg"}
+                    alt={p.title}
+                    fill
+                    className="object-cover"
+                    unoptimized
+                  />
+                </div>
+
+                <div className="p-4">
+                  <p className="text-xs font-bold uppercase tracking-widest text-[var(--color-primary-dark)]">
+                    {getPurposeBadge(p.purpose)}
+                  </p>
+
+                  <h3 className="mt-2 line-clamp-2 text-lg font-semibold text-[var(--color-text-main)]">
+                    {p.title}
+                  </h3>
+
+                  <p className="mt-2 text-sm text-[var(--color-text-muted)]">
+                    {p.area}, {p.city}, {p.state}
+                  </p>
+
+                  <p className="mt-3 text-base font-bold text-[var(--color-text-main)]">
+                    ₦{Number(p.price || 0).toLocaleString()}
+                  </p>
+                </div>
+              </Link>
             ))}
           </div>
         </section>

@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import type { Property } from "@/lib/properties";
+import type { Property } from "@/lib/api";
 import { formatNaira } from "@/lib/money";
 
 export default function PropertyCard({ p }: { p: Property }) {
@@ -11,6 +11,9 @@ export default function PropertyCard({ p }: { p: Property }) {
       ? "For Sale"
       : "Shortlet";
 
+  const imageSrc = p.image_url || p.imageUrl || "/placeholder-property.jpg";
+  const listedText = p.listedAtText || "Live listing";
+
   return (
     <Link
       href={`/property/${encodeURIComponent(p.slug)}`}
@@ -18,7 +21,7 @@ export default function PropertyCard({ p }: { p: Property }) {
     >
       <div className="relative aspect-[16/10] w-full overflow-hidden">
         <Image
-          src={p.imageUrl}
+          src={imageSrc}
           alt={`${p.title} in ${p.area}, ${p.city}`}
           fill
           unoptimized
@@ -39,15 +42,9 @@ export default function PropertyCard({ p }: { p: Property }) {
 
           <span
             className="
-              shrink-0 self-start
-              inline-flex items-center justify-center
-              h-8 min-w-[92px]
-              rounded-full
-              bg-[var(--color-primary-dark)]
-              px-3
-              text-[11px] font-extrabold uppercase tracking-widest
-              text-white
-              shadow-sm
+              inline-flex h-8 min-w-[92px] shrink-0 items-center justify-center
+              self-start rounded-full bg-[var(--color-primary-dark)] px-3
+              text-[11px] font-extrabold uppercase tracking-widest text-white shadow-sm
             "
           >
             {badge}
@@ -58,7 +55,7 @@ export default function PropertyCard({ p }: { p: Property }) {
           <p>
             {p.bedrooms} bed • {p.bathrooms} bath
           </p>
-          <p className="text-xs text-gray-500">{p.listedAtText}</p>
+          <p className="text-xs text-gray-500">{listedText}</p>
         </div>
       </div>
     </Link>
