@@ -25,6 +25,7 @@ type Property = {
   video_url?: string;
   featured?: number | boolean;
   status: PropertyStatus;
+  created_by_name?: string;
 };
 
 type PropertyForm = {
@@ -110,7 +111,6 @@ export default function EditPropertyPage() {
       }
 
       try {
-        // Check auth
         const meRes = await fetch(`${API}/api/auth/me`, {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -118,11 +118,12 @@ export default function EditPropertyPage() {
         });
 
         if (!meRes.ok) {
+          localStorage.removeItem("housein_token");
+          localStorage.removeItem("housein_user");
           router.push("/signin");
           return;
         }
 
-        // 🔥 LOAD PROPERTY (FIXED)
         const res = await fetch(`${API}/api/properties/admin/${propertyId}`, {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -135,29 +136,31 @@ export default function EditPropertyPage() {
           throw new Error(data.message || "Failed to load property");
         }
 
-        const p: Property = data.property || data;
-        setProperty(p);
+        const loadedProperty: Property = data.property || data;
+        setProperty(loadedProperty);
 
         setForm({
-          title: p.title || "",
-          purpose: p.purpose || "rent",
-          property_type: p.property_type || "",
-          price: String(p.price ?? ""),
-          bedrooms: String(p.bedrooms ?? ""),
-          bathrooms: String(p.bathrooms ?? ""),
-          toilets: String(p.toilets ?? ""),
-          parking_spaces: String(p.parking_spaces ?? ""),
-          size: p.size || "",
-          state: p.state || "",
-          area: p.area || "",
-          city: p.city || "",
-          description: p.description || "",
-          featured: Boolean(p.featured),
-          status: p.status || "pending",
+          title: loadedProperty.title || "",
+          purpose: loadedProperty.purpose || "rent",
+          property_type: loadedProperty.property_type || "",
+          price: String(loadedProperty.price ?? ""),
+          bedrooms: String(loadedProperty.bedrooms ?? ""),
+          bathrooms: String(loadedProperty.bathrooms ?? ""),
+          toilets: String(loadedProperty.toilets ?? ""),
+          parking_spaces: String(loadedProperty.parking_spaces ?? ""),
+          size: loadedProperty.size || "",
+          state: loadedProperty.state || "",
+          area: loadedProperty.area || "",
+          city: loadedProperty.city || "",
+          description: loadedProperty.description || "",
+          featured: Boolean(loadedProperty.featured),
+          status: loadedProperty.status || "pending",
         });
       } catch (error) {
         console.error(error);
-        setMessage("Could not load property");
+        setMessage(
+          error instanceof Error ? error.message : "Could not load property"
+        );
         setMessageType("error");
       } finally {
         setLoading(false);
@@ -168,17 +171,27 @@ export default function EditPropertyPage() {
   }, [API, propertyId, router]);
 
   useEffect(() => {
-    if (!selectedImage) return setImagePreview("");
-    const url = URL.createObjectURL(selectedImage);
-    setImagePreview(url);
-    return () => URL.revokeObjectURL(url);
+    if (!selectedImage) {
+      setImagePreview("");
+      return;
+    }
+
+    const objectUrl = URL.createObjectURL(selectedImage);
+    setImagePreview(objectUrl);
+
+    return () => URL.revokeObjectURL(objectUrl);
   }, [selectedImage]);
 
   useEffect(() => {
-    if (!selectedVideo) return setVideoPreview("");
-    const url = URL.createObjectURL(selectedVideo);
-    setVideoPreview(url);
-    return () => URL.revokeObjectURL(url);
+    if (!selectedVideo) {
+      setVideoPreview("");
+      return;
+    }
+
+    const objectUrl = URL.createObjectURL(selectedVideo);
+    setVideoPreview(objectUrl);
+
+    return () => URL.revokeObjectURL(objectUrl);
   }, [selectedVideo]);
 
   function handleChange(
@@ -200,26 +213,62 @@ export default function EditPropertyPage() {
     }));
   }
 
+  function handleImageChange(e: ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0] || null;
+    setSelectedImage(file);
+  }
+
+  function handleVideoChange(e: ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0] || null;
+    setSelectedVideo(file);
+  }
+
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
 
     const token = localStorage.getItem("housein_token");
-    if (!token) return router.push("/signin");
+    if (!token) {
+      router.push("/signin");
+      return;
+    }
+
+    if (!propertyId) {
+      setMessage("Invalid property ID.");
+      setMessageType("error");
+      return;
+    }
 
     setSaving(true);
     setMessage("");
+    setMessageType("");
 
     try {
       const formData = new FormData();
 
-      Object.entries(form).forEach(([key, value]) => {
-        formData.append(key, String(value));
-      });
+      formData.append("title", form.title.trim());
+      formData.append("purpose", form.purpose);
+      formData.append("property_type", form.property_type.trim());
+      formData.append("price", form.price || "0");
+      formData.append("bedrooms", form.bedrooms || "0");
+      formData.append("bathrooms", form.bathrooms || "0");
+      formData.append("toilets", form.toilets || "0");
+      formData.append("parking_spaces", form.parking_spaces || "0");
+      formData.append("size", form.size.trim());
+      formData.append("state", form.state.trim());
+      formData.append("area", form.area.trim());
+      formData.append("city", form.city.trim());
+      formData.append("description", form.description.trim());
+      formData.append("featured", String(form.featured ? 1 : 0));
+      formData.append("status", form.status);
 
-      if (selectedImage) formData.append("image", selectedImage);
-      if (selectedVideo) formData.append("video", selectedVideo);
+      if (selectedImage) {
+        formData.append("image", selectedImage);
+      }
 
-      // 🔥 UPDATE PROPERTY
+      if (selectedVideo) {
+        formData.append("video", selectedVideo);
+      }
+
       const res = await fetch(`${API}/api/properties/${propertyId}`, {
         method: "PUT",
         headers: {
@@ -230,17 +279,30 @@ export default function EditPropertyPage() {
 
       const data = await res.json();
 
-      if (!res.ok) throw new Error(data.message);
+      if (!res.ok) {
+        throw new Error(data.message || "Failed to update property");
+      }
 
-      setMessage("Property updated successfully");
+      const updatedProperty: Property = data.property || {
+        ...(property as Property),
+        ...form,
+        featured: form.featured ? 1 : 0,
+      };
+
+      setProperty(updatedProperty);
+      setSelectedImage(null);
+      setSelectedVideo(null);
+      setMessage("Property updated successfully.");
       setMessageType("success");
 
       setTimeout(() => {
         router.push("/admin/properties");
-      }, 800);
-    } catch (err) {
-      console.error(err);
-      setMessage("Update failed");
+      }, 900);
+    } catch (error) {
+      console.error(error);
+      setMessage(
+        error instanceof Error ? error.message : "Could not update property"
+      );
       setMessageType("error");
     } finally {
       setSaving(false);
@@ -248,52 +310,399 @@ export default function EditPropertyPage() {
   }
 
   return (
-    <main className="mx-auto max-w-5xl p-6">
-      <h1 className="text-2xl font-bold">Edit Property</h1>
+    <main className="min-h-screen bg-[#f6f8fb]">
+      <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 sm:py-8 lg:px-8 lg:py-10">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+          <div>
+            <p className="text-xs font-extrabold uppercase tracking-[0.25em] text-[var(--color-primary-dark)]">
+              Admin Property Editor
+            </p>
+            <h1 className="mt-2 text-3xl font-bold tracking-tight text-[var(--color-text-main)] sm:text-4xl">
+              Edit Property
+            </h1>
+            <p className="mt-2 max-w-2xl text-sm leading-6 text-[var(--color-text-muted)]">
+              Update listing details, replace media, and refine the property
+              presentation before it goes live.
+            </p>
+          </div>
 
-      {message && (
-        <p
-          className={`mt-3 ${
-            messageType === "success" ? "text-green-600" : "text-red-600"
-          }`}
-        >
-          {message}
-        </p>
-      )}
+          <div className="flex flex-col gap-3 sm:flex-row">
+            <button
+              type="button"
+              onClick={() => router.push("/admin/properties")}
+              className="rounded-xl border border-[var(--color-border)] bg-white px-4 py-2.5 text-sm font-semibold text-[var(--color-text-main)] shadow-sm transition hover:bg-gray-50"
+            >
+              Back to Properties
+            </button>
 
-      {loading ? (
-        <p className="mt-4">Loading...</p>
-      ) : (
-        <form onSubmit={handleSubmit} className="mt-6 space-y-4">
-          <input
-            name="title"
-            value={form.title}
-            onChange={handleChange}
-            placeholder="Title"
-            className="w-full border p-3"
-          />
+            {property?.slug ? (
+              <button
+                type="button"
+                onClick={() => router.push(`/property/${property.slug}`)}
+                className="rounded-xl bg-[var(--color-primary-dark)] px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:opacity-90"
+              >
+                View Live Listing
+              </button>
+            ) : null}
+          </div>
+        </div>
 
-          <input
-            name="price"
-            value={form.price}
-            onChange={handleChange}
-            placeholder="Price"
-            className="w-full border p-3"
-          />
+        {message && (
+          <div
+            className={`mt-5 rounded-2xl px-4 py-3 text-sm shadow-sm ${
+              messageType === "success"
+                ? "border border-green-200 bg-green-50 text-green-700"
+                : "border border-red-200 bg-red-50 text-red-700"
+            }`}
+          >
+            {message}
+          </div>
+        )}
 
-          <textarea
-            name="description"
-            value={form.description}
-            onChange={handleChange}
-            placeholder="Description"
-            className="w-full border p-3"
-          />
+        {loading ? (
+          <div className="mt-8 rounded-3xl border border-[var(--color-border)] bg-white p-6 text-sm text-[var(--color-text-muted)] shadow-sm">
+            Loading property editor...
+          </div>
+        ) : !property ? (
+          <div className="mt-8 rounded-3xl border border-red-200 bg-white p-6 text-sm text-red-600 shadow-sm">
+            Property not found.
+          </div>
+        ) : (
+          <form
+            onSubmit={handleSubmit}
+            className="mt-8 grid gap-6 xl:grid-cols-[1.45fr_0.85fr]"
+          >
+            <section className="space-y-6">
+              <div className="rounded-3xl border border-[var(--color-border)] bg-white p-5 shadow-sm sm:p-6">
+                <h2 className="text-lg font-semibold text-[var(--color-text-main)]">
+                  Core Details
+                </h2>
 
-          <button className="bg-black text-white px-6 py-3">
-            {saving ? "Saving..." : "Save Changes"}
-          </button>
-        </form>
-      )}
+                <div className="mt-5 grid gap-4 sm:grid-cols-2">
+                  <div className="sm:col-span-2">
+                    <label className="mb-2 block text-sm font-semibold text-[var(--color-text-main)]">
+                      Property Title
+                    </label>
+                    <input
+                      name="title"
+                      value={form.title}
+                      onChange={handleChange}
+                      required
+                      className="w-full rounded-xl border border-[var(--color-border)] bg-white px-4 py-3 text-sm outline-none transition focus:border-[var(--color-primary-dark)]"
+                      placeholder="e.g. Luxury 4 Bedroom Detached Duplex"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="mb-2 block text-sm font-semibold text-[var(--color-text-main)]">
+                      Purpose
+                    </label>
+                    <select
+                      name="purpose"
+                      value={form.purpose}
+                      onChange={handleChange}
+                      className="w-full rounded-xl border border-[var(--color-border)] bg-white px-4 py-3 text-sm outline-none transition focus:border-[var(--color-primary-dark)]"
+                    >
+                      <option value="sale">Sale</option>
+                      <option value="rent">Rent</option>
+                      <option value="shortlet">Shortlet</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="mb-2 block text-sm font-semibold text-[var(--color-text-main)]">
+                      Property Type
+                    </label>
+                    <input
+                      name="property_type"
+                      value={form.property_type}
+                      onChange={handleChange}
+                      required
+                      className="w-full rounded-xl border border-[var(--color-border)] bg-white px-4 py-3 text-sm outline-none transition focus:border-[var(--color-primary-dark)]"
+                      placeholder="e.g. Duplex, Apartment, Bungalow"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="mb-2 block text-sm font-semibold text-[var(--color-text-main)]">
+                      Price
+                    </label>
+                    <input
+                      name="price"
+                      type="number"
+                      min="0"
+                      value={form.price}
+                      onChange={handleChange}
+                      required
+                      className="w-full rounded-xl border border-[var(--color-border)] bg-white px-4 py-3 text-sm outline-none transition focus:border-[var(--color-primary-dark)]"
+                      placeholder="Enter price"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="mb-2 block text-sm font-semibold text-[var(--color-text-main)]">
+                      Size
+                    </label>
+                    <input
+                      name="size"
+                      value={form.size}
+                      onChange={handleChange}
+                      className="w-full rounded-xl border border-[var(--color-border)] bg-white px-4 py-3 text-sm outline-none transition focus:border-[var(--color-primary-dark)]"
+                      placeholder="e.g. 650 sqm"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="rounded-3xl border border-[var(--color-border)] bg-white p-5 shadow-sm sm:p-6">
+                <h2 className="text-lg font-semibold text-[var(--color-text-main)]">
+                  Property Features
+                </h2>
+
+                <div className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                  <div>
+                    <label className="mb-2 block text-sm font-semibold text-[var(--color-text-main)]">
+                      Bedrooms
+                    </label>
+                    <input
+                      name="bedrooms"
+                      type="number"
+                      min="0"
+                      value={form.bedrooms}
+                      onChange={handleChange}
+                      className="w-full rounded-xl border border-[var(--color-border)] bg-white px-4 py-3 text-sm outline-none transition focus:border-[var(--color-primary-dark)]"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="mb-2 block text-sm font-semibold text-[var(--color-text-main)]">
+                      Bathrooms
+                    </label>
+                    <input
+                      name="bathrooms"
+                      type="number"
+                      min="0"
+                      value={form.bathrooms}
+                      onChange={handleChange}
+                      className="w-full rounded-xl border border-[var(--color-border)] bg-white px-4 py-3 text-sm outline-none transition focus:border-[var(--color-primary-dark)]"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="mb-2 block text-sm font-semibold text-[var(--color-text-main)]">
+                      Toilets
+                    </label>
+                    <input
+                      name="toilets"
+                      type="number"
+                      min="0"
+                      value={form.toilets}
+                      onChange={handleChange}
+                      className="w-full rounded-xl border border-[var(--color-border)] bg-white px-4 py-3 text-sm outline-none transition focus:border-[var(--color-primary-dark)]"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="mb-2 block text-sm font-semibold text-[var(--color-text-main)]">
+                      Parking Spaces
+                    </label>
+                    <input
+                      name="parking_spaces"
+                      type="number"
+                      min="0"
+                      value={form.parking_spaces}
+                      onChange={handleChange}
+                      className="w-full rounded-xl border border-[var(--color-border)] bg-white px-4 py-3 text-sm outline-none transition focus:border-[var(--color-primary-dark)]"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="rounded-3xl border border-[var(--color-border)] bg-white p-5 shadow-sm sm:p-6">
+                <h2 className="text-lg font-semibold text-[var(--color-text-main)]">
+                  Location & Description
+                </h2>
+
+                <div className="mt-5 grid gap-4 sm:grid-cols-2">
+                  <div>
+                    <label className="mb-2 block text-sm font-semibold text-[var(--color-text-main)]">
+                      State
+                    </label>
+                    <input
+                      name="state"
+                      value={form.state}
+                      onChange={handleChange}
+                      required
+                      className="w-full rounded-xl border border-[var(--color-border)] bg-white px-4 py-3 text-sm outline-none transition focus:border-[var(--color-primary-dark)]"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="mb-2 block text-sm font-semibold text-[var(--color-text-main)]">
+                      City
+                    </label>
+                    <input
+                      name="city"
+                      value={form.city}
+                      onChange={handleChange}
+                      required
+                      className="w-full rounded-xl border border-[var(--color-border)] bg-white px-4 py-3 text-sm outline-none transition focus:border-[var(--color-primary-dark)]"
+                    />
+                  </div>
+
+                  <div className="sm:col-span-2">
+                    <label className="mb-2 block text-sm font-semibold text-[var(--color-text-main)]">
+                      Area / District
+                    </label>
+                    <input
+                      name="area"
+                      value={form.area}
+                      onChange={handleChange}
+                      required
+                      className="w-full rounded-xl border border-[var(--color-border)] bg-white px-4 py-3 text-sm outline-none transition focus:border-[var(--color-primary-dark)]"
+                    />
+                  </div>
+
+                  <div className="sm:col-span-2">
+                    <label className="mb-2 block text-sm font-semibold text-[var(--color-text-main)]">
+                      Description
+                    </label>
+                    <textarea
+                      name="description"
+                      value={form.description}
+                      onChange={handleChange}
+                      rows={7}
+                      className="w-full rounded-xl border border-[var(--color-border)] bg-white px-4 py-3 text-sm outline-none transition focus:border-[var(--color-primary-dark)]"
+                      placeholder="Write a compelling property description..."
+                    />
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <aside className="space-y-6">
+              <div className="rounded-3xl border border-[var(--color-border)] bg-white p-5 shadow-sm sm:p-6">
+                <h2 className="text-lg font-semibold text-[var(--color-text-main)]">
+                  Listing Controls
+                </h2>
+
+                <div className="mt-5 space-y-4">
+                  <div>
+                    <label className="mb-2 block text-sm font-semibold text-[var(--color-text-main)]">
+                      Status
+                    </label>
+                    <select
+                      name="status"
+                      value={form.status}
+                      onChange={handleChange}
+                      className="w-full rounded-xl border border-[var(--color-border)] bg-white px-4 py-3 text-sm outline-none transition focus:border-[var(--color-primary-dark)]"
+                    >
+                      <option value="pending">Pending</option>
+                      <option value="approved">Approved</option>
+                      <option value="rejected">Rejected</option>
+                    </select>
+                  </div>
+
+                  <label className="flex items-center gap-3 rounded-xl border border-[var(--color-border)] px-4 py-3">
+                    <input
+                      type="checkbox"
+                      name="featured"
+                      checked={form.featured}
+                      onChange={handleChange}
+                      className="h-4 w-4"
+                    />
+                    <span className="text-sm font-medium text-[var(--color-text-main)]">
+                      Mark as Featured Listing
+                    </span>
+                  </label>
+                </div>
+              </div>
+
+              <div className="rounded-3xl border border-[var(--color-border)] bg-white p-5 shadow-sm sm:p-6">
+                <h2 className="text-lg font-semibold text-[var(--color-text-main)]">
+                  Property Image
+                </h2>
+
+                <div className="mt-5">
+                  {existingImage ? (
+                    <img
+                      src={existingImage}
+                      alt={form.title || "Property preview"}
+                      className="h-56 w-full rounded-2xl border border-[var(--color-border)] object-cover"
+                    />
+                  ) : (
+                    <div className="flex h-56 items-center justify-center rounded-2xl border border-dashed border-[var(--color-border)] text-sm text-[var(--color-text-muted)]">
+                      No image selected
+                    </div>
+                  )}
+
+                  <label className="mt-4 block text-sm font-semibold text-[var(--color-text-main)]">
+                    Replace Image
+                  </label>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageChange}
+                    className="mt-2 block w-full rounded-xl border border-[var(--color-border)] px-3 py-2 text-sm"
+                  />
+                </div>
+              </div>
+
+              <div className="rounded-3xl border border-[var(--color-border)] bg-white p-5 shadow-sm sm:p-6">
+                <h2 className="text-lg font-semibold text-[var(--color-text-main)]">
+                  Property Video
+                </h2>
+
+                <div className="mt-5">
+                  {existingVideo ? (
+                    <video
+                      controls
+                      className="w-full rounded-2xl border border-[var(--color-border)] bg-black"
+                    >
+                      <source src={existingVideo} />
+                      Your browser does not support the video tag.
+                    </video>
+                  ) : (
+                    <div className="flex h-40 items-center justify-center rounded-2xl border border-dashed border-[var(--color-border)] text-sm text-[var(--color-text-muted)]">
+                      No video selected
+                    </div>
+                  )}
+
+                  <label className="mt-4 block text-sm font-semibold text-[var(--color-text-main)]">
+                    Replace Video
+                  </label>
+                  <input
+                    type="file"
+                    accept="video/*"
+                    onChange={handleVideoChange}
+                    className="mt-2 block w-full rounded-xl border border-[var(--color-border)] px-3 py-2 text-sm"
+                  />
+                </div>
+              </div>
+
+              <div className="rounded-3xl border border-[var(--color-border)] bg-white p-5 shadow-sm sm:p-6">
+                <div className="flex flex-col gap-3">
+                  <button
+                    type="submit"
+                    disabled={saving}
+                    className="rounded-xl bg-[var(--color-primary-dark)] px-4 py-3 text-sm font-semibold text-white shadow-sm transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-70"
+                  >
+                    {saving ? "Saving Changes..." : "Save Property Changes"}
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => router.push("/admin/properties")}
+                    className="rounded-xl border border-[var(--color-border)] px-4 py-3 text-sm font-semibold text-[var(--color-text-main)] transition hover:bg-gray-50"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            </aside>
+          </form>
+        )}
+      </div>
     </main>
   );
 }
