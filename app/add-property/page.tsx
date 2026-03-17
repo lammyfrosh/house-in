@@ -1,558 +1,311 @@
-"use client";
+import Image from "next/image";
+import Link from "next/link";
+import { notFound } from "next/navigation";
+import {
+  BedDouble,
+  Bath,
+  MapPin,
+  BadgeDollarSign,
+  Phone,
+  Mail,
+  Car,
+  Ruler,
+  Toilet,
+} from "lucide-react";
 
-import { FormEvent, useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
-type User = {
+type Property = {
   id: number;
-  full_name: string;
-  email: string;
-  role: string;
+  title: string;
+  slug: string;
+  purpose: string;
+  property_type: string;
+  price: number;
+  bedrooms: number;
+  bathrooms: number;
+  toilets?: number;
+  parking_spaces?: number;
+  size?: string;
+  state: string;
+  area: string;
+  city: string;
+  description: string;
+  image_url?: string;
+  video_url?: string;
+  featured?: number | boolean;
+  status?: "pending" | "approved" | "rejected";
+  created_by_name?: string;
 };
 
-export default function AddPropertyPage() {
-  const router = useRouter();
+const API =
+  process.env.NEXT_PUBLIC_API_BASE_URL || "https://api.house-in.online";
 
-  const API_BASE_URL =
-    process.env.NEXT_PUBLIC_API_BASE_URL || "https://api.house-in.online";
+function getPurposeBadge(purpose: string) {
+  if (purpose === "rent") return "FOR RENT";
+  if (purpose === "sale") return "FOR SALE";
+  return "SHORTLET";
+}
 
-  const [user, setUser] = useState<User | null>(null);
-  const [checkingAuth, setCheckingAuth] = useState(true);
+export default async function PropertyPage({
+  params,
+}: {
+  params: Promise<{ slug: string[] }>;
+}) {
+  const resolvedParams = await params;
+  const slugParts = resolvedParams?.slug || [];
+  const rawSlug = Array.isArray(slugParts) ? slugParts.join("/") : slugParts;
 
-  const [title, setTitle] = useState("");
-  const [purpose, setPurpose] = useState("rent");
-  const [propertyType, setPropertyType] = useState("apartment");
-  const [price, setPrice] = useState("");
-  const [bedrooms, setBedrooms] = useState("");
-  const [bathrooms, setBathrooms] = useState("");
-  const [toilets, setToilets] = useState("");
-  const [parkingSpaces, setParkingSpaces] = useState("");
-  const [size, setSize] = useState("");
-  const [stateName, setStateName] = useState("");
-  const [area, setArea] = useState("");
-  const [city, setCity] = useState("");
-  const [description, setDescription] = useState("");
-  const [featured, setFeatured] = useState(false);
-
-  const [mainImageFile, setMainImageFile] = useState<File | null>(null);
-  const [galleryFiles, setGalleryFiles] = useState<File[]>([]);
-  const [videoFile, setVideoFile] = useState<File | null>(null);
-
-  const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState("");
-  const [messageType, setMessageType] = useState<"success" | "error" | "">("");
-
-  useEffect(() => {
-    async function checkAuth() {
-      const token = localStorage.getItem("housein_token");
-
-      if (!token) {
-        router.push("/signin");
-        return;
-      }
-
-      try {
-        const res = await fetch(`${API_BASE_URL}/api/auth/me`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-
-        const data = await res.json();
-
-        if (!res.ok) {
-          localStorage.removeItem("housein_token");
-          localStorage.removeItem("housein_user");
-          router.push("/signin");
-          return;
-        }
-
-        setUser(data.user);
-      } catch (error) {
-        console.error(error);
-        setMessage("Could not connect to backend");
-        setMessageType("error");
-      } finally {
-        setCheckingAuth(false);
-      }
-    }
-
-    checkAuth();
-  }, [API_BASE_URL, router]);
-
-  function resetForm() {
-    setTitle("");
-    setPurpose("rent");
-    setPropertyType("apartment");
-    setPrice("");
-    setBedrooms("");
-    setBathrooms("");
-    setToilets("");
-    setParkingSpaces("");
-    setSize("");
-    setStateName("");
-    setArea("");
-    setCity("");
-    setDescription("");
-    setFeatured(false);
-    setMainImageFile(null);
-    setGalleryFiles([]);
-    setVideoFile(null);
-
-    const imageInput = document.getElementById("image") as HTMLInputElement | null;
-    const imagesInput = document.getElementById("images") as HTMLInputElement | null;
-    const videoInput = document.getElementById("video") as HTMLInputElement | null;
-
-    if (imageInput) imageInput.value = "";
-    if (imagesInput) imagesInput.value = "";
-    if (videoInput) videoInput.value = "";
+  if (!rawSlug) {
+    notFound();
   }
 
-  async function handleSubmit(e: FormEvent) {
-    e.preventDefault();
+  let property: Property | null = null;
+  let similar: Property[] = [];
 
-    const token = localStorage.getItem("housein_token");
-
-    if (!token) {
-      router.push("/signin");
-      return;
-    }
-
-    if (
-      !title.trim() ||
-      !purpose.trim() ||
-      !propertyType.trim() ||
-      !price.trim() ||
-      !stateName.trim() ||
-      !area.trim() ||
-      !city.trim()
-    ) {
-      setMessage("Please fill all required fields.");
-      setMessageType("error");
-      return;
-    }
-
-    if (!mainImageFile && galleryFiles.length === 0) {
-      setMessage("Please upload at least one property image.");
-      setMessageType("error");
-      return;
-    }
-
-    if (videoFile && videoFile.size > 50 * 1024 * 1024) {
-      setMessage("Video file must not be more than 50MB.");
-      setMessageType("error");
-      return;
-    }
-
-    setLoading(true);
-    setMessage("");
-    setMessageType("");
-
-    try {
-      const formData = new FormData();
-
-      formData.append("title", title.trim());
-      formData.append("purpose", purpose);
-      formData.append("propertyType", propertyType);
-      formData.append("price", price);
-      formData.append("bedrooms", bedrooms || "0");
-      formData.append("bathrooms", bathrooms || "0");
-      formData.append("toilets", toilets || "0");
-      formData.append("parkingSpaces", parkingSpaces || "0");
-      formData.append("size", size.trim());
-      formData.append("state", stateName.trim());
-      formData.append("area", area.trim());
-      formData.append("city", city.trim());
-      formData.append("description", description.trim());
-      formData.append("featured", String(featured));
-
-      if (mainImageFile) {
-        formData.append("image", mainImageFile);
+  try {
+    const propertyRes = await fetch(
+      `${API}/api/properties/slug/${encodeURIComponent(rawSlug)}`,
+      {
+        cache: "no-store",
       }
-
-      galleryFiles.forEach((file) => {
-        formData.append("images", file);
-      });
-
-      if (videoFile) {
-        formData.append("video", videoFile);
-      }
-
-      const res = await fetch(`${API_BASE_URL}/api/properties`, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-        body: formData,
-      });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        setMessage(data.message || "Could not create property.");
-        setMessageType("error");
-        setLoading(false);
-        return;
-      }
-
-      setMessage("Property created successfully.");
-      setMessageType("success");
-      resetForm();
-      setLoading(false);
-
-      setTimeout(() => {
-        router.push("/admin/properties");
-      }, 1200);
-    } catch (error) {
-      console.error("Create property error:", error);
-      setMessage("Could not connect to backend");
-      setMessageType("error");
-      setLoading(false);
-    }
-  }
-
-  if (checkingAuth) {
-    return (
-      <main className="mx-auto max-w-6xl px-4 py-10">
-        <p className="text-sm text-gray-600">Checking session...</p>
-      </main>
     );
+
+    if (!propertyRes.ok) {
+      notFound();
+    }
+
+    const propertyData = await propertyRes.json();
+    property = propertyData.property || propertyData;
+
+    if (!property) {
+      notFound();
+    }
+
+    const allRes = await fetch(`${API}/api/properties`, {
+      cache: "no-store",
+    });
+
+    if (allRes.ok) {
+      const allData = await allRes.json();
+      const allProperties: Property[] = allData.properties || allData || [];
+
+      similar = allProperties
+        .filter(
+          (p) =>
+            p.id !== property!.id &&
+            p.status === "approved" &&
+            p.state?.toLowerCase() === property!.state?.toLowerCase() &&
+            p.purpose?.toLowerCase() === property!.purpose?.toLowerCase()
+        )
+        .slice(0, 3);
+    }
+  } catch (error) {
+    console.error("Property page error:", error);
+    notFound();
   }
+
+  if (!property) {
+    notFound();
+  }
+
+  const badge = getPurposeBadge(property.purpose);
 
   return (
-    <main className="mx-auto max-w-6xl px-4 py-10">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-        <div>
-          <p className="text-xs font-extrabold uppercase tracking-widest text-[var(--color-primary-dark)]">
-            Admin Portal
-          </p>
-          <h1 className="mt-2 text-3xl font-bold text-[var(--color-text-main)]">
-            Add Property
+    <main className="bg-[#fcfcfc]">
+      <section className="relative h-[420px] w-full overflow-hidden">
+        <Image
+          src={property.image_url || "/placeholder-property.jpg"}
+          alt={property.title}
+          fill
+          className="object-cover"
+          unoptimized
+          priority
+        />
+
+        <div className="absolute inset-0 bg-black/40" />
+
+        <div className="absolute bottom-6 left-1/2 w-full max-w-6xl -translate-x-1/2 px-4 text-white">
+          <span className="rounded-full bg-[var(--color-primary-dark)] px-4 py-1 text-xs font-bold">
+            {badge}
+          </span>
+
+          <h1 className="mt-3 text-3xl font-bold sm:text-4xl">
+            {property.title}
           </h1>
-          <p className="mt-2 text-sm text-[var(--color-text-muted)]">
-            Create a new property listing with multiple images and optional short video.
+
+          <p className="mt-2 flex items-center gap-2 text-sm text-white/90">
+            <MapPin size={16} />
+            {property.area}, {property.city}, {property.state}
           </p>
         </div>
+      </section>
 
-        <div className="rounded-xl border border-[var(--color-border)] bg-white px-4 py-2 text-sm text-[var(--color-text-main)]">
-          {user ? `Signed in as ${user.full_name}` : "Admin session"}
+      <section className="mx-auto grid max-w-6xl gap-8 px-4 py-10 lg:grid-cols-[1fr_360px]">
+        <div>
+          <div className="rounded-2xl border border-[var(--color-border)] bg-white p-6">
+            <p className="flex items-center gap-2 text-xs font-extrabold uppercase tracking-widest text-gray-500">
+              <BadgeDollarSign size={14} />
+              Price
+            </p>
+
+            <p className="mt-2 text-3xl font-bold text-[var(--color-text-main)]">
+              ₦{Number(property.price || 0).toLocaleString()}
+            </p>
+
+            <div className="mt-6 grid gap-4 text-sm text-gray-700 sm:grid-cols-2 lg:grid-cols-3">
+              <span className="flex items-center gap-2">
+                <BedDouble size={18} />
+                {property.bedrooms ?? 0} Bedrooms
+              </span>
+
+              <span className="flex items-center gap-2">
+                <Bath size={18} />
+                {property.bathrooms ?? 0} Bathrooms
+              </span>
+
+              <span className="flex items-center gap-2">
+                <Toilet size={18} />
+                {property.toilets ?? 0} Toilets
+              </span>
+
+              <span className="flex items-center gap-2">
+                <Car size={18} />
+                {property.parking_spaces ?? 0} Parking Spaces
+              </span>
+
+              <span className="flex items-center gap-2">
+                <Ruler size={18} />
+                {property.size || "N/A"}
+              </span>
+
+              <span className="flex items-center gap-2">
+                <BadgeDollarSign size={18} />
+                {property.property_type}
+              </span>
+            </div>
+          </div>
+
+          <div className="mt-6 rounded-2xl border border-[var(--color-border)] bg-white p-6">
+            <h2 className="text-lg font-bold text-[var(--color-text-main)]">
+              Property Description
+            </h2>
+
+            <p className="mt-3 whitespace-pre-line text-sm leading-7 text-[var(--color-text-muted)]">
+              {property.description || "No description available for this property yet."}
+            </p>
+          </div>
+
+          {property.video_url && (
+            <div className="mt-6 rounded-2xl border border-[var(--color-border)] bg-white p-6">
+              <h2 className="text-lg font-bold text-[var(--color-text-main)]">
+                Property Video
+              </h2>
+
+              <video
+                controls
+                className="mt-4 w-full rounded-2xl border border-[var(--color-border)] bg-black"
+              >
+                <source src={property.video_url} />
+                Your browser does not support the video tag.
+              </video>
+            </div>
+          )}
         </div>
-      </div>
 
-      <div className="mt-8 rounded-2xl border border-[var(--color-border)] bg-white p-5 md:p-6">
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="grid gap-4 md:grid-cols-2">
-            <div>
-              <label className="text-xs font-bold uppercase tracking-widest text-[var(--color-text-main)]">
-                Title *
-              </label>
-              <input
-                type="text"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                placeholder="Luxury 4 Bedroom Duplex"
-                className="mt-2 h-11 w-full rounded-xl border border-[var(--color-border)] px-3 outline-none focus:border-[var(--color-primary-dark)]"
-              />
-            </div>
+        <aside className="h-fit rounded-2xl border border-[var(--color-border)] bg-white p-6">
+          <h2 className="text-lg font-bold text-[var(--color-text-main)]">
+            Contact Agent
+          </h2>
 
-            <div>
-              <label className="text-xs font-bold uppercase tracking-widest text-[var(--color-text-main)]">
-                Purpose *
-              </label>
-              <select
-                value={purpose}
-                onChange={(e) => setPurpose(e.target.value)}
-                className="mt-2 h-11 w-full rounded-xl border border-[var(--color-border)] px-3 outline-none focus:border-[var(--color-primary-dark)]"
-              >
-                <option value="rent">Rent</option>
-                <option value="sale">Sale</option>
-                <option value="shortlet">Shortlet</option>
-              </select>
-            </div>
+          <p className="mt-2 text-sm text-[var(--color-text-muted)]">
+            Interested in this property? Contact the listing agent for more
+            details or to schedule an inspection.
+          </p>
 
-            <div>
-              <label className="text-xs font-bold uppercase tracking-widest text-[var(--color-text-main)]">
-                Property Type *
-              </label>
-              <select
-                value={propertyType}
-                onChange={(e) => setPropertyType(e.target.value)}
-                className="mt-2 h-11 w-full rounded-xl border border-[var(--color-border)] px-3 outline-none focus:border-[var(--color-primary-dark)]"
-              >
-                <option value="apartment">Apartment</option>
-                <option value="duplex">Duplex</option>
-                <option value="bungalow">Bungalow</option>
-                <option value="terrace">Terrace</option>
-                <option value="detached-house">Detached House</option>
-                <option value="semi-detached-house">Semi-Detached House</option>
-                <option value="land">Land</option>
-                <option value="office-space">Office Space</option>
-                <option value="shop">Shop</option>
-                <option value="warehouse">Warehouse</option>
-              </select>
-            </div>
+          <div className="mt-6 space-y-3">
+            <a
+              href="tel:+2340000000000"
+              className="flex w-full items-center justify-center gap-2 rounded-xl bg-[var(--color-primary-dark)] px-4 py-3 text-sm font-semibold text-white hover:opacity-90"
+            >
+              <Phone size={16} />
+              Call Agent
+            </a>
 
-            <div>
-              <label className="text-xs font-bold uppercase tracking-widest text-[var(--color-text-main)]">
-                Price *
-              </label>
-              <input
-                type="number"
-                min="0"
-                value={price}
-                onChange={(e) => setPrice(e.target.value)}
-                placeholder="250000000"
-                className="mt-2 h-11 w-full rounded-xl border border-[var(--color-border)] px-3 outline-none focus:border-[var(--color-primary-dark)]"
-              />
-            </div>
-
-            <div>
-              <label className="text-xs font-bold uppercase tracking-widest text-[var(--color-text-main)]">
-                Bedrooms
-              </label>
-              <input
-                type="number"
-                min="0"
-                value={bedrooms}
-                onChange={(e) => setBedrooms(e.target.value)}
-                placeholder="4"
-                className="mt-2 h-11 w-full rounded-xl border border-[var(--color-border)] px-3 outline-none focus:border-[var(--color-primary-dark)]"
-              />
-            </div>
-
-            <div>
-              <label className="text-xs font-bold uppercase tracking-widest text-[var(--color-text-main)]">
-                Bathrooms
-              </label>
-              <input
-                type="number"
-                min="0"
-                value={bathrooms}
-                onChange={(e) => setBathrooms(e.target.value)}
-                placeholder="5"
-                className="mt-2 h-11 w-full rounded-xl border border-[var(--color-border)] px-3 outline-none focus:border-[var(--color-primary-dark)]"
-              />
-            </div>
-
-            <div>
-              <label className="text-xs font-bold uppercase tracking-widest text-[var(--color-text-main)]">
-                Toilets
-              </label>
-              <input
-                type="number"
-                min="0"
-                value={toilets}
-                onChange={(e) => setToilets(e.target.value)}
-                placeholder="5"
-                className="mt-2 h-11 w-full rounded-xl border border-[var(--color-border)] px-3 outline-none focus:border-[var(--color-primary-dark)]"
-              />
-            </div>
-
-            <div>
-              <label className="text-xs font-bold uppercase tracking-widest text-[var(--color-text-main)]">
-                Parking Spaces
-              </label>
-              <input
-                type="number"
-                min="0"
-                value={parkingSpaces}
-                onChange={(e) => setParkingSpaces(e.target.value)}
-                placeholder="3"
-                className="mt-2 h-11 w-full rounded-xl border border-[var(--color-border)] px-3 outline-none focus:border-[var(--color-primary-dark)]"
-              />
-            </div>
-
-            <div>
-              <label className="text-xs font-bold uppercase tracking-widest text-[var(--color-text-main)]">
-                Size
-              </label>
-              <input
-                type="text"
-                value={size}
-                onChange={(e) => setSize(e.target.value)}
-                placeholder="650 sqm"
-                className="mt-2 h-11 w-full rounded-xl border border-[var(--color-border)] px-3 outline-none focus:border-[var(--color-primary-dark)]"
-              />
-            </div>
-
-            <div className="flex items-end">
-              <label className="flex items-center gap-3 rounded-xl border border-[var(--color-border)] px-4 py-3 text-sm text-[var(--color-text-main)]">
-                <input
-                  type="checkbox"
-                  checked={featured}
-                  onChange={(e) => setFeatured(e.target.checked)}
-                />
-                Featured Property
-              </label>
-            </div>
-
-            <div>
-              <label className="text-xs font-bold uppercase tracking-widest text-[var(--color-text-main)]">
-                State *
-              </label>
-              <input
-                type="text"
-                value={stateName}
-                onChange={(e) => setStateName(e.target.value)}
-                placeholder="Lagos"
-                className="mt-2 h-11 w-full rounded-xl border border-[var(--color-border)] px-3 outline-none focus:border-[var(--color-primary-dark)]"
-              />
-            </div>
-
-            <div>
-              <label className="text-xs font-bold uppercase tracking-widest text-[var(--color-text-main)]">
-                Area *
-              </label>
-              <input
-                type="text"
-                value={area}
-                onChange={(e) => setArea(e.target.value)}
-                placeholder="Lekki Phase 1"
-                className="mt-2 h-11 w-full rounded-xl border border-[var(--color-border)] px-3 outline-none focus:border-[var(--color-primary-dark)]"
-              />
-            </div>
-
-            <div>
-              <label className="text-xs font-bold uppercase tracking-widest text-[var(--color-text-main)]">
-                City *
-              </label>
-              <input
-                type="text"
-                value={city}
-                onChange={(e) => setCity(e.target.value)}
-                placeholder="Lagos"
-                className="mt-2 h-11 w-full rounded-xl border border-[var(--color-border)] px-3 outline-none focus:border-[var(--color-primary-dark)]"
-              />
-            </div>
-
-            <div>
-              <label
-                htmlFor="image"
-                className="text-xs font-bold uppercase tracking-widest text-[var(--color-text-main)]"
-              >
-                Main Property Image
-              </label>
-              <input
-                id="image"
-                type="file"
-                accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp"
-                onChange={(e) => {
-                  const file = e.target.files?.[0] || null;
-                  setMainImageFile(file);
-                }}
-                className="mt-2 block w-full rounded-xl border border-[var(--color-border)] px-3 py-2 text-sm"
-              />
-              <p className="mt-2 text-xs text-[var(--color-text-muted)]">
-                Optional if you upload gallery images below. The first available image becomes the main image.
-              </p>
-            </div>
-
-            <div>
-              <label
-                htmlFor="images"
-                className="text-xs font-bold uppercase tracking-widest text-[var(--color-text-main)]"
-              >
-                Gallery Images
-              </label>
-              <input
-                id="images"
-                type="file"
-                multiple
-                accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp"
-                onChange={(e) => {
-                  const files = Array.from(e.target.files || []);
-                  setGalleryFiles(files);
-                }}
-                className="mt-2 block w-full rounded-xl border border-[var(--color-border)] px-3 py-2 text-sm"
-              />
-              <p className="mt-2 text-xs text-[var(--color-text-muted)]">
-                Upload multiple property pictures here.
-              </p>
-            </div>
-
-            <div>
-              <label
-                htmlFor="video"
-                className="text-xs font-bold uppercase tracking-widest text-[var(--color-text-main)]"
-              >
-                Short Video
-              </label>
-              <input
-                id="video"
-                type="file"
-                accept=".mp4,.mov,.webm,video/mp4,video/quicktime,video/webm"
-                onChange={(e) => {
-                  const file = e.target.files?.[0] || null;
-                  setVideoFile(file);
-                }}
-                className="mt-2 block w-full rounded-xl border border-[var(--color-border)] px-3 py-2 text-sm"
-              />
-              <p className="mt-2 text-xs text-[var(--color-text-muted)]">
-                Optional. Maximum file size: 50MB.
-              </p>
-            </div>
+            <a
+              href={`mailto:info@house-in.online?subject=${encodeURIComponent(
+                `Inquiry about ${property.title}`
+              )}`}
+              className="flex w-full items-center justify-center gap-2 rounded-xl border border-[var(--color-border)] px-4 py-3 text-sm font-semibold text-[var(--color-text-main)] hover:bg-gray-50"
+            >
+              <Mail size={16} />
+              Send Message
+            </a>
           </div>
 
-          {(mainImageFile || galleryFiles.length > 0 || videoFile) && (
-            <div className="rounded-xl border border-[var(--color-border)] bg-gray-50 p-4">
-              <p className="text-sm font-semibold text-[var(--color-text-main)]">
-                Selected media
-              </p>
+          <div className="mt-6 rounded-xl bg-gray-50 p-4 text-xs text-gray-600">
+            Safety Tip: Always inspect properties physically before making any
+            payment.
+          </div>
+        </aside>
+      </section>
 
-              <div className="mt-3 space-y-2 text-sm text-[var(--color-text-muted)]">
-                {mainImageFile && <p>Main image: {mainImageFile.name}</p>}
-                {galleryFiles.length > 0 && (
-                  <p>Gallery images selected: {galleryFiles.length}</p>
-                )}
-                {videoFile && <p>Video: {videoFile.name}</p>}
-              </div>
-            </div>
-          )}
+      {similar.length > 0 && (
+        <section className="mx-auto max-w-6xl px-4 pb-16">
+          <div className="mb-5 flex items-center justify-between">
+            <h2 className="text-xl font-semibold text-[var(--color-text-main)]">
+              Similar Properties
+            </h2>
 
-          <div>
-            <label className="text-xs font-bold uppercase tracking-widest text-[var(--color-text-main)]">
-              Description
-            </label>
-            <textarea
-              rows={6}
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              placeholder="Write a clear and attractive property description..."
-              className="mt-2 w-full rounded-xl border border-[var(--color-border)] px-3 py-3 outline-none focus:border-[var(--color-primary-dark)]"
-            />
+            <Link
+              href="/properties"
+              className="text-sm text-[var(--color-primary-dark)] hover:underline"
+            >
+              View more
+            </Link>
           </div>
 
-          {message && (
-            <div
-              className={`rounded-xl px-4 py-3 text-sm ${
-                messageType === "success"
-                  ? "bg-green-50 text-green-700"
-                  : "bg-red-50 text-red-700"
-              }`}
-            >
-              {message}
-            </div>
-          )}
+          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+            {similar.map((p) => (
+              <Link
+                key={p.id}
+                href={`/property/${p.slug}`}
+                className="overflow-hidden rounded-2xl border border-[var(--color-border)] bg-white transition hover:-translate-y-1 hover:shadow-md"
+              >
+                <div className="relative h-56 w-full">
+                  <Image
+                    src={p.image_url || "/placeholder-property.jpg"}
+                    alt={p.title}
+                    fill
+                    className="object-cover"
+                    unoptimized
+                  />
+                </div>
 
-          <div className="flex flex-col gap-3 sm:flex-row">
-            <button
-              type="submit"
-              disabled={loading}
-              className="h-11 rounded-xl bg-[var(--color-primary-dark)] px-6 text-sm font-bold uppercase text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-70"
-            >
-              {loading ? "Submitting..." : "Create Property"}
-            </button>
+                <div className="p-4">
+                  <p className="text-xs font-bold uppercase tracking-widest text-[var(--color-primary-dark)]">
+                    {getPurposeBadge(p.purpose)}
+                  </p>
 
-            <button
-              type="button"
-              onClick={() => router.push("/admin")}
-              className="h-11 rounded-xl border border-[var(--color-border)] px-6 text-sm font-semibold text-[var(--color-text-main)] hover:bg-gray-50"
-            >
-              Back to Admin
-            </button>
+                  <h3 className="mt-2 line-clamp-2 text-lg font-semibold text-[var(--color-text-main)]">
+                    {p.title}
+                  </h3>
+
+                  <p className="mt-2 text-sm text-[var(--color-text-muted)]">
+                    {p.area}, {p.city}, {p.state}
+                  </p>
+
+                  <p className="mt-3 text-base font-bold text-[var(--color-text-main)]">
+                    ₦{Number(p.price || 0).toLocaleString()}
+                  </p>
+                </div>
+              </Link>
+            ))}
           </div>
-        </form>
-      </div>
+        </section>
+      )}
     </main>
   );
 }
