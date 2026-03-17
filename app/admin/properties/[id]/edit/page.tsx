@@ -137,6 +137,7 @@ export default function EditPropertyPage() {
         }
 
         const loadedProperty: Property = data.property || data;
+
         setProperty(loadedProperty);
 
         setForm({
@@ -227,6 +228,7 @@ export default function EditPropertyPage() {
     e.preventDefault();
 
     const token = localStorage.getItem("housein_token");
+
     if (!token) {
       router.push("/signin");
       return;
@@ -245,6 +247,7 @@ export default function EditPropertyPage() {
     try {
       const formData = new FormData();
 
+      // MUST match backend updateProperty field names exactly
       formData.append("title", form.title.trim());
       formData.append("purpose", form.purpose);
       formData.append("property_type", form.property_type.trim());
@@ -286,12 +289,15 @@ export default function EditPropertyPage() {
       const updatedProperty: Property = data.property || {
         ...(property as Property),
         ...form,
+        image_url: selectedImage ? imagePreview : property?.image_url,
+        video_url: selectedVideo ? videoPreview : property?.video_url,
         featured: form.featured ? 1 : 0,
       };
 
       setProperty(updatedProperty);
       setSelectedImage(null);
       setSelectedVideo(null);
+
       setMessage("Property updated successfully.");
       setMessageType("success");
 
@@ -321,8 +327,8 @@ export default function EditPropertyPage() {
               Edit Property
             </h1>
             <p className="mt-2 max-w-2xl text-sm leading-6 text-[var(--color-text-muted)]">
-              Update listing details, replace media, and refine the property
-              presentation before it goes live.
+              Update listing details, replace the main image or video, and keep
+              the property presentation sharp and production-ready.
             </p>
           </div>
 
@@ -335,7 +341,7 @@ export default function EditPropertyPage() {
               Back to Properties
             </button>
 
-            {property?.slug ? (
+            {property?.slug && property.status === "approved" ? (
               <button
                 type="button"
                 onClick={() => router.push(`/property/${property.slug}`)}
@@ -343,7 +349,16 @@ export default function EditPropertyPage() {
               >
                 View Live Listing
               </button>
-            ) : null}
+            ) : (
+              <button
+                type="button"
+                disabled
+                className="rounded-xl border border-[var(--color-border)] bg-white px-4 py-2.5 text-sm font-semibold text-gray-400 shadow-sm cursor-not-allowed"
+                title="Only approved properties can be viewed on the live website"
+              >
+                Not Live Yet
+              </button>
+            )}
           </div>
         </div>
 
@@ -615,12 +630,17 @@ export default function EditPropertyPage() {
                       Mark as Featured Listing
                     </span>
                   </label>
+
+                  <div className="rounded-2xl bg-gray-50 p-4 text-xs text-[var(--color-text-muted)]">
+                    This edit flow currently replaces the main image and video only.
+                    Full gallery editing can be added later without breaking this flow.
+                  </div>
                 </div>
               </div>
 
               <div className="rounded-3xl border border-[var(--color-border)] bg-white p-5 shadow-sm sm:p-6">
                 <h2 className="text-lg font-semibold text-[var(--color-text-main)]">
-                  Property Image
+                  Main Property Image
                 </h2>
 
                 <div className="mt-5">
@@ -637,7 +657,7 @@ export default function EditPropertyPage() {
                   )}
 
                   <label className="mt-4 block text-sm font-semibold text-[var(--color-text-main)]">
-                    Replace Image
+                    Replace Main Image
                   </label>
                   <input
                     type="file"
