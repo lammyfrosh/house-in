@@ -1,8 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
-import { useRouter, usePathname } from "next/navigation";
+import { useEffect, useMemo, useState } from "react";
+import { usePathname, useRouter } from "next/navigation";
+import { Menu, X, UserCircle2, LogOut } from "lucide-react";
 
 type StoredUser = {
   id: number;
@@ -24,12 +25,15 @@ export default function Header() {
         const storedUser = localStorage.getItem("housein_user");
         const storedToken = localStorage.getItem("housein_token");
 
-        if (storedUser && storedToken) {
-          setUser(JSON.parse(storedUser));
-        } else {
+        if (!storedUser || !storedToken) {
           setUser(null);
+          return;
         }
-      } catch {
+
+        const parsedUser: StoredUser = JSON.parse(storedUser);
+        setUser(parsedUser);
+      } catch (error) {
+        console.error(error);
         setUser(null);
       }
     }
@@ -40,70 +44,100 @@ export default function Header() {
     return () => window.removeEventListener("storage", loadUser);
   }, []);
 
+  useEffect(() => {
+    setMobileOpen(false);
+  }, [pathname]);
+
+  const normalizedRole = useMemo(() => {
+    return String(user?.role || "").toLowerCase().trim();
+  }, [user]);
+
+  const isAdmin =
+    normalizedRole === "admin" ||
+    normalizedRole === "superadmin" ||
+    normalizedRole === "super_admin";
+
+  const dashboardHref = isAdmin ? "/admin" : "/dashboard";
+  const addPropertyHref = "/add-property";
+
   function handleLogout() {
     localStorage.removeItem("housein_token");
     localStorage.removeItem("housein_user");
     setUser(null);
-    router.push("/signin");
+    router.push("/");
   }
 
-  const navLinks = [
+  const publicLinks = [
+    { href: "/", label: "Home" },
     { href: "/for-sale", label: "For Sale" },
     { href: "/for-rent", label: "For Rent" },
     { href: "/shortlet", label: "Shortlet" },
+    { href: "/search", label: "Search" },
   ];
 
-  function isActive(href: string) {
-    return pathname === href;
-  }
+  const authedLinks = [
+    { href: dashboardHref, label: "Dashboard" },
+    { href: addPropertyHref, label: "Add Property" },
+  ];
 
   return (
-    <header className="sticky top-0 z-50 border-b border-white/10 bg-teal-700 text-white shadow-sm">
+    <header className="sticky top-0 z-50 border-b border-[var(--color-border)] bg-white/95 backdrop-blur">
       <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
         <Link
           href="/"
-          className="text-2xl font-extrabold tracking-tight transition hover:opacity-90"
+          className="text-xl font-extrabold tracking-tight text-[var(--color-text-main)]"
         >
-          House-In
+          HOUSE-IN
         </Link>
 
-        <nav className="hidden items-center gap-8 lg:flex">
-          {navLinks.map((link) => (
-            <Link
-              key={link.href}
-              href={link.href}
-              className={`text-sm font-semibold transition ${
-                isActive(link.href)
-                  ? "text-white"
-                  : "text-white/90 hover:text-white"
-              }`}
-            >
-              {link.label}
-            </Link>
-          ))}
+        <nav className="hidden items-center gap-7 md:flex">
+          {publicLinks.map((link) => {
+            const active = pathname === link.href;
+            return (
+              <Link
+                key={link.href}
+                href={link.href}
+                className={`text-sm font-medium transition ${
+                  active
+                    ? "text-[var(--color-primary-dark)]"
+                    : "text-[var(--color-text-main)] hover:text-[var(--color-primary-dark)]"
+                }`}
+              >
+                {link.label}
+              </Link>
+            );
+          })}
         </nav>
 
-        <div className="hidden items-center gap-3 lg:flex">
+        <div className="hidden items-center gap-3 md:flex">
           {user ? (
             <>
               <Link
-                href="/admin"
-                className="rounded-xl border border-white/30 px-4 py-2 text-sm font-medium text-white transition hover:bg-white/10"
+                href={dashboardHref}
+                className="rounded-xl border border-[var(--color-border)] px-4 py-2 text-sm font-semibold text-[var(--color-text-main)] transition hover:bg-gray-50"
               >
                 Dashboard
               </Link>
 
               <Link
-                href="/add-property"
-                className="rounded-xl bg-white px-4 py-2 text-sm font-semibold text-teal-700 transition hover:bg-white/90"
+                href={addPropertyHref}
+                className="rounded-xl bg-[var(--color-primary-dark)] px-4 py-2 text-sm font-semibold text-white transition hover:opacity-90"
               >
                 Add Property
               </Link>
 
+              <div className="flex items-center gap-2 rounded-xl border border-[var(--color-border)] px-3 py-2">
+                <UserCircle2 size={18} className="text-gray-500" />
+                <span className="max-w-[140px] truncate text-sm font-medium text-[var(--color-text-main)]">
+                  {user.full_name}
+                </span>
+              </div>
+
               <button
                 onClick={handleLogout}
-                className="text-sm font-medium text-white/90 transition hover:text-white"
+                className="inline-flex items-center gap-2 rounded-xl border border-[var(--color-border)] px-4 py-2 text-sm font-semibold text-[var(--color-text-main)] transition hover:bg-gray-50"
               >
+                <LogOut size={16} />
                 Logout
               </button>
             </>
@@ -111,73 +145,68 @@ export default function Header() {
             <>
               <Link
                 href="/signin"
-                className="text-sm font-medium text-white/90 transition hover:text-white"
+                className="rounded-xl border border-[var(--color-border)] px-4 py-2 text-sm font-semibold text-[var(--color-text-main)] transition hover:bg-gray-50"
               >
                 Sign In
               </Link>
 
               <Link
-                href="/add-property"
-                className="rounded-xl bg-white px-4 py-2 text-sm font-semibold text-teal-700 transition hover:bg-white/90"
+                href="/register"
+                className="rounded-xl bg-[var(--color-primary-dark)] px-4 py-2 text-sm font-semibold text-white transition hover:opacity-90"
               >
-                Add Property
+                Sign Up
               </Link>
             </>
           )}
         </div>
 
         <button
-          type="button"
           onClick={() => setMobileOpen((prev) => !prev)}
-          className="inline-flex items-center rounded-lg border border-white/20 px-3 py-2 text-sm font-medium text-white lg:hidden"
+          className="inline-flex items-center justify-center rounded-xl border border-[var(--color-border)] p-2 md:hidden"
+          aria-label="Toggle menu"
         >
-          Menu
+          {mobileOpen ? <X size={20} /> : <Menu size={20} />}
         </button>
       </div>
 
       {mobileOpen && (
-        <div className="border-t border-white/10 bg-teal-700 lg:hidden">
-          <div className="mx-auto flex max-w-7xl flex-col gap-3 px-4 py-4 sm:px-6">
-            {navLinks.map((link) => (
-              <Link
-                key={link.href}
-                href={link.href}
-                onClick={() => setMobileOpen(false)}
-                className={`text-sm font-medium ${
-                  isActive(link.href)
-                    ? "text-white"
-                    : "text-white/90 hover:text-white"
-                }`}
-              >
-                {link.label}
-              </Link>
-            ))}
+        <div className="border-t border-[var(--color-border)] bg-white md:hidden">
+          <div className="mx-auto max-w-7xl px-4 py-4 sm:px-6">
+            <div className="space-y-2">
+              {publicLinks.map((link) => (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className="block rounded-xl px-3 py-3 text-sm font-medium text-[var(--color-text-main)] transition hover:bg-gray-50"
+                >
+                  {link.label}
+                </Link>
+              ))}
 
-            <div className="mt-2 flex flex-col gap-3 border-t border-white/10 pt-3">
               {user ? (
                 <>
-                  <Link
-                    href="/admin"
-                    onClick={() => setMobileOpen(false)}
-                    className="rounded-xl border border-white/30 px-4 py-2 text-sm font-medium text-white"
-                  >
-                    Dashboard
-                  </Link>
+                  {authedLinks.map((link) => (
+                    <Link
+                      key={link.href}
+                      href={link.href}
+                      className="block rounded-xl px-3 py-3 text-sm font-semibold text-[var(--color-primary-dark)] transition hover:bg-gray-50"
+                    >
+                      {link.label}
+                    </Link>
+                  ))}
 
-                  <Link
-                    href="/add-property"
-                    onClick={() => setMobileOpen(false)}
-                    className="rounded-xl bg-white px-4 py-2 text-sm font-semibold text-teal-700"
-                  >
-                    Add Property
-                  </Link>
+                  <div className="rounded-xl border border-[var(--color-border)] px-3 py-3">
+                    <p className="text-sm font-semibold text-[var(--color-text-main)]">
+                      {user.full_name}
+                    </p>
+                    <p className="mt-1 text-xs text-[var(--color-text-muted)]">
+                      {user.email}
+                    </p>
+                  </div>
 
                   <button
-                    onClick={() => {
-                      setMobileOpen(false);
-                      handleLogout();
-                    }}
-                    className="text-left text-sm font-medium text-white/90 hover:text-white"
+                    onClick={handleLogout}
+                    className="block w-full rounded-xl border border-[var(--color-border)] px-3 py-3 text-left text-sm font-semibold text-[var(--color-text-main)] transition hover:bg-gray-50"
                   >
                     Logout
                   </button>
@@ -186,18 +215,15 @@ export default function Header() {
                 <>
                   <Link
                     href="/signin"
-                    onClick={() => setMobileOpen(false)}
-                    className="text-sm font-medium text-white/90 hover:text-white"
+                    className="block rounded-xl px-3 py-3 text-sm font-semibold text-[var(--color-text-main)] transition hover:bg-gray-50"
                   >
                     Sign In
                   </Link>
-
                   <Link
-                    href="/add-property"
-                    onClick={() => setMobileOpen(false)}
-                    className="rounded-xl bg-white px-4 py-2 text-sm font-semibold text-teal-700"
+                    href="/register"
+                    className="block rounded-xl bg-[var(--color-primary-dark)] px-3 py-3 text-sm font-semibold text-white transition hover:opacity-90"
                   >
-                    Add Property
+                    Sign Up
                   </Link>
                 </>
               )}
