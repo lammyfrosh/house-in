@@ -41,7 +41,15 @@ export default function Header() {
     loadUser();
 
     window.addEventListener("storage", loadUser);
-    return () => window.removeEventListener("storage", loadUser);
+    window.addEventListener("housein-auth-changed", loadUser as EventListener);
+
+    return () => {
+      window.removeEventListener("storage", loadUser);
+      window.removeEventListener(
+        "housein-auth-changed",
+        loadUser as EventListener
+      );
+    };
   }, []);
 
   useEffect(() => {
@@ -63,6 +71,7 @@ export default function Header() {
   function handleLogout() {
     localStorage.removeItem("housein_token");
     localStorage.removeItem("housein_user");
+    window.dispatchEvent(new Event("housein-auth-changed"));
     setUser(null);
     router.push("/");
   }
@@ -81,12 +90,9 @@ export default function Header() {
   ];
 
   return (
-    <header className="sticky top-0 z-50 border-b border-[var(--color-border)] bg-white/95 backdrop-blur">
+    <header className="sticky top-0 z-50 border-b border-white/10 bg-[var(--color-primary-dark)] text-white shadow-sm">
       <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
-        <Link
-          href="/"
-          className="text-xl font-extrabold tracking-tight text-[var(--color-text-main)]"
-        >
+        <Link href="/" className="text-xl font-extrabold tracking-tight text-white">
           HOUSE-IN
         </Link>
 
@@ -98,9 +104,7 @@ export default function Header() {
                 key={link.href}
                 href={link.href}
                 className={`text-sm font-medium transition ${
-                  active
-                    ? "text-[var(--color-primary-dark)]"
-                    : "text-[var(--color-text-main)] hover:text-[var(--color-primary-dark)]"
+                  active ? "text-white" : "text-white/80 hover:text-white"
                 }`}
               >
                 {link.label}
@@ -114,28 +118,28 @@ export default function Header() {
             <>
               <Link
                 href={dashboardHref}
-                className="rounded-xl border border-[var(--color-border)] px-4 py-2 text-sm font-semibold text-[var(--color-text-main)] transition hover:bg-gray-50"
+                className="rounded-xl border border-white/20 px-4 py-2 text-sm font-semibold text-white transition hover:bg-white/10"
               >
                 Dashboard
               </Link>
 
               <Link
                 href={addPropertyHref}
-                className="rounded-xl bg-[var(--color-primary-dark)] px-4 py-2 text-sm font-semibold text-white transition hover:opacity-90"
+                className="rounded-xl bg-white px-4 py-2 text-sm font-semibold text-[var(--color-primary-dark)] transition hover:opacity-90"
               >
                 Add Property
               </Link>
 
-              <div className="flex items-center gap-2 rounded-xl border border-[var(--color-border)] px-3 py-2">
-                <UserCircle2 size={18} className="text-gray-500" />
-                <span className="max-w-[140px] truncate text-sm font-medium text-[var(--color-text-main)]">
+              <div className="flex items-center gap-2 rounded-xl border border-white/20 px-3 py-2">
+                <UserCircle2 size={18} className="text-white/80" />
+                <span className="max-w-[140px] truncate text-sm font-medium text-white">
                   {user.full_name}
                 </span>
               </div>
 
               <button
                 onClick={handleLogout}
-                className="inline-flex items-center gap-2 rounded-xl border border-[var(--color-border)] px-4 py-2 text-sm font-semibold text-[var(--color-text-main)] transition hover:bg-gray-50"
+                className="inline-flex items-center gap-2 rounded-xl border border-white/20 px-4 py-2 text-sm font-semibold text-white transition hover:bg-white/10"
               >
                 <LogOut size={16} />
                 Logout
@@ -145,14 +149,14 @@ export default function Header() {
             <>
               <Link
                 href="/signin"
-                className="rounded-xl border border-[var(--color-border)] px-4 py-2 text-sm font-semibold text-[var(--color-text-main)] transition hover:bg-gray-50"
+                className="rounded-xl border border-white/20 px-4 py-2 text-sm font-semibold text-white transition hover:bg-white/10"
               >
                 Sign In
               </Link>
 
               <Link
                 href="/register"
-                className="rounded-xl bg-[var(--color-primary-dark)] px-4 py-2 text-sm font-semibold text-white transition hover:opacity-90"
+                className="rounded-xl bg-white px-4 py-2 text-sm font-semibold text-[var(--color-primary-dark)] transition hover:opacity-90"
               >
                 Sign Up
               </Link>
@@ -162,22 +166,22 @@ export default function Header() {
 
         <button
           onClick={() => setMobileOpen((prev) => !prev)}
-          className="inline-flex items-center justify-center rounded-xl border border-[var(--color-border)] p-2 md:hidden"
+          className="inline-flex items-center justify-center rounded-xl border border-white/20 p-2 md:hidden"
           aria-label="Toggle menu"
         >
-          {mobileOpen ? <X size={20} /> : <Menu size={20} />}
+          {mobileOpen ? <X size={20} className="text-white" /> : <Menu size={20} className="text-white" />}
         </button>
       </div>
 
       {mobileOpen && (
-        <div className="border-t border-[var(--color-border)] bg-white md:hidden">
+        <div className="border-t border-white/10 bg-[var(--color-primary-dark)] md:hidden">
           <div className="mx-auto max-w-7xl px-4 py-4 sm:px-6">
             <div className="space-y-2">
               {publicLinks.map((link) => (
                 <Link
                   key={link.href}
                   href={link.href}
-                  className="block rounded-xl px-3 py-3 text-sm font-medium text-[var(--color-text-main)] transition hover:bg-gray-50"
+                  className="block rounded-xl px-3 py-3 text-sm font-medium text-white/85 transition hover:bg-white/10 hover:text-white"
                 >
                   {link.label}
                 </Link>
@@ -189,24 +193,22 @@ export default function Header() {
                     <Link
                       key={link.href}
                       href={link.href}
-                      className="block rounded-xl px-3 py-3 text-sm font-semibold text-[var(--color-primary-dark)] transition hover:bg-gray-50"
+                      className="block rounded-xl px-3 py-3 text-sm font-semibold text-white transition hover:bg-white/10"
                     >
                       {link.label}
                     </Link>
                   ))}
 
-                  <div className="rounded-xl border border-[var(--color-border)] px-3 py-3">
-                    <p className="text-sm font-semibold text-[var(--color-text-main)]">
+                  <div className="rounded-xl border border-white/20 px-3 py-3">
+                    <p className="text-sm font-semibold text-white">
                       {user.full_name}
                     </p>
-                    <p className="mt-1 text-xs text-[var(--color-text-muted)]">
-                      {user.email}
-                    </p>
+                    <p className="mt-1 text-xs text-white/70">{user.email}</p>
                   </div>
 
                   <button
                     onClick={handleLogout}
-                    className="block w-full rounded-xl border border-[var(--color-border)] px-3 py-3 text-left text-sm font-semibold text-[var(--color-text-main)] transition hover:bg-gray-50"
+                    className="block w-full rounded-xl border border-white/20 px-3 py-3 text-left text-sm font-semibold text-white transition hover:bg-white/10"
                   >
                     Logout
                   </button>
@@ -215,13 +217,13 @@ export default function Header() {
                 <>
                   <Link
                     href="/signin"
-                    className="block rounded-xl px-3 py-3 text-sm font-semibold text-[var(--color-text-main)] transition hover:bg-gray-50"
+                    className="block rounded-xl px-3 py-3 text-sm font-semibold text-white transition hover:bg-white/10"
                   >
                     Sign In
                   </Link>
                   <Link
                     href="/register"
-                    className="block rounded-xl bg-[var(--color-primary-dark)] px-3 py-3 text-sm font-semibold text-white transition hover:opacity-90"
+                    className="block rounded-xl bg-white px-3 py-3 text-sm font-semibold text-[var(--color-primary-dark)] transition hover:opacity-90"
                   >
                     Sign Up
                   </Link>

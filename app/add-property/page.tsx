@@ -64,6 +64,17 @@ export default function AddPropertyPage() {
   const [message, setMessage] = useState("");
   const [messageType, setMessageType] = useState<"success" | "error" | "">("");
 
+  const normalizedRole = useMemo(() => {
+    return String(user?.role || "").toLowerCase().trim();
+  }, [user]);
+
+  const isAdmin =
+    normalizedRole === "admin" ||
+    normalizedRole === "superadmin" ||
+    normalizedRole === "super_admin";
+
+  const dashboardHref = isAdmin ? "/admin" : "/dashboard";
+
   useEffect(() => {
     async function checkAuth() {
       const token = localStorage.getItem("housein_token");
@@ -85,6 +96,7 @@ export default function AddPropertyPage() {
         if (!res.ok) {
           localStorage.removeItem("housein_token");
           localStorage.removeItem("housein_user");
+          window.dispatchEvent(new Event("housein-auth-changed"));
           router.push("/signin");
           return;
         }
@@ -129,12 +141,14 @@ export default function AddPropertyPage() {
   }, [selectedVideo]);
 
   const roleLabel = useMemo(() => {
-    const role = String(user?.role || "").toLowerCase().trim();
-
-    if (role === "superadmin" || role === "super_admin") return "Super Admin";
-    if (role === "admin") return "Admin";
-    return user?.role || "User";
-  }, [user]);
+    if (normalizedRole === "superadmin" || normalizedRole === "super_admin") {
+      return "Super Admin";
+    }
+    if (normalizedRole === "admin") {
+      return "Admin";
+    }
+    return "External User";
+  }, [normalizedRole]);
 
   function handleChange(
     e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
@@ -192,7 +206,6 @@ export default function AddPropertyPage() {
     try {
       const formData = new FormData();
 
-      // must match backend createProperty names exactly
       formData.append("title", form.title.trim());
       formData.append("purpose", form.purpose);
       formData.append("propertyType", form.propertyType.trim());
@@ -208,7 +221,6 @@ export default function AddPropertyPage() {
       formData.append("description", form.description.trim());
       formData.append("featured", String(form.featured));
 
-      // backend supports both image and images
       if (selectedImages[0]) {
         formData.append("image", selectedImages[0]);
       }
@@ -268,7 +280,7 @@ export default function AddPropertyPage() {
       setSelectedVideo(null);
 
       setTimeout(() => {
-        router.push("/admin/properties");
+        router.push(dashboardHref);
       }, 1000);
     } catch (error) {
       console.error(error);
@@ -673,7 +685,7 @@ export default function AddPropertyPage() {
 
                 <button
                   type="button"
-                  onClick={() => router.push("/admin/properties")}
+                  onClick={() => router.push(dashboardHref)}
                   className="rounded-xl border border-[var(--color-border)] px-4 py-3 text-sm font-semibold text-[var(--color-text-main)] transition hover:bg-gray-50"
                 >
                   Cancel

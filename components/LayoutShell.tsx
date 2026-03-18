@@ -11,11 +11,10 @@ export default function LayoutShell({
 }) {
   const pathname = usePathname();
 
-  const isAdminRoute =
-    pathname.startsWith("/admin") || pathname.startsWith("/add-property");
+  const isAdminRoute = pathname.startsWith("/admin");
 
   return (
-    <div className="flex min-h-screen flex-col">
+    <div className="flex min-h-screen flex-col bg-white">
       {!isAdminRoute && <Header />}
       <main className="flex-1">{children}</main>
       {!isAdminRoute && <Footer />}
