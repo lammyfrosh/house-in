@@ -9,7 +9,7 @@ import {
   BadgeCheck,
   ArrowRight,
 } from "lucide-react";
-import { getApprovedProperties } from "@/lib/api";
+import { getApprovedProperties, Property } from "@/lib/api";
 import PropertyCard from "@/components/PropertyCard";
 
 const STATES = [
@@ -51,8 +51,18 @@ const trustItems = [
   },
 ];
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 export default async function Home() {
-  const properties = await getApprovedProperties();
+  let properties: Property[] = [];
+
+  try {
+    properties = await getApprovedProperties();
+  } catch (error) {
+    console.error("Homepage properties fetch failed:", error);
+    properties = [];
+  }
 
   const featured = [
     ...properties.filter((p) => p.purpose === "rent").slice(0, 2),
@@ -265,11 +275,23 @@ export default async function Home() {
           </Link>
         </div>
 
-        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-          {featured.map((p) => (
-            <PropertyCard key={p.id} p={p} />
-          ))}
-        </div>
+        {featured.length === 0 ? (
+          <div className="rounded-3xl border border-[var(--color-border)] bg-white p-8 text-center shadow-sm">
+            <h3 className="text-xl font-bold text-[var(--color-text-main)]">
+              Featured listings are temporarily unavailable
+            </h3>
+            <p className="mt-2 text-sm text-[var(--color-text-muted)]">
+              The website is still live. Property data will appear here once the
+              backend connection responds successfully.
+            </p>
+          </div>
+        ) : (
+          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+            {featured.map((p) => (
+              <PropertyCard key={p.id} p={p} />
+            ))}
+          </div>
+        )}
       </section>
 
       <section className="bg-white">
@@ -327,10 +349,7 @@ export default async function Home() {
               <div className="mt-5 space-y-4 text-sm leading-7 text-[var(--color-text-muted)] md:text-base">
                 <p>
                   House-In was built with one clear goal: to make property search
-                  in Nigeria feel easier, clearer, and more dependable. Instead
-                  of overwhelming users with clutter, confusion, or inconsistent
-                  information, we aim to present listings in a way that feels
-                  simple, organised, and worth trusting.
+                  in Nigeria feel easier, clearer, and more dependable.
                 </p>
 
                 <p>
