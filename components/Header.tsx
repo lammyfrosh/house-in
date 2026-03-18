@@ -77,7 +77,7 @@ export default function Header() {
 
   const shortName = user?.full_name?.trim()
     ? user.full_name.trim().split(" ")[0]
-    : "";
+    : roleLabel;
 
   function handleLogout() {
     localStorage.removeItem("housein_token");
@@ -131,23 +131,22 @@ export default function Header() {
 
               <Link
                 href={addPropertyHref}
-                className="inline-flex items-center gap-2 rounded-xl bg-white px-4 py-2 text-sm font-semibold text-[#0f766e] transition hover:opacity-90"
+                className="inline-flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold transition hover:opacity-90"
+                style={{
+                  backgroundColor: "#ffffff",
+                  color: "#0f766e",
+                  textDecoration: "none",
+                  whiteSpace: "nowrap",
+                }}
               >
-                <PlusCircle size={16} className="text-[#0f766e]" />
-                Add Property
+                <PlusCircle size={16} style={{ color: "#0f766e" }} />
+                <span style={{ color: "#0f766e" }}>Add Property</span>
               </Link>
 
-              {shortName ? (
-                <div className="inline-flex items-center gap-2 rounded-xl border border-white/20 px-4 py-2 text-sm font-semibold text-white">
-                  <UserCircle2 size={17} className="text-white/80" />
-                  <span className="truncate max-w-[120px]">{shortName}</span>
-                </div>
-              ) : (
-                <div className="inline-flex items-center gap-2 rounded-xl border border-white/20 px-4 py-2 text-sm font-semibold text-white">
-                  <UserCircle2 size={17} className="text-white/80" />
-                  <span>{roleLabel}</span>
-                </div>
-              )}
+              <div className="inline-flex items-center gap-2 rounded-xl border border-white/20 px-4 py-2 text-sm font-semibold text-white">
+                <UserCircle2 size={17} className="text-white/80" />
+                <span>{shortName}</span>
+              </div>
 
               <button
                 onClick={handleLogout}
@@ -168,9 +167,15 @@ export default function Header() {
 
               <Link
                 href="/register"
-                className="rounded-xl bg-white px-4 py-2 text-sm font-semibold text-[#0f766e] transition hover:opacity-90"
+                className="rounded-xl px-4 py-2 text-sm font-semibold transition hover:opacity-90"
+                style={{
+                  backgroundColor: "#ffffff",
+                  color: "#0f766e",
+                  textDecoration: "none",
+                  whiteSpace: "nowrap",
+                }}
               >
-                Sign Up
+                <span style={{ color: "#0f766e" }}>Sign Up</span>
               </Link>
             </>
           )}
@@ -214,15 +219,18 @@ export default function Header() {
 
                   <Link
                     href={addPropertyHref}
-                    className="block rounded-xl bg-white px-3 py-3 text-sm font-semibold text-[#0f766e] transition hover:opacity-90"
+                    className="block rounded-xl px-3 py-3 text-sm font-semibold transition hover:opacity-90"
+                    style={{
+                      backgroundColor: "#ffffff",
+                      color: "#0f766e",
+                      textDecoration: "none",
+                    }}
                   >
-                    Add Property
+                    <span style={{ color: "#0f766e" }}>Add Property</span>
                   </Link>
 
                   <div className="rounded-xl border border-white/20 px-3 py-3">
-                    <p className="text-sm font-semibold text-white">
-                      {shortName || roleLabel}
-                    </p>
+                    <p className="text-sm font-semibold text-white">{shortName}</p>
                     <p className="mt-1 text-xs text-white/70">{user.email}</p>
                   </div>
 
@@ -241,11 +249,17 @@ export default function Header() {
                   >
                     Sign In
                   </Link>
+
                   <Link
                     href="/register"
-                    className="block rounded-xl bg-white px-3 py-3 text-sm font-semibold text-[#0f766e] transition hover:opacity-90"
+                    className="block rounded-xl px-3 py-3 text-sm font-semibold transition hover:opacity-90"
+                    style={{
+                      backgroundColor: "#ffffff",
+                      color: "#0f766e",
+                      textDecoration: "none",
+                    }}
                   >
-                    Sign Up
+                    <span style={{ color: "#0f766e" }}>Sign Up</span>
                   </Link>
                 </>
               )}
