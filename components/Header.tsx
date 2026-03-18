@@ -68,6 +68,17 @@ export default function Header() {
   const dashboardHref = isAdmin ? "/admin" : "/dashboard";
   const addPropertyHref = "/add-property";
 
+  const roleLabel =
+    normalizedRole === "superadmin" || normalizedRole === "super_admin"
+      ? "Super Admin"
+      : normalizedRole === "admin"
+      ? "Admin"
+      : "User";
+
+  const shortName = user?.full_name?.trim()
+    ? user.full_name.trim().split(" ")[0]
+    : "";
+
   function handleLogout() {
     localStorage.removeItem("housein_token");
     localStorage.removeItem("housein_user");
@@ -83,13 +94,6 @@ export default function Header() {
     { href: "/shortlet", label: "Shortlet" },
     { href: "/search", label: "Search" },
   ];
-
-  const roleLabel =
-    normalizedRole === "superadmin" || normalizedRole === "super_admin"
-      ? "Super Admin"
-      : normalizedRole === "admin"
-      ? "Admin"
-      : "User";
 
   return (
     <header className="sticky top-0 z-50 border-b border-white/10 bg-[var(--color-primary-dark)] text-white shadow-sm">
@@ -133,12 +137,17 @@ export default function Header() {
                 Add Property
               </Link>
 
-              <div className="flex items-center gap-2 rounded-xl border border-white/20 px-3 py-2">
-                <UserCircle2 size={18} className="text-white/80" />
-                <span className="max-w-[140px] truncate text-sm font-medium text-white">
-                  {roleLabel}
-                </span>
-              </div>
+              {shortName ? (
+                <div className="inline-flex items-center gap-2 rounded-xl border border-white/20 px-4 py-2 text-sm font-semibold text-white">
+                  <UserCircle2 size={17} className="text-white/80" />
+                  <span className="truncate max-w-[120px]">{shortName}</span>
+                </div>
+              ) : (
+                <div className="inline-flex items-center gap-2 rounded-xl border border-white/20 px-4 py-2 text-sm font-semibold text-white">
+                  <UserCircle2 size={17} className="text-white/80" />
+                  <span>{roleLabel}</span>
+                </div>
+              )}
 
               <button
                 onClick={handleLogout}
@@ -172,7 +181,11 @@ export default function Header() {
           className="inline-flex items-center justify-center rounded-xl border border-white/20 p-2 md:hidden"
           aria-label="Toggle menu"
         >
-          {mobileOpen ? <X size={20} className="text-white" /> : <Menu size={20} className="text-white" />}
+          {mobileOpen ? (
+            <X size={20} className="text-white" />
+          ) : (
+            <Menu size={20} className="text-white" />
+          )}
         </button>
       </div>
 
@@ -207,7 +220,9 @@ export default function Header() {
                   </Link>
 
                   <div className="rounded-xl border border-white/20 px-3 py-3">
-                    <p className="text-sm font-semibold text-white">{roleLabel}</p>
+                    <p className="text-sm font-semibold text-white">
+                      {shortName || roleLabel}
+                    </p>
                     <p className="mt-1 text-xs text-white/70">{user.email}</p>
                   </div>
 

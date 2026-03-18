@@ -2,6 +2,7 @@
 
 import { ChangeEvent, FormEvent, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+import { X } from "lucide-react";
 
 type User = {
   id: number;
@@ -171,7 +172,10 @@ export default function AddPropertyPage() {
 
   function handleImagesChange(e: ChangeEvent<HTMLInputElement>) {
     const files = Array.from(e.target.files || []);
-    setSelectedImages(files);
+    if (files.length === 0) return;
+
+    setSelectedImages((prev) => [...prev, ...files]);
+    e.target.value = "";
   }
 
   function handleVideoChange(e: ChangeEvent<HTMLInputElement>) {
@@ -603,17 +607,20 @@ export default function AddPropertyPage() {
                           alt={`Preview ${index + 1}`}
                           className="h-36 w-full object-cover"
                         />
+
+                        <button
+                          type="button"
+                          onClick={() => removeImage(index)}
+                          className="absolute right-2 top-2 inline-flex h-8 w-8 items-center justify-center rounded-full bg-black/70 text-white transition hover:bg-black"
+                          aria-label={`Remove image ${index + 1}`}
+                        >
+                          <X size={16} />
+                        </button>
+
                         <div className="flex items-center justify-between bg-white px-3 py-2 text-xs">
                           <span className="font-semibold text-[var(--color-text-main)]">
                             {index === 0 ? "Primary image" : `Image ${index + 1}`}
                           </span>
-                          <button
-                            type="button"
-                            onClick={() => removeImage(index)}
-                            className="font-semibold text-red-600"
-                          >
-                            Remove
-                          </button>
                         </div>
                       </div>
                     ))}
@@ -636,7 +643,8 @@ export default function AddPropertyPage() {
                 />
                 <p className="mt-2 text-xs text-[var(--color-text-muted)]">
                   You can upload multiple images. The first one will be used as
-                  the main listing image.
+                  the main listing image, and you can remove any image before
+                  submitting.
                 </p>
               </div>
             </div>
