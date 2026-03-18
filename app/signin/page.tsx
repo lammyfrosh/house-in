@@ -71,6 +71,7 @@ export default function SignInPage() {
 
       localStorage.setItem("housein_token", data.token);
       localStorage.setItem("housein_user", JSON.stringify(data.user));
+      window.dispatchEvent(new Event("housein-auth-changed"));
 
       const role = String(data.user?.role || "").toLowerCase().trim();
 

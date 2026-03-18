@@ -82,8 +82,15 @@ export default function RegisterPage() {
 
       localStorage.setItem("housein_token", data.token);
       localStorage.setItem("housein_user", JSON.stringify(data.user));
+      window.dispatchEvent(new Event("housein-auth-changed"));
 
-      router.push("/dashboard");
+      const role = String(data.user?.role || "").toLowerCase().trim();
+
+      if (role === "admin" || role === "superadmin" || role === "super_admin") {
+        router.push("/admin");
+      } else {
+        router.push("/dashboard");
+      }
     } catch (err) {
       console.error(err);
       setError(err instanceof Error ? err.message : "Could not create account");

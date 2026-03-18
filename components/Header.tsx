@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { Menu, X, UserCircle2, LogOut } from "lucide-react";
+import { Menu, X, UserCircle2, LogOut, PlusCircle } from "lucide-react";
 
 type StoredUser = {
   id: number;
@@ -84,10 +84,12 @@ export default function Header() {
     { href: "/search", label: "Search" },
   ];
 
-  const authedLinks = [
-    { href: dashboardHref, label: "Dashboard" },
-    { href: addPropertyHref, label: "Add Property" },
-  ];
+  const roleLabel =
+    normalizedRole === "superadmin" || normalizedRole === "super_admin"
+      ? "Super Admin"
+      : normalizedRole === "admin"
+      ? "Admin"
+      : "User";
 
   return (
     <header className="sticky top-0 z-50 border-b border-white/10 bg-[var(--color-primary-dark)] text-white shadow-sm">
@@ -125,15 +127,16 @@ export default function Header() {
 
               <Link
                 href={addPropertyHref}
-                className="rounded-xl bg-white px-4 py-2 text-sm font-semibold text-[var(--color-primary-dark)] transition hover:opacity-90"
+                className="inline-flex items-center gap-2 rounded-xl bg-white px-4 py-2 text-sm font-semibold text-[#0f766e] transition hover:opacity-90"
               >
+                <PlusCircle size={16} className="text-[#0f766e]" />
                 Add Property
               </Link>
 
               <div className="flex items-center gap-2 rounded-xl border border-white/20 px-3 py-2">
                 <UserCircle2 size={18} className="text-white/80" />
                 <span className="max-w-[140px] truncate text-sm font-medium text-white">
-                  {user.full_name}
+                  {roleLabel}
                 </span>
               </div>
 
@@ -156,7 +159,7 @@ export default function Header() {
 
               <Link
                 href="/register"
-                className="rounded-xl bg-white px-4 py-2 text-sm font-semibold text-[var(--color-primary-dark)] transition hover:opacity-90"
+                className="rounded-xl bg-white px-4 py-2 text-sm font-semibold text-[#0f766e] transition hover:opacity-90"
               >
                 Sign Up
               </Link>
@@ -189,20 +192,22 @@ export default function Header() {
 
               {user ? (
                 <>
-                  {authedLinks.map((link) => (
-                    <Link
-                      key={link.href}
-                      href={link.href}
-                      className="block rounded-xl px-3 py-3 text-sm font-semibold text-white transition hover:bg-white/10"
-                    >
-                      {link.label}
-                    </Link>
-                  ))}
+                  <Link
+                    href={dashboardHref}
+                    className="block rounded-xl px-3 py-3 text-sm font-semibold text-white transition hover:bg-white/10"
+                  >
+                    Dashboard
+                  </Link>
+
+                  <Link
+                    href={addPropertyHref}
+                    className="block rounded-xl bg-white px-3 py-3 text-sm font-semibold text-[#0f766e] transition hover:opacity-90"
+                  >
+                    Add Property
+                  </Link>
 
                   <div className="rounded-xl border border-white/20 px-3 py-3">
-                    <p className="text-sm font-semibold text-white">
-                      {user.full_name}
-                    </p>
+                    <p className="text-sm font-semibold text-white">{roleLabel}</p>
                     <p className="mt-1 text-xs text-white/70">{user.email}</p>
                   </div>
 
@@ -223,7 +228,7 @@ export default function Header() {
                   </Link>
                   <Link
                     href="/register"
-                    className="block rounded-xl bg-white px-3 py-3 text-sm font-semibold text-[var(--color-primary-dark)] transition hover:opacity-90"
+                    className="block rounded-xl bg-white px-3 py-3 text-sm font-semibold text-[#0f766e] transition hover:opacity-90"
                   >
                     Sign Up
                   </Link>

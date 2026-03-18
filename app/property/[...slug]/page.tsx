@@ -6,11 +6,11 @@ import {
   Bath,
   MapPin,
   BadgeDollarSign,
-  Phone,
   Mail,
   Car,
   Ruler,
   Toilet,
+  MessageCircle,
 } from "lucide-react";
 import {
   getApprovedProperties,
@@ -26,6 +26,9 @@ function getPurposeBadge(purpose: string) {
   if (purpose === "sale") return "FOR SALE";
   return "SHORTLET";
 }
+
+const ADMIN_WHATSAPP_NUMBER = "+2348033103109";
+const CONTACT_EMAIL = "contact@house-in.online";
 
 export default async function PropertyPage({
   params,
@@ -54,6 +57,28 @@ export default async function PropertyPage({
     .slice(0, 3);
 
   const badge = getPurposeBadge(property.purpose);
+
+  const whatsappMessage = `Hello, I am interested in this property: ${property.title} in ${property.area}, ${property.city}, ${property.state}. Please share more details.`;
+  const whatsappHref = `https://wa.me/${ADMIN_WHATSAPP_NUMBER}?text=${encodeURIComponent(
+    whatsappMessage
+  )}`;
+
+  const emailSubject = `Inquiry about ${property.title}`;
+  const emailBody = `Hello,
+
+I am interested in this property:
+
+Title: ${property.title}
+Location: ${property.area}, ${property.city}, ${property.state}
+Price: ₦${Number(property.price || 0).toLocaleString()}
+
+Please share more details.
+
+Thank you.`;
+
+  const mailHref = `mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent(
+    emailSubject
+  )}&body=${encodeURIComponent(emailBody)}`;
 
   return (
     <main className="bg-[#f7f9fc]">
@@ -164,27 +189,26 @@ export default async function PropertyPage({
           </h2>
 
           <p className="mt-2 text-sm text-[var(--color-text-muted)]">
-            Interested in this property? Contact the listing agent for more
-            details or to schedule an inspection.
+            Interested in this property? Reach out directly through WhatsApp or email.
           </p>
 
           <div className="mt-6 space-y-3">
             <a
-              href="tel:+2340000000000"
-              className="flex w-full items-center justify-center gap-2 rounded-xl bg-[var(--color-primary-dark)] px-4 py-3 text-sm font-semibold text-white hover:opacity-90"
+              href={whatsappHref}
+              target="_blank"
+              rel="noreferrer"
+              className="flex w-full items-center justify-center gap-2 rounded-xl bg-green-600 px-4 py-3 text-sm font-semibold text-white transition hover:bg-green-700"
             >
-              <Phone size={16} />
-              Call Agent
+              <MessageCircle size={16} />
+              Contact via WhatsApp
             </a>
 
             <a
-              href={`mailto:info@house-in.online?subject=${encodeURIComponent(
-                `Inquiry about ${property.title}`
-              )}`}
-              className="flex w-full items-center justify-center gap-2 rounded-xl border border-[var(--color-border)] px-4 py-3 text-sm font-semibold text-[var(--color-text-main)] hover:bg-gray-50"
+              href={mailHref}
+              className="flex w-full items-center justify-center gap-2 rounded-xl border border-[var(--color-border)] px-4 py-3 text-sm font-semibold text-[var(--color-text-main)] transition hover:bg-gray-50"
             >
               <Mail size={16} />
-              Send Message
+              Send Email
             </a>
           </div>
 
