@@ -72,7 +72,7 @@ export default async function Home() {
 
   return (
     <main>
-      <section className="relative h-[82vh] min-h-[600px] w-full overflow-hidden">
+      <section className="relative min-h-[760px] w-full overflow-hidden md:min-h-[860px]">
         <Image
           src="/hero-v2.jpg"
           alt="Organised residential estate view"
@@ -84,7 +84,7 @@ export default async function Home() {
         <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/50 to-black/25" />
         <div className="absolute inset-0 bg-[var(--color-primary)]/20" />
 
-        <div className="relative z-10 mx-auto flex h-full max-w-6xl flex-col justify-center px-4">
+        <div className="relative z-10 mx-auto flex h-full max-w-6xl flex-col justify-center px-4 py-16 md:py-20">
           <div className="max-w-3xl">
             <p className="inline-flex items-center gap-2 rounded-full bg-white/15 px-4 py-1.5 text-xs font-medium text-white backdrop-blur">
               <ShieldCheck size={14} />
@@ -102,62 +102,63 @@ export default async function Home() {
             </p>
           </div>
 
-          <div className="mt-8 rounded-3xl bg-white p-4 shadow-xl md:p-5">
-            <form action="/search" className="grid gap-3 md:grid-cols-12">
-              <select
-                name="state"
-                className="h-11 rounded-xl border border-[var(--color-border)] px-3 md:col-span-3"
-                defaultValue=""
-              >
-                <option value="">Select State</option>
-                {STATES.map((s) => (
-                  <option key={s} value={s}>
-                    {s}
-                  </option>
-                ))}
-              </select>
+          <div className="mt-8 space-y-6">
+            {/* MOBILE: search first, current owner-approved layout */}
+            <div className="rounded-3xl bg-white p-4 shadow-xl md:hidden">
+              <form action="/search" className="grid gap-3">
+                <select
+                  name="state"
+                  className="h-11 rounded-xl border border-[var(--color-border)] px-3"
+                  defaultValue=""
+                >
+                  <option value="">Select State</option>
+                  {STATES.map((s) => (
+                    <option key={s} value={s}>
+                      {s}
+                    </option>
+                  ))}
+                </select>
 
-              <input
-                name="area"
-                className="h-11 rounded-xl border border-[var(--color-border)] px-3 md:col-span-4"
-                placeholder="Area / LGA (e.g. Lekki, Ikeja, Wuse)"
-              />
+                <input
+                  name="area"
+                  className="h-11 rounded-xl border border-[var(--color-border)] px-3"
+                  placeholder="Area / LGA (e.g. Lekki, Ikeja, Wuse)"
+                />
 
-              <select
-                name="purpose"
-                className="h-11 rounded-xl border border-[var(--color-border)] px-3 md:col-span-2"
-                defaultValue=""
-              >
-                <option value="">Purpose</option>
-                <option value="rent">For Rent</option>
-                <option value="sale">For Sale</option>
-                <option value="shortlet">Shortlet</option>
-              </select>
+                <select
+                  name="purpose"
+                  className="h-11 rounded-xl border border-[var(--color-border)] px-3"
+                  defaultValue=""
+                >
+                  <option value="">Purpose</option>
+                  <option value="rent">For Rent</option>
+                  <option value="sale">For Sale</option>
+                  <option value="shortlet">Shortlet</option>
+                </select>
 
-              <select
-                name="propertyType"
-                className="h-11 rounded-xl border border-[var(--color-border)] px-3 md:col-span-2"
-                defaultValue=""
-              >
-                <option value="">Property Type</option>
-                <option value="Apartment">Flat / Apartment</option>
-                <option value="Duplex">Duplex</option>
-                <option value="Terrace">Terrace</option>
-                <option value="Bungalow">Bungalow</option>
-                <option value="Land">Land</option>
-              </select>
+                <select
+                  name="propertyType"
+                  className="h-11 rounded-xl border border-[var(--color-border)] px-3"
+                  defaultValue=""
+                >
+                  <option value="">Property Type</option>
+                  <option value="Apartment">Flat / Apartment</option>
+                  <option value="Duplex">Duplex</option>
+                  <option value="Terrace">Terrace</option>
+                  <option value="Bungalow">Bungalow</option>
+                  <option value="Land">Land</option>
+                </select>
 
-              <button
-                type="submit"
-                className="h-11 rounded-xl bg-[var(--color-primary-dark)] font-semibold text-white hover:opacity-90 md:col-span-1"
-              >
-                Search
-              </button>
+                <button
+                  type="submit"
+                  className="h-11 rounded-xl bg-[var(--color-primary-dark)] font-semibold text-white hover:opacity-90"
+                >
+                  Search
+                </button>
 
-              <div className="grid gap-3 md:col-span-12 md:grid-cols-12">
                 <select
                   name="beds"
-                  className="h-11 rounded-xl border border-[var(--color-border)] px-3 md:col-span-2"
+                  className="h-11 rounded-xl border border-[var(--color-border)] px-3"
                   defaultValue=""
                 >
                   <option value="">Beds</option>
@@ -170,7 +171,7 @@ export default async function Home() {
 
                 <select
                   name="baths"
-                  className="h-11 rounded-xl border border-[var(--color-border)] px-3 md:col-span-2"
+                  className="h-11 rounded-xl border border-[var(--color-border)] px-3"
                   defaultValue=""
                 >
                   <option value="">Baths</option>
@@ -182,7 +183,7 @@ export default async function Home() {
 
                 <select
                   name="minPrice"
-                  className="h-11 rounded-xl border border-[var(--color-border)] px-3 md:col-span-4"
+                  className="h-11 rounded-xl border border-[var(--color-border)] px-3"
                   defaultValue=""
                 >
                   <option value="">Min Price</option>
@@ -197,7 +198,7 @@ export default async function Home() {
 
                 <select
                   name="maxPrice"
-                  className="h-11 rounded-xl border border-[var(--color-border)] px-3 md:col-span-4"
+                  className="h-11 rounded-xl border border-[var(--color-border)] px-3"
                   defaultValue=""
                 >
                   <option value="">Max Price</option>
@@ -209,48 +210,224 @@ export default async function Home() {
                   <option value="100000000">₦100m</option>
                   <option value="500000000">₦500m</option>
                 </select>
-              </div>
 
-              <div className="md:col-span-12">
-                <div className="mt-2 flex flex-wrap items-center gap-3 text-xs text-gray-600">
-                  <span className="font-medium text-[var(--color-text-main)]">
-                    Popular:
-                  </span>
+                <div>
+                  <div className="mt-2 flex flex-wrap items-center gap-3 text-xs text-gray-600">
+                    <span className="font-medium text-[var(--color-text-main)]">
+                      Popular:
+                    </span>
+                    <Link
+                      href="/search?state=Lagos&area=Lekki&purpose=rent"
+                      className="hover:underline"
+                    >
+                      Lekki (Rent)
+                    </Link>
+                    <Link
+                      href="/search?state=Abuja&area=Wuse&purpose=sale"
+                      className="hover:underline"
+                    >
+                      Abuja (Sale)
+                    </Link>
+                    <Link
+                      href="/search?state=Lagos&area=Victoria%20Island&purpose=shortlet"
+                      className="hover:underline"
+                    >
+                      VI (Shortlet)
+                    </Link>
+                  </div>
+                </div>
+              </form>
+            </div>
+
+            {/* MOBILE CARDS */}
+            <div className="grid max-w-3xl grid-cols-3 gap-3 md:hidden">
+              <div className="rounded-2xl bg-white/10 px-4 py-3 text-white backdrop-blur">
+                <p className="text-lg font-bold">Sale</p>
+                <p className="text-xs text-white/80">Curated property options</p>
+              </div>
+              <div className="rounded-2xl bg-white/10 px-4 py-3 text-white backdrop-blur">
+                <p className="text-lg font-bold">Rent</p>
+                <p className="text-xs text-white/80">Better search clarity</p>
+              </div>
+              <div className="rounded-2xl bg-white/10 px-4 py-3 text-white backdrop-blur">
+                <p className="text-lg font-bold">Shortlet</p>
+                <p className="text-xs text-white/80">Flexible stay options</p>
+              </div>
+            </div>
+
+            {/* DESKTOP: cards first */}
+            <div className="hidden md:block">
+              <div className="rounded-[32px] border border-white/15 bg-white/10 p-4 shadow-xl backdrop-blur">
+                <div className="grid gap-4 md:grid-cols-3">
                   <Link
-                    href="/search?state=Lagos&area=Lekki&purpose=rent"
-                    className="hover:underline"
+                    href="/search?purpose=sale"
+                    className="rounded-3xl border border-white/20 bg-white/12 px-6 py-6 text-white transition hover:bg-white/20"
                   >
-                    Lekki (Rent)
+                    <p className="text-2xl font-bold text-white">For Sale</p>
+                    <p className="mt-2 text-sm text-white/85">
+                      Explore verified sale listings in key locations.
+                    </p>
                   </Link>
+
                   <Link
-                    href="/search?state=Abuja&area=Wuse&purpose=sale"
-                    className="hover:underline"
+                    href="/search?purpose=rent"
+                    className="rounded-3xl border border-white/20 bg-white/12 px-6 py-6 text-white transition hover:bg-white/20"
                   >
-                    Abuja (Sale)
+                    <p className="text-2xl font-bold text-white">For Rent</p>
+                    <p className="mt-2 text-sm text-white/85">
+                      Search clearer rental options with better filters.
+                    </p>
                   </Link>
+
                   <Link
-                    href="/search?state=Lagos&area=Victoria%20Island&purpose=shortlet"
-                    className="hover:underline"
+                    href="/search?purpose=shortlet"
+                    className="rounded-3xl border border-white/20 bg-white/12 px-6 py-6 text-white transition hover:bg-white/20"
                   >
-                    VI (Shortlet)
+                    <p className="text-2xl font-bold text-white">Shortlet</p>
+                    <p className="mt-2 text-sm text-white/85">
+                      Find flexible short-stay options with ease.
+                    </p>
                   </Link>
                 </div>
               </div>
-            </form>
-          </div>
+            </div>
 
-          <div className="mt-6 grid max-w-3xl grid-cols-3 gap-3">
-            <div className="rounded-2xl bg-white/10 px-4 py-3 text-white backdrop-blur">
-              <p className="text-lg font-bold">Sale</p>
-              <p className="text-xs text-white/80">Curated property options</p>
-            </div>
-            <div className="rounded-2xl bg-white/10 px-4 py-3 text-white backdrop-blur">
-              <p className="text-lg font-bold">Rent</p>
-              <p className="text-xs text-white/80">Better search clarity</p>
-            </div>
-            <div className="rounded-2xl bg-white/10 px-4 py-3 text-white backdrop-blur">
-              <p className="text-lg font-bold">Shortlet</p>
-              <p className="text-xs text-white/80">Flexible stay options</p>
+            {/* DESKTOP: search second */}
+            <div className="hidden rounded-3xl bg-white p-4 shadow-xl md:block md:p-5">
+              <form action="/search" className="grid gap-3 md:grid-cols-12">
+                <select
+                  name="state"
+                  className="h-11 rounded-xl border border-[var(--color-border)] px-3 md:col-span-3"
+                  defaultValue=""
+                >
+                  <option value="">Select State</option>
+                  {STATES.map((s) => (
+                    <option key={s} value={s}>
+                      {s}
+                    </option>
+                  ))}
+                </select>
+
+                <input
+                  name="area"
+                  className="h-11 rounded-xl border border-[var(--color-border)] px-3 md:col-span-4"
+                  placeholder="Area / LGA (e.g. Lekki, Ikeja, Wuse)"
+                />
+
+                <select
+                  name="purpose"
+                  className="h-11 rounded-xl border border-[var(--color-border)] px-3 md:col-span-2"
+                  defaultValue=""
+                >
+                  <option value="">Purpose</option>
+                  <option value="rent">For Rent</option>
+                  <option value="sale">For Sale</option>
+                  <option value="shortlet">Shortlet</option>
+                </select>
+
+                <select
+                  name="propertyType"
+                  className="h-11 rounded-xl border border-[var(--color-border)] px-3 md:col-span-2"
+                  defaultValue=""
+                >
+                  <option value="">Property Type</option>
+                  <option value="Apartment">Flat / Apartment</option>
+                  <option value="Duplex">Duplex</option>
+                  <option value="Terrace">Terrace</option>
+                  <option value="Bungalow">Bungalow</option>
+                  <option value="Land">Land</option>
+                </select>
+
+                <button
+                  type="submit"
+                  className="h-11 rounded-xl bg-[var(--color-primary-dark)] font-semibold text-white hover:opacity-90 md:col-span-1"
+                >
+                  Search
+                </button>
+
+                <div className="grid gap-3 md:col-span-12 md:grid-cols-12">
+                  <select
+                    name="beds"
+                    className="h-11 rounded-xl border border-[var(--color-border)] px-3 md:col-span-2"
+                    defaultValue=""
+                  >
+                    <option value="">Beds</option>
+                    <option value="1">1+</option>
+                    <option value="2">2+</option>
+                    <option value="3">3+</option>
+                    <option value="4">4+</option>
+                    <option value="5">5+</option>
+                  </select>
+
+                  <select
+                    name="baths"
+                    className="h-11 rounded-xl border border-[var(--color-border)] px-3 md:col-span-2"
+                    defaultValue=""
+                  >
+                    <option value="">Baths</option>
+                    <option value="1">1+</option>
+                    <option value="2">2+</option>
+                    <option value="3">3+</option>
+                    <option value="4">4+</option>
+                  </select>
+
+                  <select
+                    name="minPrice"
+                    className="h-11 rounded-xl border border-[var(--color-border)] px-3 md:col-span-4"
+                    defaultValue=""
+                  >
+                    <option value="">Min Price</option>
+                    <option value="500000">₦500k</option>
+                    <option value="1000000">₦1m</option>
+                    <option value="2000000">₦2m</option>
+                    <option value="5000000">₦5m</option>
+                    <option value="10000000">₦10m</option>
+                    <option value="50000000">₦50m</option>
+                    <option value="100000000">₦100m</option>
+                  </select>
+
+                  <select
+                    name="maxPrice"
+                    className="h-11 rounded-xl border border-[var(--color-border)] px-3 md:col-span-4"
+                    defaultValue=""
+                  >
+                    <option value="">Max Price</option>
+                    <option value="1000000">₦1m</option>
+                    <option value="2000000">₦2m</option>
+                    <option value="5000000">₦5m</option>
+                    <option value="10000000">₦10m</option>
+                    <option value="50000000">₦50m</option>
+                    <option value="100000000">₦100m</option>
+                    <option value="500000000">₦500m</option>
+                  </select>
+                </div>
+
+                <div className="md:col-span-12">
+                  <div className="mt-2 flex flex-wrap items-center gap-3 text-xs text-gray-600">
+                    <span className="font-medium text-[var(--color-text-main)]">
+                      Popular:
+                    </span>
+                    <Link
+                      href="/search?state=Lagos&area=Lekki&purpose=rent"
+                      className="hover:underline"
+                    >
+                      Lekki (Rent)
+                    </Link>
+                    <Link
+                      href="/search?state=Abuja&area=Wuse&purpose=sale"
+                      className="hover:underline"
+                    >
+                      Abuja (Sale)
+                    </Link>
+                    <Link
+                      href="/search?state=Lagos&area=Victoria%20Island&purpose=shortlet"
+                      className="hover:underline"
+                    >
+                      VI (Shortlet)
+                    </Link>
+                  </div>
+                </div>
+              </form>
             </div>
           </div>
         </div>
