@@ -22,19 +22,14 @@ type RegisteredUser = {
 
 export default function RegisterPage() {
   const router = useRouter();
-
-  const API =
-    process.env.NEXT_PUBLIC_API_BASE_URL || "https://api.house-in.online";
+  const API = "https://api.house-in.online";
 
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-
   const [showPassword, setShowPassword] = useState(false);
-
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
 
   useEffect(() => {
     const token = localStorage.getItem("housein_token");
@@ -61,7 +56,6 @@ export default function RegisterPage() {
     e.preventDefault();
     setLoading(true);
     setError("");
-    setSuccess("");
 
     try {
       const res = await fetch(`${API}/api/auth/register`, {
@@ -82,18 +76,11 @@ export default function RegisterPage() {
         throw new Error(data.message || "Registration failed");
       }
 
-      setSuccess(
-        data.message ||
-          "Account created successfully. Please check your email to verify your account."
-      );
+      localStorage.setItem("housein_token", data.token);
+      localStorage.setItem("housein_user", JSON.stringify(data.user));
+      window.dispatchEvent(new Event("housein-auth-changed"));
 
-      setFullName("");
-      setEmail("");
-      setPassword("");
-
-      setTimeout(() => {
-        router.push("/signin");
-      }, 2500);
+      router.push("/dashboard");
     } catch (err) {
       console.error(err);
       setError(err instanceof Error ? err.message : "Could not create account");
@@ -122,22 +109,6 @@ export default function RegisterPage() {
               dashboard.
             </p>
           </div>
-
-          <div className="space-y-4">
-            <div className="rounded-3xl border border-white/15 bg-white/10 p-5 backdrop-blur">
-              <h2 className="text-lg font-semibold">Submit Properties</h2>
-              <p className="mt-2 text-sm text-white/80">
-                Upload your property details and media from your own account.
-              </p>
-            </div>
-
-            <div className="rounded-3xl border border-white/15 bg-white/10 p-5 backdrop-blur">
-              <h2 className="text-lg font-semibold">Track Approval</h2>
-              <p className="mt-2 text-sm text-white/80">
-                See whether your property is pending, approved, or rejected.
-              </p>
-            </div>
-          </div>
         </section>
 
         <section className="flex items-center justify-center px-4 py-10 sm:px-6 lg:px-10">
@@ -149,20 +120,11 @@ export default function RegisterPage() {
               <h2 className="mt-2 text-3xl font-bold text-[var(--color-text-main)]">
                 Create your account
               </h2>
-              <p className="mt-2 text-sm leading-6 text-[var(--color-text-muted)]">
-                Fill in your details to get started.
-              </p>
             </div>
 
             {error && (
               <div className="mt-5 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
                 {error}
-              </div>
-            )}
-
-            {success && (
-              <div className="mt-5 rounded-2xl border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700">
-                {success}
               </div>
             )}
 

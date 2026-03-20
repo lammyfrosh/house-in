@@ -14,14 +14,11 @@ type LoginUser = {
 
 export default function SignInPage() {
   const router = useRouter();
-
-  const API =
-    process.env.NEXT_PUBLIC_API_BASE_URL || "https://api.house-in.online";
+  const API = "https://api.house-in.online";
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -101,29 +98,6 @@ export default function SignInPage() {
             <h1 className="mt-6 text-4xl font-bold leading-tight">
               Welcome back to your property workspace
             </h1>
-
-            <p className="mt-4 max-w-xl text-sm leading-7 text-white/85">
-              Sign in as an admin or external user to manage listings, monitor
-              property submissions, and continue where you stopped.
-            </p>
-          </div>
-
-          <div className="space-y-4">
-            <div className="rounded-3xl border border-white/15 bg-white/10 p-5 backdrop-blur">
-              <h2 className="text-lg font-semibold">Admins</h2>
-              <p className="mt-2 text-sm text-white/80">
-                Access property management, approvals, live listings, and admin
-                controls.
-              </p>
-            </div>
-
-            <div className="rounded-3xl border border-white/15 bg-white/10 p-5 backdrop-blur">
-              <h2 className="text-lg font-semibold">External Users</h2>
-              <p className="mt-2 text-sm text-white/80">
-                Sign in to submit properties, track approval status, and manage
-                your own listings from your dashboard.
-              </p>
-            </div>
           </div>
         </section>
 
@@ -136,9 +110,6 @@ export default function SignInPage() {
               <h2 className="mt-2 text-3xl font-bold text-[var(--color-text-main)]">
                 Access your account
               </h2>
-              <p className="mt-2 text-sm leading-6 text-[var(--color-text-muted)]">
-                Enter your email and password to continue.
-              </p>
             </div>
 
             {error && (
