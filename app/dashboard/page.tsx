@@ -23,7 +23,7 @@ type StoredUser = {
   role: string;
 };
 
-const ADMIN_WHATSAPP_NUMBER = "2348033103109";
+const ADMIN_WHATSAPP_NUMBER = "+23408075990912";
 
 export default function DashboardPage() {
   const router = useRouter();

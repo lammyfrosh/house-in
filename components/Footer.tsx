@@ -7,7 +7,7 @@ import {
   MessageCircle,
 } from "lucide-react";
 
-const ADMIN_WHATSAPP_NUMBER = "2340000000000";
+const ADMIN_WHATSAPP_NUMBER = "+23408075990912";
 
 export default function Footer() {
   const whatsappHref = `https://wa.me/${ADMIN_WHATSAPP_NUMBER}?text=${encodeURIComponent(
@@ -155,7 +155,7 @@ export default function Footer() {
 
             <ul className="mt-4 space-y-3 text-sm text-gray-400">
               <li>Email: contact@house-in.online</li>
-              <li>Phone: +234 800 000 0000</li>
+              <li>Phone: +23408075990912</li>
               <li>Hours: Mon–Sat, 9am–6pm</li>
             </ul>
 

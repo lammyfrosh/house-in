@@ -30,7 +30,7 @@ export default function ContactPage() {
               Phone
             </p>
             <p className="mt-2 text-lg font-semibold text-[var(--color-text-main)]">
-              +234 800 000 0000
+              +23408075990912
             </p>
           </div>
 

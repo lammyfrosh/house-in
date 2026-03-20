@@ -27,7 +27,7 @@ function getPurposeBadge(purpose: string) {
   return "SHORTLET";
 }
 
-const ADMIN_WHATSAPP_NUMBER = "+2348033103109";
+const ADMIN_WHATSAPP_NUMBER = "+23408075990912";
 const CONTACT_EMAIL = "contact@house-in.online";
 
 export default async function PropertyPage({

@@ -1,20 +1,17 @@
 import type { MetadataRoute } from "next";
-import { getApprovedProperties } from "@/lib/api";
+
+export const dynamic = "force-dynamic";
+
+type PropertyItem = {
+  slug?: string;
+  updated_at?: string;
+  created_at?: string;
+};
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = "https://house-in.online";
-
-  let properties: Array<{
-    slug?: string;
-    updated_at?: string;
-    created_at?: string;
-  }> = [];
-
-  try {
-    properties = await getApprovedProperties();
-  } catch (error) {
-    console.error("Sitemap property fetch failed:", error);
-  }
+  const apiBase =
+    process.env.NEXT_PUBLIC_API_BASE_URL || "https://api.house-in.online";
 
   const staticPages: MetadataRoute.Sitemap = [
     {
@@ -55,18 +52,37 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     },
   ];
 
-  const propertyPages: MetadataRoute.Sitemap = properties
-    .filter((property) => property.slug)
-    .map((property) => ({
-      url: `${baseUrl}/property/${property.slug}`,
-      lastModified: property.updated_at
-        ? new Date(property.updated_at)
-        : property.created_at
-        ? new Date(property.created_at)
-        : new Date(),
-      changeFrequency: "weekly" as const,
-      priority: 0.85,
-    }));
+  try {
+    const res = await fetch(`${apiBase}/api/properties`, {
+      cache: "no-store",
+    });
 
-  return [...staticPages, ...propertyPages];
+    if (!res.ok) {
+      return staticPages;
+    }
+
+    const data = await res.json();
+
+    const properties: PropertyItem[] = Array.isArray(data?.properties)
+      ? data.properties
+      : [];
+
+    const propertyPages: MetadataRoute.Sitemap = properties
+      .filter((property) => property.slug)
+      .map((property) => ({
+        url: `${baseUrl}/property/${property.slug}`,
+        lastModified: property.updated_at
+          ? new Date(property.updated_at)
+          : property.created_at
+          ? new Date(property.created_at)
+          : new Date(),
+        changeFrequency: "weekly" as const,
+        priority: 0.85,
+      }));
+
+    return [...staticPages, ...propertyPages];
+  } catch (error) {
+    console.error("Sitemap property fetch failed:", error);
+    return staticPages;
+  }
 }

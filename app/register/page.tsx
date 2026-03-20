@@ -34,6 +34,7 @@ export default function RegisterPage() {
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
 
   useEffect(() => {
     const token = localStorage.getItem("housein_token");
@@ -60,6 +61,7 @@ export default function RegisterPage() {
     e.preventDefault();
     setLoading(true);
     setError("");
+    setSuccess("");
 
     try {
       const res = await fetch(`${API}/api/auth/register`, {
@@ -80,17 +82,18 @@ export default function RegisterPage() {
         throw new Error(data.message || "Registration failed");
       }
 
-      localStorage.setItem("housein_token", data.token);
-      localStorage.setItem("housein_user", JSON.stringify(data.user));
-      window.dispatchEvent(new Event("housein-auth-changed"));
+      setSuccess(
+        data.message ||
+          "Account created successfully. Please check your email to verify your account."
+      );
 
-      const role = String(data.user?.role || "").toLowerCase().trim();
+      setFullName("");
+      setEmail("");
+      setPassword("");
 
-      if (role === "admin" || role === "superadmin" || role === "super_admin") {
-        router.push("/admin");
-      } else {
-        router.push("/dashboard");
-      }
+      setTimeout(() => {
+        router.push("/signin");
+      }, 2500);
     } catch (err) {
       console.error(err);
       setError(err instanceof Error ? err.message : "Could not create account");
@@ -154,6 +157,12 @@ export default function RegisterPage() {
             {error && (
               <div className="mt-5 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
                 {error}
+              </div>
+            )}
+
+            {success && (
+              <div className="mt-5 rounded-2xl border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700">
+                {success}
               </div>
             )}
 
