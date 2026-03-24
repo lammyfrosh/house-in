@@ -73,7 +73,7 @@ export default async function Home() {
   return (
     <main>
       {/* HERO */}
-      <section className="relative min-h-[720px] overflow-hidden md:min-h-[780px]">
+      <section className="relative min-h-[760px] md:min-h-[860px]">
         <Image
           src="/hero-v2.jpg"
           alt="Organised residential estate view"
@@ -83,16 +83,16 @@ export default async function Home() {
         />
 
         <div className="absolute inset-0 bg-gradient-to-r from-black/75 via-black/55 to-black/30" />
-        <div className="absolute inset-0 bg-[var(--color-primary-dark)]/30" />
+        <div className="absolute inset-0 bg-[var(--color-primary-dark)]/28" />
 
-        <div className="relative z-10 mx-auto flex min-h-[720px] max-w-6xl flex-col justify-center px-4 pb-36 pt-24 md:min-h-[780px] md:pb-44">
+        <div className="relative z-10 mx-auto flex min-h-[760px] max-w-6xl flex-col px-4 pt-24 pb-64 md:min-h-[860px] md:pt-28 md:pb-72">
           <div className="max-w-3xl">
             <p className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-4 py-2 text-xs font-medium tracking-wide text-white backdrop-blur-md">
               <ShieldCheck size={14} />
               SEARCH BY STATE & AREA • RENT • SALE • SHORTLET
             </p>
 
-            <h1 className="mt-6 text-4xl font-semibold leading-tight text-white drop-shadow-sm md:text-6xl md:leading-[1.08]">
+            <h1 className="mt-6 max-w-[900px] text-4xl font-semibold leading-tight text-white drop-shadow-sm md:text-7xl md:leading-[1.04]">
               Find Property the Smarter Way in Nigeria
             </h1>
 
@@ -103,57 +103,60 @@ export default async function Home() {
             </p>
           </div>
         </div>
-      </section>
 
-      {/* FLOATING PROPERTY TYPE CARDS */}
-      <section className="relative z-20 mx-auto -mt-24 max-w-6xl px-4 md:-mt-28">
-        <div className="rounded-[30px] border border-white/30 bg-white/95 p-4 shadow-2xl backdrop-blur-md md:p-5">
-          <div className="grid gap-4 md:grid-cols-3">
-            <Link
-              href="/search?purpose=sale"
-              className="group cursor-pointer rounded-3xl bg-[var(--color-primary-dark)] px-6 py-8 text-white transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
-            >
-              <div className="mb-5 inline-flex rounded-2xl bg-white/15 p-3 text-white">
-                <Building2 size={22} />
-              </div>
-              <p className="text-2xl font-bold text-white">For Sale</p>
-              <p className="mt-3 text-sm leading-6 text-white/85">
-                Explore curated sale listings across prime locations.
-              </p>
-            </Link>
+        {/* HERO OVERLAY CARDS */}
+        <div className="absolute inset-x-0 bottom-[-88px] z-20">
+          <div className="mx-auto max-w-6xl px-4">
+            <div className="rounded-[30px] border border-white/30 bg-white/95 p-4 shadow-2xl backdrop-blur-md md:p-5">
+              <div className="grid gap-4 md:grid-cols-3">
+                <Link
+                  href="/search?purpose=sale"
+                  className="group cursor-pointer rounded-3xl bg-[var(--color-primary-dark)] px-6 py-8 text-white transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
+                >
+                  <div className="mb-5 inline-flex rounded-2xl bg-white/15 p-3 text-white">
+                    <Building2 size={22} />
+                  </div>
+                  <p className="text-2xl font-bold text-white">For Sale</p>
+                  <p className="mt-3 text-sm leading-6 text-white/85">
+                    Explore curated sale listings across prime locations.
+                  </p>
+                </Link>
 
-            <Link
-              href="/search?purpose=rent"
-              className="group cursor-pointer rounded-3xl bg-[var(--color-primary-dark)] px-6 py-8 text-white transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
-            >
-              <div className="mb-5 inline-flex rounded-2xl bg-white/15 p-3 text-white">
-                <House size={22} />
-              </div>
-              <p className="text-2xl font-bold text-white">For Rent</p>
-              <p className="mt-3 text-sm leading-6 text-white/85">
-                Discover rental properties with better clarity and faster
-                access.
-              </p>
-            </Link>
+                <Link
+                  href="/search?purpose=rent"
+                  className="group cursor-pointer rounded-3xl bg-[var(--color-primary-dark)] px-6 py-8 text-white transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
+                >
+                  <div className="mb-5 inline-flex rounded-2xl bg-white/15 p-3 text-white">
+                    <House size={22} />
+                  </div>
+                  <p className="text-2xl font-bold text-white">For Rent</p>
+                  <p className="mt-3 text-sm leading-6 text-white/85">
+                    Discover rental properties with better clarity and faster
+                    access.
+                  </p>
+                </Link>
 
-            <Link
-              href="/search?purpose=shortlet"
-              className="group cursor-pointer rounded-3xl bg-[var(--color-primary-dark)] px-6 py-8 text-white transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
-            >
-              <div className="mb-5 inline-flex rounded-2xl bg-white/15 p-3 text-white">
-                <BadgeCheck size={22} />
+                <Link
+                  href="/search?purpose=shortlet"
+                  className="group cursor-pointer rounded-3xl bg-[var(--color-primary-dark)] px-6 py-8 text-white transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
+                >
+                  <div className="mb-5 inline-flex rounded-2xl bg-white/15 p-3 text-white">
+                    <BadgeCheck size={22} />
+                  </div>
+                  <p className="text-2xl font-bold text-white">Shortlet</p>
+                  <p className="mt-3 text-sm leading-6 text-white/85">
+                    Find flexible short-stay options for comfort and
+                    convenience.
+                  </p>
+                </Link>
               </div>
-              <p className="text-2xl font-bold text-white">Shortlet</p>
-              <p className="mt-3 text-sm leading-6 text-white/85">
-                Find flexible short-stay options for comfort and convenience.
-              </p>
-            </Link>
+            </div>
           </div>
         </div>
       </section>
 
       {/* SEARCH SECTION */}
-      <section className="bg-[#eef2f5] pt-8 pb-10 md:pt-10 md:pb-12">
+      <section className="bg-[#eef2f5] pt-32 pb-10 md:pt-36 md:pb-12">
         <div className="mx-auto max-w-6xl px-4">
           <div className="rounded-3xl border border-[var(--color-border)] bg-[#f7f8fa] p-4 shadow-sm md:p-6">
             <form action="/search" className="grid gap-3 md:grid-cols-12">
