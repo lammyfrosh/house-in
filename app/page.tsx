@@ -72,8 +72,8 @@ export default async function Home() {
 
   return (
     <main>
-      {/* HERO ONLY */}
-      <section className="relative h-[82vh] min-h-[560px] w-full overflow-hidden">
+      {/* HERO */}
+      <section className="relative min-h-[760px] w-full overflow-hidden md:min-h-[840px]">
         <Image
           src="/hero-v2.jpg"
           alt="Organised residential estate view"
@@ -82,203 +82,218 @@ export default async function Home() {
           className="object-cover"
         />
 
-        <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/50 to-black/25" />
-        <div className="absolute inset-0 bg-[var(--color-primary)]/20" />
+        <div className="absolute inset-0 bg-gradient-to-r from-black/75 via-black/55 to-black/30" />
+        <div className="absolute inset-0 bg-[var(--color-primary-dark)]/30" />
 
-        <div className="relative z-10 mx-auto flex h-full max-w-6xl flex-col justify-center px-4">
+        <div className="relative z-10 mx-auto flex min-h-[760px] max-w-6xl flex-col justify-center px-4 pb-36 pt-28 md:min-h-[840px] md:pb-44">
           <div className="max-w-3xl">
-            <p className="inline-flex items-center gap-2 rounded-full bg-white/15 px-4 py-1.5 text-xs font-medium text-white backdrop-blur">
+            <p className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-4 py-2 text-xs font-medium tracking-wide text-white backdrop-blur-md">
               <ShieldCheck size={14} />
               SEARCH BY STATE & AREA • RENT • SALE • SHORTLET
             </p>
 
-            <h1 className="mt-5 text-3xl font-semibold leading-tight text-white drop-shadow-sm md:text-5xl">
+            <h1 className="mt-6 text-4xl font-semibold leading-tight text-white drop-shadow-sm md:text-6xl md:leading-[1.08]">
               Find Property the Smarter Way in Nigeria
             </h1>
 
-            <p className="mt-4 max-w-2xl text-base text-white/90 drop-shadow md:text-lg">
+            <p className="mt-5 max-w-2xl text-base leading-8 text-white/90 drop-shadow md:text-xl">
               Discover houses, apartments, land, and shortlet listings across
               selected states in Nigeria — with a platform designed to make your
               search easier, faster, and more reliable.
             </p>
           </div>
         </div>
-      </section>
 
-      {/* FOR SALE / RENT / SHORTLET AFTER HERO */}
-      <section className="relative -mt-10 z-20 mx-auto max-w-6xl px-4 md:-mt-12">
-        <div className="rounded-[32px] border border-[var(--color-border)] bg-white p-4 shadow-xl md:p-5">
-          <div className="grid gap-4 md:grid-cols-3">
-            <Link
-              href="/search?purpose=sale"
-              className="rounded-3xl bg-[var(--color-primary-dark)] px-6 py-6 text-white transition hover:opacity-95"
-            >
-              <p className="text-2xl font-bold text-white">For Sale</p>
-              <p className="mt-2 text-sm text-white/85">
-                Explore curated sale listings across prime locations.
-              </p>
-            </Link>
+        {/* HERO FLOATING PROPERTY TYPE CARDS */}
+        <div className="absolute inset-x-0 bottom-0 z-20 translate-y-1/2">
+          <div className="mx-auto max-w-6xl px-4">
+            <div className="rounded-[32px] border border-white/25 bg-white/95 p-4 shadow-2xl backdrop-blur-md md:p-5">
+              <div className="grid gap-4 md:grid-cols-3">
+                <Link
+                  href="/search?purpose=sale"
+                  className="group cursor-pointer rounded-3xl bg-[var(--color-primary-dark)] px-6 py-7 text-white transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
+                >
+                  <div className="mb-4 inline-flex rounded-2xl bg-white/15 p-3 text-white">
+                    <Building2 size={22} />
+                  </div>
+                  <p className="text-2xl font-bold text-white">For Sale</p>
+                  <p className="mt-2 text-sm leading-6 text-white/85">
+                    Explore curated sale listings across prime locations.
+                  </p>
+                </Link>
 
-            <Link
-              href="/search?purpose=rent"
-              className="rounded-3xl bg-[var(--color-primary-dark)] px-6 py-6 text-white transition hover:opacity-95"
-            >
-              <p className="text-2xl font-bold text-white">For Rent</p>
-              <p className="mt-2 text-sm text-white/85">
-                Discover rental properties with better clarity and faster access.
-              </p>
-            </Link>
+                <Link
+                  href="/search?purpose=rent"
+                  className="group cursor-pointer rounded-3xl bg-[var(--color-primary-dark)] px-6 py-7 text-white transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
+                >
+                  <div className="mb-4 inline-flex rounded-2xl bg-white/15 p-3 text-white">
+                    <House size={22} />
+                  </div>
+                  <p className="text-2xl font-bold text-white">For Rent</p>
+                  <p className="mt-2 text-sm leading-6 text-white/85">
+                    Discover rental properties with better clarity and faster
+                    access.
+                  </p>
+                </Link>
 
-            <Link
-              href="/search?purpose=shortlet"
-              className="rounded-3xl bg-[var(--color-primary-dark)] px-6 py-6 text-white transition hover:opacity-95"
-            >
-              <p className="text-2xl font-bold text-white">Shortlet</p>
-              <p className="mt-2 text-sm text-white/85">
-                Find flexible short-stay options for comfort and convenience.
-              </p>
-            </Link>
+                <Link
+                  href="/search?purpose=shortlet"
+                  className="group cursor-pointer rounded-3xl bg-[var(--color-primary-dark)] px-6 py-7 text-white transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
+                >
+                  <div className="mb-4 inline-flex rounded-2xl bg-white/15 p-3 text-white">
+                    <BadgeCheck size={22} />
+                  </div>
+                  <p className="text-2xl font-bold text-white">Shortlet</p>
+                  <p className="mt-2 text-sm leading-6 text-white/85">
+                    Find flexible short-stay options for comfort and
+                    convenience.
+                  </p>
+                </Link>
+              </div>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* SEARCH MODULE AFTER PROPERTY TYPE SECTION */}
-      <section className="mx-auto max-w-6xl px-4 pt-8 pb-6 md:pt-10">
-        <div className="rounded-3xl bg-white p-4 shadow-xl md:p-5">
-          <form action="/search" className="grid gap-3 md:grid-cols-12">
-            <select
-              name="state"
-              className="h-11 rounded-xl border border-[var(--color-border)] px-3 md:col-span-3"
-              defaultValue=""
-            >
-              <option value="">Select State</option>
-              {STATES.map((s) => (
-                <option key={s} value={s}>
-                  {s}
-                </option>
-              ))}
-            </select>
-
-            <input
-              name="area"
-              className="h-11 rounded-xl border border-[var(--color-border)] px-3 md:col-span-4"
-              placeholder="Area / LGA (e.g. Lekki, Ikeja, Wuse)"
-            />
-
-            <select
-              name="purpose"
-              className="h-11 rounded-xl border border-[var(--color-border)] px-3 md:col-span-2"
-              defaultValue=""
-            >
-              <option value="">Purpose</option>
-              <option value="rent">For Rent</option>
-              <option value="sale">For Sale</option>
-              <option value="shortlet">Shortlet</option>
-            </select>
-
-            <select
-              name="propertyType"
-              className="h-11 rounded-xl border border-[var(--color-border)] px-3 md:col-span-2"
-              defaultValue=""
-            >
-              <option value="">Property Type</option>
-              <option value="Apartment">Flat / Apartment</option>
-              <option value="Duplex">Duplex</option>
-              <option value="Terrace">Terrace</option>
-              <option value="Bungalow">Bungalow</option>
-              <option value="Land">Land</option>
-            </select>
-
-            <button
-              type="submit"
-              className="h-11 rounded-xl bg-[var(--color-primary-dark)] font-semibold text-white hover:opacity-90 md:col-span-1"
-            >
-              Search
-            </button>
-
-            <div className="grid gap-3 md:col-span-12 md:grid-cols-12">
+      {/* SEARCH SECTION */}
+      <section className="bg-[#eef2f5] pt-40 pb-10 md:pt-44 md:pb-12">
+        <div className="mx-auto max-w-6xl px-4">
+          <div className="rounded-3xl border border-[var(--color-border)] bg-[#f7f8fa] p-4 shadow-sm md:p-6">
+            <form action="/search" className="grid gap-3 md:grid-cols-12">
               <select
-                name="beds"
-                className="h-11 rounded-xl border border-[var(--color-border)] px-3 md:col-span-2"
+                name="state"
+                className="h-12 rounded-xl border border-[var(--color-border)] bg-white px-3 transition outline-none focus:border-[var(--color-primary-dark)] focus:ring-2 focus:ring-[var(--color-primary)]/20 md:col-span-3"
                 defaultValue=""
               >
-                <option value="">Beds</option>
-                <option value="1">1+</option>
-                <option value="2">2+</option>
-                <option value="3">3+</option>
-                <option value="4">4+</option>
-                <option value="5">5+</option>
+                <option value="">Select State</option>
+                {STATES.map((s) => (
+                  <option key={s} value={s}>
+                    {s}
+                  </option>
+                ))}
+              </select>
+
+              <input
+                name="area"
+                className="h-12 rounded-xl border border-[var(--color-border)] bg-white px-3 transition outline-none focus:border-[var(--color-primary-dark)] focus:ring-2 focus:ring-[var(--color-primary)]/20 md:col-span-4"
+                placeholder="Area / LGA (e.g. Lekki, Ikeja, Wuse)"
+              />
+
+              <select
+                name="purpose"
+                className="h-12 rounded-xl border border-[var(--color-border)] bg-white px-3 transition outline-none focus:border-[var(--color-primary-dark)] focus:ring-2 focus:ring-[var(--color-primary)]/20 md:col-span-2"
+                defaultValue=""
+              >
+                <option value="">Purpose</option>
+                <option value="rent">For Rent</option>
+                <option value="sale">For Sale</option>
+                <option value="shortlet">Shortlet</option>
               </select>
 
               <select
-                name="baths"
-                className="h-11 rounded-xl border border-[var(--color-border)] px-3 md:col-span-2"
+                name="propertyType"
+                className="h-12 rounded-xl border border-[var(--color-border)] bg-white px-3 transition outline-none focus:border-[var(--color-primary-dark)] focus:ring-2 focus:ring-[var(--color-primary)]/20 md:col-span-2"
                 defaultValue=""
               >
-                <option value="">Baths</option>
-                <option value="1">1+</option>
-                <option value="2">2+</option>
-                <option value="3">3+</option>
-                <option value="4">4+</option>
+                <option value="">Property Type</option>
+                <option value="Apartment">Flat / Apartment</option>
+                <option value="Duplex">Duplex</option>
+                <option value="Terrace">Terrace</option>
+                <option value="Bungalow">Bungalow</option>
+                <option value="Land">Land</option>
               </select>
 
-              <select
-                name="minPrice"
-                className="h-11 rounded-xl border border-[var(--color-border)] px-3 md:col-span-4"
-                defaultValue=""
+              <button
+                type="submit"
+                className="h-12 rounded-xl bg-[var(--color-primary-dark)] font-semibold text-white transition-all duration-300 hover:-translate-y-0.5 hover:opacity-95 hover:shadow-md md:col-span-1"
               >
-                <option value="">Min Price</option>
-                <option value="500000">₦500k</option>
-                <option value="1000000">₦1m</option>
-                <option value="2000000">₦2m</option>
-                <option value="5000000">₦5m</option>
-                <option value="10000000">₦10m</option>
-                <option value="50000000">₦50m</option>
-                <option value="100000000">₦100m</option>
-              </select>
+                Search
+              </button>
 
-              <select
-                name="maxPrice"
-                className="h-11 rounded-xl border border-[var(--color-border)] px-3 md:col-span-4"
-                defaultValue=""
-              >
-                <option value="">Max Price</option>
-                <option value="1000000">₦1m</option>
-                <option value="2000000">₦2m</option>
-                <option value="5000000">₦5m</option>
-                <option value="10000000">₦10m</option>
-                <option value="50000000">₦50m</option>
-                <option value="100000000">₦100m</option>
-                <option value="500000000">₦500m</option>
-              </select>
-            </div>
-
-            <div className="md:col-span-12">
-              <div className="mt-2 flex flex-wrap items-center gap-3 text-xs text-gray-600">
-                <span className="font-medium text-[var(--color-text-main)]">
-                  Popular:
-                </span>
-                <Link
-                  href="/search?state=Lagos&area=Lekki&purpose=rent"
-                  className="hover:underline"
+              <div className="grid gap-3 md:col-span-12 md:grid-cols-12">
+                <select
+                  name="beds"
+                  className="h-12 rounded-xl border border-[var(--color-border)] bg-white px-3 transition outline-none focus:border-[var(--color-primary-dark)] focus:ring-2 focus:ring-[var(--color-primary)]/20 md:col-span-2"
+                  defaultValue=""
                 >
-                  Lekki (Rent)
-                </Link>
-                <Link
-                  href="/search?state=Abuja&area=Wuse&purpose=sale"
-                  className="hover:underline"
+                  <option value="">Beds</option>
+                  <option value="1">1+</option>
+                  <option value="2">2+</option>
+                  <option value="3">3+</option>
+                  <option value="4">4+</option>
+                  <option value="5">5+</option>
+                </select>
+
+                <select
+                  name="baths"
+                  className="h-12 rounded-xl border border-[var(--color-border)] bg-white px-3 transition outline-none focus:border-[var(--color-primary-dark)] focus:ring-2 focus:ring-[var(--color-primary)]/20 md:col-span-2"
+                  defaultValue=""
                 >
-                  Abuja (Sale)
-                </Link>
-                <Link
-                  href="/search?state=Lagos&area=Victoria%20Island&purpose=shortlet"
-                  className="hover:underline"
+                  <option value="">Baths</option>
+                  <option value="1">1+</option>
+                  <option value="2">2+</option>
+                  <option value="3">3+</option>
+                  <option value="4">4+</option>
+                </select>
+
+                <select
+                  name="minPrice"
+                  className="h-12 rounded-xl border border-[var(--color-border)] bg-white px-3 transition outline-none focus:border-[var(--color-primary-dark)] focus:ring-2 focus:ring-[var(--color-primary)]/20 md:col-span-4"
+                  defaultValue=""
                 >
-                  VI (Shortlet)
-                </Link>
+                  <option value="">Min Price</option>
+                  <option value="500000">₦500k</option>
+                  <option value="1000000">₦1m</option>
+                  <option value="2000000">₦2m</option>
+                  <option value="5000000">₦5m</option>
+                  <option value="10000000">₦10m</option>
+                  <option value="50000000">₦50m</option>
+                  <option value="100000000">₦100m</option>
+                </select>
+
+                <select
+                  name="maxPrice"
+                  className="h-12 rounded-xl border border-[var(--color-border)] bg-white px-3 transition outline-none focus:border-[var(--color-primary-dark)] focus:ring-2 focus:ring-[var(--color-primary)]/20 md:col-span-4"
+                  defaultValue=""
+                >
+                  <option value="">Max Price</option>
+                  <option value="1000000">₦1m</option>
+                  <option value="2000000">₦2m</option>
+                  <option value="5000000">₦5m</option>
+                  <option value="10000000">₦10m</option>
+                  <option value="50000000">₦50m</option>
+                  <option value="100000000">₦100m</option>
+                  <option value="500000000">₦500m</option>
+                </select>
               </div>
-            </div>
-          </form>
+
+              <div className="md:col-span-12">
+                <div className="mt-2 flex flex-wrap items-center gap-3 text-xs text-gray-600">
+                  <span className="font-medium text-[var(--color-text-main)]">
+                    Popular:
+                  </span>
+                  <Link
+                    href="/search?state=Lagos&area=Lekki&purpose=rent"
+                    className="transition hover:text-[var(--color-primary-dark)] hover:underline"
+                  >
+                    Lekki (Rent)
+                  </Link>
+                  <Link
+                    href="/search?state=Abuja&area=Wuse&purpose=sale"
+                    className="transition hover:text-[var(--color-primary-dark)] hover:underline"
+                  >
+                    Abuja (Sale)
+                  </Link>
+                  <Link
+                    href="/search?state=Lagos&area=Victoria%20Island&purpose=shortlet"
+                    className="transition hover:text-[var(--color-primary-dark)] hover:underline"
+                  >
+                    VI (Shortlet)
+                  </Link>
+                </div>
+              </div>
+            </form>
+          </div>
         </div>
       </section>
 
@@ -290,13 +305,14 @@ export default async function Home() {
               Featured Properties
             </h2>
             <p className="mt-1 text-sm text-[var(--color-text-muted)]">
-              A handpicked mix of sale, rent, and shortlet listings across key locations.
+              A handpicked mix of sale, rent, and shortlet listings across key
+              locations.
             </p>
           </div>
 
           <Link
             href="/search"
-            className="inline-flex items-center gap-1 text-sm font-medium text-[var(--color-primary-dark)] hover:underline"
+            className="inline-flex items-center gap-1 text-sm font-medium text-[var(--color-primary-dark)] transition hover:underline"
           >
             View all <ArrowRight size={16} />
           </Link>
@@ -329,7 +345,8 @@ export default async function Home() {
               Browse by State
             </h2>
             <p className="mt-1 text-sm text-[var(--color-text-muted)]">
-              Explore property opportunities in some of Nigeria’s most active locations.
+              Explore property opportunities in some of Nigeria’s most active
+              locations.
             </p>
           </div>
 
@@ -340,7 +357,7 @@ export default async function Home() {
                 <Link
                   key={state.name}
                   href={state.href}
-                  className="group rounded-2xl border border-[var(--color-border)] bg-white p-5 transition hover:border-[var(--color-primary)] hover:shadow-sm"
+                  className="group rounded-2xl border border-[var(--color-border)] bg-white p-5 transition-all duration-300 hover:border-[var(--color-primary)] hover:shadow-sm"
                 >
                   <div className="flex items-start justify-between">
                     <div>
@@ -377,8 +394,8 @@ export default async function Home() {
 
               <div className="mt-5 space-y-4 text-sm leading-7 text-[var(--color-text-muted)] md:text-base">
                 <p>
-                  House-In was built with one clear goal: to make property search
-                  in Nigeria feel easier, clearer, and more dependable.
+                  House-In was built with one clear goal: to make property
+                  search in Nigeria feel easier, clearer, and more dependable.
                 </p>
 
                 <p>
@@ -412,7 +429,8 @@ export default async function Home() {
                       Clarity
                     </h3>
                     <p className="mt-1 text-sm text-[var(--color-text-muted)]">
-                      Search tools and property information presented in a way people can understand quickly.
+                      Search tools and property information presented in a way
+                      people can understand quickly.
                     </p>
                   </div>
                 </div>
@@ -426,7 +444,8 @@ export default async function Home() {
                       Confidence
                     </h3>
                     <p className="mt-1 text-sm text-[var(--color-text-muted)]">
-                      A platform experience that feels organised, intentional, and trustworthy.
+                      A platform experience that feels organised, intentional,
+                      and trustworthy.
                     </p>
                   </div>
                 </div>
@@ -440,7 +459,8 @@ export default async function Home() {
                       Convenience
                     </h3>
                     <p className="mt-1 text-sm text-[var(--color-text-muted)]">
-                      From search to enquiry, every step is being designed to feel smoother and smarter.
+                      From search to enquiry, every step is being designed to
+                      feel smoother and smarter.
                     </p>
                   </div>
                 </div>
@@ -458,7 +478,8 @@ export default async function Home() {
               Why People Will Love Using House-In
             </h2>
             <p className="mt-1 text-sm text-[var(--color-text-muted)]">
-              Built to feel simple, attractive, and useful from the very first visit.
+              Built to feel simple, attractive, and useful from the very first
+              visit.
             </p>
           </div>
 
