@@ -148,7 +148,7 @@ export default function AddPropertyPage() {
     if (normalizedRole === "admin") {
       return "Admin";
     }
-    return "External User";
+    return "User";
   }, [normalizedRole]);
 
   function handleChange(
@@ -254,12 +254,12 @@ export default function AddPropertyPage() {
       }
 
       const createdStatus: PropertyStatus =
-        data.status || data.property?.status || "pending";
+        data.status || data.property?.status || "approved";
 
       setMessage(
         createdStatus === "approved"
           ? "Property created successfully and is now live."
-          : "Property created successfully and is awaiting approval."
+          : "Property created successfully."
       );
       setMessageType("success");
 
@@ -303,7 +303,7 @@ export default function AddPropertyPage() {
         <div className="mx-auto max-w-6xl px-4 py-10">
           <div className="rounded-3xl border border-[var(--color-border)] bg-white p-6 shadow-sm">
             <p className="text-sm text-[var(--color-text-muted)]">
-              Checking your session...
+              Checking your session.
             </p>
           </div>
         </div>
@@ -328,42 +328,42 @@ export default function AddPropertyPage() {
             </p>
           </div>
 
-          <div className="rounded-2xl border border-[var(--color-border)] bg-white px-4 py-3 shadow-sm">
-            <p className="text-xs font-extrabold uppercase tracking-[0.18em] text-gray-500">
-              Logged In As
-            </p>
-            <p className="mt-1 text-sm font-semibold text-[var(--color-text-main)]">
-              {user?.full_name || "Unknown user"}
-            </p>
-            <p className="text-xs text-[var(--color-text-muted)]">{roleLabel}</p>
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+            <div className="rounded-xl border border-[var(--color-border)] bg-white px-4 py-2 text-sm text-[var(--color-text-main)]">
+              {user ? `${user.full_name} • ${roleLabel}` : "Authenticated session"}
+            </div>
+
+            <button
+              onClick={() => router.push(dashboardHref)}
+              className="rounded-xl border border-[var(--color-border)] px-4 py-2 text-sm font-semibold text-[var(--color-text-main)] transition hover:bg-gray-50"
+            >
+              Back to Dashboard
+            </button>
           </div>
         </div>
 
         {message && (
           <div
-            className={`mt-5 rounded-2xl px-4 py-3 text-sm shadow-sm ${
+            className={`mt-5 rounded-xl px-4 py-3 text-sm ${
               messageType === "success"
-                ? "border border-green-200 bg-green-50 text-green-700"
-                : "border border-red-200 bg-red-50 text-red-700"
+                ? "bg-green-50 text-green-700"
+                : "bg-red-50 text-red-700"
             }`}
           >
             {message}
           </div>
         )}
 
-        <form
-          onSubmit={handleSubmit}
-          className="mt-8 grid gap-6 xl:grid-cols-[1.45fr_0.85fr]"
-        >
-          <section className="space-y-6">
-            <div className="rounded-3xl border border-[var(--color-border)] bg-white p-5 shadow-sm sm:p-6">
+        <form onSubmit={handleSubmit} className="mt-8 grid gap-8 xl:grid-cols-[1.1fr_0.9fr]">
+          <div className="space-y-8">
+            <section className="rounded-3xl border border-[var(--color-border)] bg-white p-5 shadow-sm sm:p-6">
               <h2 className="text-lg font-semibold text-[var(--color-text-main)]">
-                Core Details
+                Property Details
               </h2>
 
-              <div className="mt-5 grid gap-4 sm:grid-cols-2">
-                <div className="sm:col-span-2">
-                  <label className="mb-2 block text-sm font-semibold text-[var(--color-text-main)]">
+              <div className="mt-5 grid gap-4 md:grid-cols-2">
+                <div className="md:col-span-2">
+                  <label className="mb-2 block text-sm font-medium text-[var(--color-text-main)]">
                     Property Title
                   </label>
                   <input
@@ -371,29 +371,30 @@ export default function AddPropertyPage() {
                     value={form.title}
                     onChange={handleChange}
                     required
-                    className="w-full rounded-xl border border-[var(--color-border)] bg-white px-4 py-3 text-sm outline-none transition focus:border-[var(--color-primary-dark)]"
-                    placeholder="e.g. Luxury 4 Bedroom Detached Duplex"
+                    className="h-12 w-full rounded-xl border border-[var(--color-border)] px-4 outline-none transition focus:border-[var(--color-primary-dark)] focus:ring-2 focus:ring-[var(--color-primary)]/20"
+                    placeholder="e.g. Luxury 4 Bedroom Duplex"
                   />
                 </div>
 
                 <div>
-                  <label className="mb-2 block text-sm font-semibold text-[var(--color-text-main)]">
+                  <label className="mb-2 block text-sm font-medium text-[var(--color-text-main)]">
                     Purpose
                   </label>
                   <select
                     name="purpose"
                     value={form.purpose}
                     onChange={handleChange}
-                    className="w-full rounded-xl border border-[var(--color-border)] bg-white px-4 py-3 text-sm outline-none transition focus:border-[var(--color-primary-dark)]"
+                    required
+                    className="h-12 w-full rounded-xl border border-[var(--color-border)] px-4 outline-none transition focus:border-[var(--color-primary-dark)] focus:ring-2 focus:ring-[var(--color-primary)]/20"
                   >
-                    <option value="sale">Sale</option>
-                    <option value="rent">Rent</option>
+                    <option value="rent">For Rent</option>
+                    <option value="sale">For Sale</option>
                     <option value="shortlet">Shortlet</option>
                   </select>
                 </div>
 
                 <div>
-                  <label className="mb-2 block text-sm font-semibold text-[var(--color-text-main)]">
+                  <label className="mb-2 block text-sm font-medium text-[var(--color-text-main)]">
                     Property Type
                   </label>
                   <input
@@ -401,114 +402,105 @@ export default function AddPropertyPage() {
                     value={form.propertyType}
                     onChange={handleChange}
                     required
-                    className="w-full rounded-xl border border-[var(--color-border)] bg-white px-4 py-3 text-sm outline-none transition focus:border-[var(--color-primary-dark)]"
-                    placeholder="e.g. Duplex, Apartment, Bungalow"
+                    className="h-12 w-full rounded-xl border border-[var(--color-border)] px-4 outline-none transition focus:border-[var(--color-primary-dark)] focus:ring-2 focus:ring-[var(--color-primary)]/20"
+                    placeholder="e.g. Duplex, Apartment, Land"
                   />
                 </div>
 
                 <div>
-                  <label className="mb-2 block text-sm font-semibold text-[var(--color-text-main)]">
+                  <label className="mb-2 block text-sm font-medium text-[var(--color-text-main)]">
                     Price
                   </label>
                   <input
-                    name="price"
                     type="number"
-                    min="0"
+                    name="price"
                     value={form.price}
                     onChange={handleChange}
                     required
-                    className="w-full rounded-xl border border-[var(--color-border)] bg-white px-4 py-3 text-sm outline-none transition focus:border-[var(--color-primary-dark)]"
-                    placeholder="Enter price"
+                    className="h-12 w-full rounded-xl border border-[var(--color-border)] px-4 outline-none transition focus:border-[var(--color-primary-dark)] focus:ring-2 focus:ring-[var(--color-primary)]/20"
+                    placeholder="e.g. 25000000"
                   />
                 </div>
 
                 <div>
-                  <label className="mb-2 block text-sm font-semibold text-[var(--color-text-main)]">
+                  <label className="mb-2 block text-sm font-medium text-[var(--color-text-main)]">
                     Size
                   </label>
                   <input
                     name="size"
                     value={form.size}
                     onChange={handleChange}
-                    className="w-full rounded-xl border border-[var(--color-border)] bg-white px-4 py-3 text-sm outline-none transition focus:border-[var(--color-primary-dark)]"
-                    placeholder="e.g. 650 sqm"
+                    className="h-12 w-full rounded-xl border border-[var(--color-border)] px-4 outline-none transition focus:border-[var(--color-primary-dark)] focus:ring-2 focus:ring-[var(--color-primary)]/20"
+                    placeholder="e.g. 600 sqm"
                   />
                 </div>
-              </div>
-            </div>
 
-            <div className="rounded-3xl border border-[var(--color-border)] bg-white p-5 shadow-sm sm:p-6">
-              <h2 className="text-lg font-semibold text-[var(--color-text-main)]">
-                Property Features
-              </h2>
-
-              <div className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
                 <div>
-                  <label className="mb-2 block text-sm font-semibold text-[var(--color-text-main)]">
+                  <label className="mb-2 block text-sm font-medium text-[var(--color-text-main)]">
                     Bedrooms
                   </label>
                   <input
-                    name="bedrooms"
                     type="number"
-                    min="0"
+                    name="bedrooms"
                     value={form.bedrooms}
                     onChange={handleChange}
-                    className="w-full rounded-xl border border-[var(--color-border)] bg-white px-4 py-3 text-sm outline-none transition focus:border-[var(--color-primary-dark)]"
+                    className="h-12 w-full rounded-xl border border-[var(--color-border)] px-4 outline-none transition focus:border-[var(--color-primary-dark)] focus:ring-2 focus:ring-[var(--color-primary)]/20"
+                    placeholder="0"
                   />
                 </div>
 
                 <div>
-                  <label className="mb-2 block text-sm font-semibold text-[var(--color-text-main)]">
+                  <label className="mb-2 block text-sm font-medium text-[var(--color-text-main)]">
                     Bathrooms
                   </label>
                   <input
-                    name="bathrooms"
                     type="number"
-                    min="0"
+                    name="bathrooms"
                     value={form.bathrooms}
                     onChange={handleChange}
-                    className="w-full rounded-xl border border-[var(--color-border)] bg-white px-4 py-3 text-sm outline-none transition focus:border-[var(--color-primary-dark)]"
+                    className="h-12 w-full rounded-xl border border-[var(--color-border)] px-4 outline-none transition focus:border-[var(--color-primary-dark)] focus:ring-2 focus:ring-[var(--color-primary)]/20"
+                    placeholder="0"
                   />
                 </div>
 
                 <div>
-                  <label className="mb-2 block text-sm font-semibold text-[var(--color-text-main)]">
+                  <label className="mb-2 block text-sm font-medium text-[var(--color-text-main)]">
                     Toilets
                   </label>
                   <input
-                    name="toilets"
                     type="number"
-                    min="0"
+                    name="toilets"
                     value={form.toilets}
                     onChange={handleChange}
-                    className="w-full rounded-xl border border-[var(--color-border)] bg-white px-4 py-3 text-sm outline-none transition focus:border-[var(--color-primary-dark)]"
+                    className="h-12 w-full rounded-xl border border-[var(--color-border)] px-4 outline-none transition focus:border-[var(--color-primary-dark)] focus:ring-2 focus:ring-[var(--color-primary)]/20"
+                    placeholder="0"
                   />
                 </div>
 
                 <div>
-                  <label className="mb-2 block text-sm font-semibold text-[var(--color-text-main)]">
+                  <label className="mb-2 block text-sm font-medium text-[var(--color-text-main)]">
                     Parking Spaces
                   </label>
                   <input
-                    name="parkingSpaces"
                     type="number"
-                    min="0"
+                    name="parkingSpaces"
                     value={form.parkingSpaces}
                     onChange={handleChange}
-                    className="w-full rounded-xl border border-[var(--color-border)] bg-white px-4 py-3 text-sm outline-none transition focus:border-[var(--color-primary-dark)]"
+                    className="h-12 w-full rounded-xl border border-[var(--color-border)] px-4 outline-none transition focus:border-[var(--color-primary-dark)] focus:ring-2 focus:ring-[var(--color-primary)]/20"
+                    placeholder="0"
                   />
                 </div>
               </div>
-            </div>
+            </section>
 
-            <div className="rounded-3xl border border-[var(--color-border)] bg-white p-5 shadow-sm sm:p-6">
+            <section className="rounded-3xl border border-[var(--color-border)] bg-white p-5 shadow-sm sm:p-6">
               <h2 className="text-lg font-semibold text-[var(--color-text-main)]">
-                Location & Description
+                Location
               </h2>
 
-              <div className="mt-5 grid gap-4 sm:grid-cols-2">
+              <div className="mt-5 grid gap-4 md:grid-cols-3">
                 <div>
-                  <label className="mb-2 block text-sm font-semibold text-[var(--color-text-main)]">
+                  <label className="mb-2 block text-sm font-medium text-[var(--color-text-main)]">
                     State
                   </label>
                   <input
@@ -516,12 +508,27 @@ export default function AddPropertyPage() {
                     value={form.state}
                     onChange={handleChange}
                     required
-                    className="w-full rounded-xl border border-[var(--color-border)] bg-white px-4 py-3 text-sm outline-none transition focus:border-[var(--color-primary-dark)]"
+                    className="h-12 w-full rounded-xl border border-[var(--color-border)] px-4 outline-none transition focus:border-[var(--color-primary-dark)] focus:ring-2 focus:ring-[var(--color-primary)]/20"
+                    placeholder="e.g. Lagos"
                   />
                 </div>
 
                 <div>
-                  <label className="mb-2 block text-sm font-semibold text-[var(--color-text-main)]">
+                  <label className="mb-2 block text-sm font-medium text-[var(--color-text-main)]">
+                    Area / LGA
+                  </label>
+                  <input
+                    name="area"
+                    value={form.area}
+                    onChange={handleChange}
+                    required
+                    className="h-12 w-full rounded-xl border border-[var(--color-border)] px-4 outline-none transition focus:border-[var(--color-primary-dark)] focus:ring-2 focus:ring-[var(--color-primary)]/20"
+                    placeholder="e.g. Lekki"
+                  />
+                </div>
+
+                <div>
+                  <label className="mb-2 block text-sm font-medium text-[var(--color-text-main)]">
                     City
                   </label>
                   <input
@@ -529,48 +536,34 @@ export default function AddPropertyPage() {
                     value={form.city}
                     onChange={handleChange}
                     required
-                    className="w-full rounded-xl border border-[var(--color-border)] bg-white px-4 py-3 text-sm outline-none transition focus:border-[var(--color-primary-dark)]"
-                  />
-                </div>
-
-                <div className="sm:col-span-2">
-                  <label className="mb-2 block text-sm font-semibold text-[var(--color-text-main)]">
-                    Area / District
-                  </label>
-                  <input
-                    name="area"
-                    value={form.area}
-                    onChange={handleChange}
-                    required
-                    className="w-full rounded-xl border border-[var(--color-border)] bg-white px-4 py-3 text-sm outline-none transition focus:border-[var(--color-primary-dark)]"
-                  />
-                </div>
-
-                <div className="sm:col-span-2">
-                  <label className="mb-2 block text-sm font-semibold text-[var(--color-text-main)]">
-                    Description
-                  </label>
-                  <textarea
-                    name="description"
-                    value={form.description}
-                    onChange={handleChange}
-                    rows={7}
-                    className="w-full rounded-xl border border-[var(--color-border)] bg-white px-4 py-3 text-sm outline-none transition focus:border-[var(--color-primary-dark)]"
-                    placeholder="Write a compelling property description..."
+                    className="h-12 w-full rounded-xl border border-[var(--color-border)] px-4 outline-none transition focus:border-[var(--color-primary-dark)] focus:ring-2 focus:ring-[var(--color-primary)]/20"
+                    placeholder="e.g. Lagos"
                   />
                 </div>
               </div>
-            </div>
-          </section>
+            </section>
 
-          <aside className="space-y-6">
-            <div className="rounded-3xl border border-[var(--color-border)] bg-white p-5 shadow-sm sm:p-6">
+            <section className="rounded-3xl border border-[var(--color-border)] bg-white p-5 shadow-sm sm:p-6">
               <h2 className="text-lg font-semibold text-[var(--color-text-main)]">
-                Listing Controls
+                Description
               </h2>
 
-              <div className="mt-5 space-y-4">
-                <label className="flex items-center gap-3 rounded-xl border border-[var(--color-border)] px-4 py-3">
+              <div className="mt-5">
+                <label className="mb-2 block text-sm font-medium text-[var(--color-text-main)]">
+                  Property Description
+                </label>
+                <textarea
+                  name="description"
+                  value={form.description}
+                  onChange={handleChange}
+                  rows={7}
+                  className="w-full rounded-2xl border border-[var(--color-border)] px-4 py-3 outline-none transition focus:border-[var(--color-primary-dark)] focus:ring-2 focus:ring-[var(--color-primary)]/20"
+                  placeholder="Write a strong and clear property description..."
+                />
+              </div>
+
+              {isAdmin && (
+                <label className="mt-5 flex items-center gap-3 rounded-2xl border border-[var(--color-border)] bg-[#f8fafc] px-4 py-3 text-sm text-[var(--color-text-main)]">
                   <input
                     type="checkbox"
                     name="featured"
@@ -578,129 +571,112 @@ export default function AddPropertyPage() {
                     onChange={handleChange}
                     className="h-4 w-4"
                   />
-                  <span className="text-sm font-medium text-[var(--color-text-main)]">
-                    Mark as Featured Listing
-                  </span>
+                  Mark as featured
                 </label>
+              )}
+            </section>
+          </div>
 
-                <div className="rounded-2xl bg-gray-50 p-4 text-xs text-[var(--color-text-muted)]">
-                  The first uploaded image becomes the primary listing image.
-                </div>
-              </div>
-            </div>
-
-            <div className="rounded-3xl border border-[var(--color-border)] bg-white p-5 shadow-sm sm:p-6">
+          <div className="space-y-8">
+            <section className="rounded-3xl border border-[var(--color-border)] bg-white p-5 shadow-sm sm:p-6">
               <h2 className="text-lg font-semibold text-[var(--color-text-main)]">
-                Property Images
+                Images
               </h2>
 
               <div className="mt-5">
-                {imagePreviews.length > 0 ? (
-                  <div className="grid grid-cols-2 gap-3">
-                    {imagePreviews.map((preview, index) => (
-                      <div
-                        key={`${preview}-${index}`}
-                        className="relative overflow-hidden rounded-2xl border border-[var(--color-border)]"
-                      >
-                        <img
-                          src={preview}
-                          alt={`Preview ${index + 1}`}
-                          className="h-36 w-full object-cover"
-                        />
-
-                        <button
-                          type="button"
-                          onClick={() => removeImage(index)}
-                          className="absolute right-2 top-2 inline-flex h-8 w-8 items-center justify-center rounded-full bg-black/70 text-white transition hover:bg-black"
-                          aria-label={`Remove image ${index + 1}`}
-                        >
-                          <X size={16} />
-                        </button>
-
-                        <div className="flex items-center justify-between bg-white px-3 py-2 text-xs">
-                          <span className="font-semibold text-[var(--color-text-main)]">
-                            {index === 0 ? "Primary image" : `Image ${index + 1}`}
-                          </span>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="flex h-56 items-center justify-center rounded-2xl border border-dashed border-[var(--color-border)] text-sm text-[var(--color-text-muted)]">
-                    Upload one or more property images
-                  </div>
-                )}
-
-                <label className="mt-4 block text-sm font-semibold text-[var(--color-text-main)]">
-                  Property Images <span className="text-red-500">*</span>
+                <label className="mb-2 block text-sm font-medium text-[var(--color-text-main)]">
+                  Upload Images
                 </label>
                 <input
                   type="file"
                   accept="image/*"
                   multiple
                   onChange={handleImagesChange}
-                  className="mt-2 block w-full rounded-xl border border-[var(--color-border)] px-3 py-2 text-sm"
+                  className="block w-full rounded-xl border border-[var(--color-border)] px-4 py-3 text-sm"
                 />
                 <p className="mt-2 text-xs text-[var(--color-text-muted)]">
-                  You can upload multiple images. The first one will be used as
-                  the main listing image, and you can remove any image before
-                  submitting.
+                  Upload one or multiple images. The first image becomes the main image.
                 </p>
               </div>
-            </div>
 
-            <div className="rounded-3xl border border-[var(--color-border)] bg-white p-5 shadow-sm sm:p-6">
+              {imagePreviews.length > 0 && (
+                <div className="mt-5 grid grid-cols-2 gap-4 sm:grid-cols-3">
+                  {imagePreviews.map((src, index) => (
+                    <div
+                      key={`${src}-${index}`}
+                      className="relative overflow-hidden rounded-2xl border border-[var(--color-border)] bg-[#f8fafc]"
+                    >
+                      <img
+                        src={src}
+                        alt={`Preview ${index + 1}`}
+                        className="h-36 w-full object-cover"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => removeImage(index)}
+                        className="absolute right-2 top-2 rounded-full bg-black/70 p-1 text-white"
+                      >
+                        <X size={14} />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </section>
+
+            <section className="rounded-3xl border border-[var(--color-border)] bg-white p-5 shadow-sm sm:p-6">
               <h2 className="text-lg font-semibold text-[var(--color-text-main)]">
-                Property Video
+                Video
               </h2>
 
               <div className="mt-5">
-                {videoPreview ? (
-                  <video
-                    controls
-                    className="w-full rounded-2xl border border-[var(--color-border)] bg-black"
-                  >
-                    <source src={videoPreview} />
-                    Your browser does not support the video tag.
-                  </video>
-                ) : (
-                  <div className="flex h-40 items-center justify-center rounded-2xl border border-dashed border-[var(--color-border)] text-sm text-[var(--color-text-muted)]">
-                    Optional video upload
-                  </div>
-                )}
-
-                <label className="mt-4 block text-sm font-semibold text-[var(--color-text-main)]">
-                  Property Video
+                <label className="mb-2 block text-sm font-medium text-[var(--color-text-main)]">
+                  Upload Video
                 </label>
                 <input
                   type="file"
                   accept="video/*"
                   onChange={handleVideoChange}
-                  className="mt-2 block w-full rounded-xl border border-[var(--color-border)] px-3 py-2 text-sm"
+                  className="block w-full rounded-xl border border-[var(--color-border)] px-4 py-3 text-sm"
                 />
+                <p className="mt-2 text-xs text-[var(--color-text-muted)]">
+                  Optional. Add a property walkthrough video if available.
+                </p>
               </div>
-            </div>
 
-            <div className="rounded-3xl border border-[var(--color-border)] bg-white p-5 shadow-sm sm:p-6">
-              <div className="flex flex-col gap-3">
-                <button
-                  type="submit"
-                  disabled={saving}
-                  className="rounded-xl bg-[var(--color-primary-dark)] px-4 py-3 text-sm font-semibold text-white shadow-sm transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-70"
-                >
-                  {saving ? "Creating Property..." : "Create Property"}
-                </button>
+              {videoPreview && (
+                <div className="mt-5 overflow-hidden rounded-2xl border border-[var(--color-border)] bg-black">
+                  <video controls className="w-full">
+                    <source src={videoPreview} />
+                    Your browser does not support the video tag.
+                  </video>
+                </div>
+              )}
+            </section>
 
-                <button
-                  type="button"
-                  onClick={() => router.push(dashboardHref)}
-                  className="rounded-xl border border-[var(--color-border)] px-4 py-3 text-sm font-semibold text-[var(--color-text-main)] transition hover:bg-gray-50"
-                >
-                  Cancel
-                </button>
+            <section className="rounded-3xl border border-[var(--color-border)] bg-white p-5 shadow-sm sm:p-6">
+              <h2 className="text-lg font-semibold text-[var(--color-text-main)]">
+                Submit
+              </h2>
+
+              <div className="mt-4 space-y-3 text-sm text-[var(--color-text-muted)]">
+                <p>
+                  Once submitted, this property will go live immediately for public viewing.
+                </p>
+                <p>
+                  Admins will still be able to reject or delete the listing later if needed.
+                </p>
               </div>
-            </div>
-          </aside>
+
+              <button
+                type="submit"
+                disabled={saving}
+                className="mt-6 inline-flex w-full items-center justify-center rounded-2xl bg-[var(--color-primary-dark)] px-5 py-3 text-sm font-semibold text-white transition hover:opacity-95 disabled:cursor-not-allowed disabled:opacity-70"
+              >
+                {saving ? "Publishing Property..." : "Publish Property"}
+              </button>
+            </section>
+          </div>
         </form>
       </div>
     </main>
