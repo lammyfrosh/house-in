@@ -73,7 +73,7 @@ export default async function Home() {
   return (
     <main>
       {/* HERO */}
-      <section className="relative min-h-[760px] w-full overflow-hidden md:min-h-[840px]">
+      <section className="relative h-[88vh] min-h-[680px] w-full overflow-hidden">
         <Image
           src="/hero-v2.jpg"
           alt="Organised residential estate view"
@@ -85,7 +85,7 @@ export default async function Home() {
         <div className="absolute inset-0 bg-gradient-to-r from-black/75 via-black/55 to-black/30" />
         <div className="absolute inset-0 bg-[var(--color-primary-dark)]/30" />
 
-        <div className="relative z-10 mx-auto flex min-h-[760px] max-w-6xl flex-col justify-center px-4 pb-36 pt-28 md:min-h-[840px] md:pb-44">
+        <div className="relative z-10 mx-auto flex h-full max-w-6xl flex-col justify-center px-4 pb-28 pt-24 md:pb-36">
           <div className="max-w-3xl">
             <p className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-4 py-2 text-xs font-medium tracking-wide text-white backdrop-blur-md">
               <ShieldCheck size={14} />
@@ -104,14 +104,14 @@ export default async function Home() {
           </div>
         </div>
 
-        {/* HERO FLOATING PROPERTY TYPE CARDS */}
-        <div className="absolute inset-x-0 bottom-0 z-20 translate-y-1/2">
+        {/* FLOATING PROPERTY TYPE CARDS */}
+        <div className="absolute inset-x-0 -bottom-16 z-20">
           <div className="mx-auto max-w-6xl px-4">
-            <div className="rounded-[32px] border border-white/25 bg-white/95 p-4 shadow-2xl backdrop-blur-md md:p-5">
+            <div className="rounded-[28px] border border-white/20 bg-white/95 p-4 shadow-2xl backdrop-blur-md md:p-6">
               <div className="grid gap-4 md:grid-cols-3">
                 <Link
                   href="/search?purpose=sale"
-                  className="group cursor-pointer rounded-3xl bg-[var(--color-primary-dark)] px-6 py-7 text-white transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
+                  className="group cursor-pointer rounded-3xl bg-[var(--color-primary-dark)] px-6 py-7 text-white transition-all duration-300 hover:-translate-y-1 hover:scale-[1.02] hover:shadow-xl"
                 >
                   <div className="mb-4 inline-flex rounded-2xl bg-white/15 p-3 text-white">
                     <Building2 size={22} />
@@ -124,7 +124,7 @@ export default async function Home() {
 
                 <Link
                   href="/search?purpose=rent"
-                  className="group cursor-pointer rounded-3xl bg-[var(--color-primary-dark)] px-6 py-7 text-white transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
+                  className="group cursor-pointer rounded-3xl bg-[var(--color-primary-dark)] px-6 py-7 text-white transition-all duration-300 hover:-translate-y-1 hover:scale-[1.02] hover:shadow-xl"
                 >
                   <div className="mb-4 inline-flex rounded-2xl bg-white/15 p-3 text-white">
                     <House size={22} />
@@ -138,7 +138,7 @@ export default async function Home() {
 
                 <Link
                   href="/search?purpose=shortlet"
-                  className="group cursor-pointer rounded-3xl bg-[var(--color-primary-dark)] px-6 py-7 text-white transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
+                  className="group cursor-pointer rounded-3xl bg-[var(--color-primary-dark)] px-6 py-7 text-white transition-all duration-300 hover:-translate-y-1 hover:scale-[1.02] hover:shadow-xl"
                 >
                   <div className="mb-4 inline-flex rounded-2xl bg-white/15 p-3 text-white">
                     <BadgeCheck size={22} />
@@ -156,7 +156,7 @@ export default async function Home() {
       </section>
 
       {/* SEARCH SECTION */}
-      <section className="bg-[#eef2f5] pt-40 pb-10 md:pt-44 md:pb-12">
+      <section className="bg-[#eef2f5] pt-24 pb-10 md:pt-28 md:pb-12">
         <div className="mx-auto max-w-6xl px-4">
           <div className="rounded-3xl border border-[var(--color-border)] bg-[#f7f8fa] p-4 shadow-sm md:p-6">
             <form action="/search" className="grid gap-3 md:grid-cols-12">
