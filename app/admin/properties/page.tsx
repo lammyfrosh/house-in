@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 
 type PropertyStatus = "pending" | "approved" | "rejected";
@@ -26,6 +26,8 @@ type Property = {
   featured?: number | boolean;
   status: PropertyStatus;
   created_by_name?: string;
+  admin_reviewed?: number | boolean;
+  admin_reviewed_at?: string | null;
 };
 
 type User = {
@@ -43,10 +45,18 @@ export default function AdminPropertiesPage() {
 
   const [user, setUser] = useState<User | null>(null);
   const [properties, setProperties] = useState<Property[]>([]);
+  const [unreviewedCount, setUnreviewedCount] = useState(0);
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState("");
   const [messageType, setMessageType] = useState<"success" | "error" | "">("");
   const [actionId, setActionId] = useState<number | null>(null);
+
+  const reviewedCount = useMemo(
+    () =>
+      properties.filter((property) => Number(property.admin_reviewed) === 1)
+        .length,
+    [properties]
+  );
 
   async function loadProperties(token: string) {
     const res = await fetch(`${API}/api/properties/admin/all`, {
@@ -62,6 +72,7 @@ export default function AdminPropertiesPage() {
     }
 
     setProperties(data.properties || []);
+    setUnreviewedCount(Number(data.unreviewedCount) || 0);
   }
 
   useEffect(() => {
@@ -105,7 +116,6 @@ export default function AdminPropertiesPage() {
 
   async function updateStatus(id: number, status: PropertyStatus) {
     const token = localStorage.getItem("housein_token");
-
     if (!token) return;
 
     setActionId(id);
@@ -177,7 +187,14 @@ export default function AdminPropertiesPage() {
         return;
       }
 
+      const deletedProperty = properties.find((p) => p.id === id);
+
       setProperties((prev) => prev.filter((p) => p.id !== id));
+
+      if (deletedProperty && Number(deletedProperty.admin_reviewed) === 0) {
+        setUnreviewedCount((prev) => Math.max(0, prev - 1));
+      }
+
       setMessage("Property deleted successfully.");
       setMessageType("success");
     } catch (error) {
@@ -187,6 +204,25 @@ export default function AdminPropertiesPage() {
     } finally {
       setActionId(null);
     }
+  }
+
+  function openEdit(property: Property) {
+    if (Number(property.admin_reviewed) === 0) {
+      setProperties((prev) =>
+        prev.map((p) =>
+          p.id === property.id
+            ? {
+                ...p,
+                admin_reviewed: 1,
+                admin_reviewed_at: new Date().toISOString(),
+              }
+            : p
+        )
+      );
+      setUnreviewedCount((prev) => Math.max(0, prev - 1));
+    }
+
+    router.push(`/admin/properties/${property.id}/edit`);
   }
 
   function formatPrice(price: number) {
@@ -222,7 +258,8 @@ export default function AdminPropertiesPage() {
           </h1>
 
           <p className="mt-2 max-w-2xl text-sm leading-6 text-[var(--color-text-muted)]">
-            Review all listings, manage approval status, edit property details, and remove unwanted properties.
+            Review all listings, manage approval status, edit property details,
+            and remove unwanted properties.
           </p>
         </div>
 
@@ -237,6 +274,35 @@ export default function AdminPropertiesPage() {
           >
             Back to Dashboard
           </button>
+        </div>
+      </div>
+
+      <div className="mt-5 grid gap-4 sm:grid-cols-3">
+        <div className="rounded-2xl border border-[var(--color-border)] bg-white p-4">
+          <p className="text-xs font-bold uppercase tracking-widest text-[var(--color-text-muted)]">
+            Total Properties
+          </p>
+          <p className="mt-2 text-2xl font-bold text-[var(--color-text-main)]">
+            {properties.length}
+          </p>
+        </div>
+
+        <div className="rounded-2xl border border-[var(--color-primary)]/20 bg-[var(--color-primary)]/10 p-4">
+          <p className="text-xs font-bold uppercase tracking-widest text-[var(--color-primary-dark)]">
+            Unreviewed
+          </p>
+          <p className="mt-2 text-2xl font-bold text-[var(--color-primary-dark)]">
+            {unreviewedCount}
+          </p>
+        </div>
+
+        <div className="rounded-2xl border border-[var(--color-border)] bg-white p-4">
+          <p className="text-xs font-bold uppercase tracking-widest text-[var(--color-text-muted)]">
+            Reviewed
+          </p>
+          <p className="mt-2 text-2xl font-bold text-[var(--color-text-main)]">
+            {reviewedCount}
+          </p>
         </div>
       </div>
 
@@ -262,155 +328,183 @@ export default function AdminPropertiesPage() {
             No properties found.
           </div>
         ) : (
-          properties.map((property) => (
-            <div
-              key={property.id}
-              className="overflow-hidden rounded-2xl border border-[var(--color-border)] bg-white"
-            >
-              <div className="grid gap-0 lg:grid-cols-[320px_1fr]">
-                <div className="border-b border-[var(--color-border)] bg-gray-50 lg:border-b-0 lg:border-r">
-                  {property.image_url ? (
-                    <img
-                      src={property.image_url}
-                      alt={property.title}
-                      className="h-60 w-full object-cover lg:h-full"
-                    />
-                  ) : (
-                    <div className="flex h-60 items-center justify-center px-4 text-center text-sm text-[var(--color-text-muted)] lg:h-full">
-                      No property image uploaded
-                    </div>
-                  )}
-                </div>
+          properties.map((property) => {
+            const isUnreviewed = Number(property.admin_reviewed) === 0;
 
-                <div className="p-4 sm:p-5 md:p-6">
-                  <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
-                    <div className="min-w-0 flex-1">
-                      <div className="flex flex-wrap items-center gap-3">
-                        <h2 className="text-xl font-semibold text-[var(--color-text-main)]">
-                          {property.title}
-                        </h2>
+            return (
+              <div
+                key={property.id}
+                className={`overflow-hidden rounded-2xl border ${
+                  isUnreviewed
+                    ? "border-[var(--color-primary)]/25 bg-[var(--color-primary)]/10"
+                    : "border-[var(--color-border)] bg-white"
+                }`}
+              >
+                <div className="grid gap-0 lg:grid-cols-[320px_1fr]">
+                  <div
+                    className={`border-b lg:border-b-0 lg:border-r ${
+                      isUnreviewed
+                        ? "border-[var(--color-primary)]/15 bg-[var(--color-primary)]/5"
+                        : "border-[var(--color-border)] bg-gray-50"
+                    }`}
+                  >
+                    {property.image_url ? (
+                      <img
+                        src={property.image_url}
+                        alt={property.title}
+                        className="h-60 w-full object-cover lg:h-full"
+                      />
+                    ) : (
+                      <div className="flex h-60 items-center justify-center px-4 text-center text-sm text-[var(--color-text-muted)] lg:h-full">
+                        No property image uploaded
+                      </div>
+                    )}
+                  </div>
 
-                        <span
-                          className={`rounded-full px-3 py-1 text-xs font-bold uppercase ${statusClasses(
-                            property.status
-                          )}`}
-                        >
-                          {property.status}
-                        </span>
+                  <div className="p-4 sm:p-5 md:p-6">
+                    <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
+                      <div className="min-w-0 flex-1">
+                        <div className="flex flex-wrap items-center gap-3">
+                          <h2 className="text-xl font-semibold text-[var(--color-text-main)]">
+                            {property.title}
+                          </h2>
 
-                        {Boolean(property.featured) && (
-                          <span className="rounded-full bg-[var(--color-primary-dark)]/10 px-3 py-1 text-xs font-bold uppercase text-[var(--color-primary-dark)]">
-                            Featured
+                          <span
+                            className={`rounded-full px-3 py-1 text-xs font-bold uppercase ${statusClasses(
+                              property.status
+                            )}`}
+                          >
+                            {property.status}
                           </span>
+
+                          {Boolean(property.featured) && (
+                            <span className="rounded-full bg-[var(--color-primary-dark)]/10 px-3 py-1 text-xs font-bold uppercase text-[var(--color-primary-dark)]">
+                              Featured
+                            </span>
+                          )}
+
+                          {isUnreviewed && (
+                            <span className="rounded-full bg-[var(--color-primary-dark)] px-3 py-1 text-xs font-bold uppercase text-white">
+                              New / Unreviewed
+                            </span>
+                          )}
+                        </div>
+
+                        <p className="mt-3 text-sm text-[var(--color-text-muted)]">
+                          {property.area}, {property.city}, {property.state}
+                        </p>
+
+                        <p className="mt-3 text-lg font-bold text-[var(--color-text-main)]">
+                          {formatPrice(property.price)}
+                        </p>
+
+                        <div className="mt-4 grid gap-2 text-sm text-[var(--color-text-muted)] sm:grid-cols-2 xl:grid-cols-3">
+                          <span>Purpose: {property.purpose}</span>
+                          <span>Type: {property.property_type}</span>
+                          <span>Bedrooms: {property.bedrooms ?? 0}</span>
+                          <span>Bathrooms: {property.bathrooms ?? 0}</span>
+                          <span>Toilets: {property.toilets ?? 0}</span>
+                          <span>Parking: {property.parking_spaces ?? 0}</span>
+                          {property.size ? (
+                            <span>Size: {property.size}</span>
+                          ) : null}
+                        </div>
+
+                        {property.created_by_name && (
+                          <p className="mt-3 text-sm text-[var(--color-text-muted)]">
+                            Created by: {property.created_by_name}
+                          </p>
+                        )}
+
+                        {property.description && (
+                          <p className="mt-4 text-sm leading-6 text-[var(--color-text-muted)]">
+                            {property.description}
+                          </p>
+                        )}
+
+                        {property.video_url && (
+                          <div className="mt-5">
+                            <p className="mb-2 text-sm font-semibold text-[var(--color-text-main)]">
+                              Property Video
+                            </p>
+                            <video
+                              controls
+                              className="w-full rounded-xl border border-[var(--color-border)] bg-black"
+                            >
+                              <source src={property.video_url} />
+                              Your browser does not support the video tag.
+                            </video>
+                          </div>
                         )}
                       </div>
 
-                      <p className="mt-3 text-sm text-[var(--color-text-muted)]">
-                        {property.area}, {property.city}, {property.state}
-                      </p>
+                      <div className="flex w-full flex-col gap-2 xl:w-48">
+                        <button
+                          onClick={() => openEdit(property)}
+                          className="rounded-lg bg-[var(--color-primary-dark)] px-4 py-2 text-sm font-semibold text-white hover:opacity-90"
+                        >
+                          Edit Property
+                        </button>
 
-                      <p className="mt-3 text-lg font-bold text-[var(--color-text-main)]">
-                        {formatPrice(property.price)}
-                      </p>
+                        <button
+                          onClick={() => router.push(`/property/${property.slug}`)}
+                          className="rounded-lg border border-[var(--color-border)] px-4 py-2 text-sm font-semibold text-[var(--color-text-main)] hover:bg-gray-50"
+                        >
+                          View Listing
+                        </button>
 
-                      <div className="mt-4 grid gap-2 text-sm text-[var(--color-text-muted)] sm:grid-cols-2 xl:grid-cols-3">
-                        <span>Purpose: {property.purpose}</span>
-                        <span>Type: {property.property_type}</span>
-                        <span>Bedrooms: {property.bedrooms ?? 0}</span>
-                        <span>Bathrooms: {property.bathrooms ?? 0}</span>
-                        <span>Toilets: {property.toilets ?? 0}</span>
-                        <span>Parking: {property.parking_spaces ?? 0}</span>
-                        {property.size ? <span>Size: {property.size}</span> : null}
-                      </div>
-
-                      {property.created_by_name && (
-                        <p className="mt-3 text-sm text-[var(--color-text-muted)]">
-                          Created by: {property.created_by_name}
-                        </p>
-                      )}
-
-                      {property.description && (
-                        <p className="mt-4 text-sm leading-6 text-[var(--color-text-muted)]">
-                          {property.description}
-                        </p>
-                      )}
-
-                      {property.video_url && (
-                        <div className="mt-5">
-                          <p className="mb-2 text-sm font-semibold text-[var(--color-text-main)]">
-                            Property Video
-                          </p>
-                          <video
-                            controls
-                            className="w-full rounded-xl border border-[var(--color-border)] bg-black"
+                        {property.status !== "approved" && (
+                          <button
+                            onClick={() => updateStatus(property.id, "approved")}
+                            disabled={actionId === property.id}
+                            className="rounded-lg bg-green-600 px-4 py-2 text-sm font-semibold text-white hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-70"
                           >
-                            <source src={property.video_url} />
-                            Your browser does not support the video tag.
-                          </video>
-                        </div>
-                      )}
-                    </div>
+                            {actionId === property.id
+                              ? "Processing..."
+                              : "Approve"}
+                          </button>
+                        )}
 
-                    <div className="flex w-full flex-col gap-2 xl:w-48">
-                      <button
-                        onClick={() =>
-                          router.push(`/admin/properties/${property.id}/edit`)
-                        }
-                        className="rounded-lg bg-[var(--color-primary-dark)] px-4 py-2 text-sm font-semibold text-white hover:opacity-90"
-                      >
-                        Edit Property
-                      </button>
+                        {property.status !== "rejected" && (
+                          <button
+                            onClick={() => updateStatus(property.id, "rejected")}
+                            disabled={actionId === property.id}
+                            className="rounded-lg bg-red-600 px-4 py-2 text-sm font-semibold text-white hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-70"
+                          >
+                            {actionId === property.id
+                              ? "Processing..."
+                              : "Reject"}
+                          </button>
+                        )}
 
-                      <button
-                        onClick={() => router.push(`/property/${property.slug}`)}
-                        className="rounded-lg border border-[var(--color-border)] px-4 py-2 text-sm font-semibold text-[var(--color-text-main)] hover:bg-gray-50"
-                      >
-                        View Listing
-                      </button>
+                        {property.status !== "pending" && (
+                          <button
+                            onClick={() => updateStatus(property.id, "pending")}
+                            disabled={actionId === property.id}
+                            className="rounded-lg bg-yellow-500 px-4 py-2 text-sm font-semibold text-white hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-70"
+                          >
+                            {actionId === property.id
+                              ? "Processing..."
+                              : "Mark Pending"}
+                          </button>
+                        )}
 
-                      {property.status !== "approved" && (
                         <button
-                          onClick={() => updateStatus(property.id, "approved")}
+                          onClick={() => deleteProperty(property.id)}
                           disabled={actionId === property.id}
-                          className="rounded-lg bg-green-600 px-4 py-2 text-sm font-semibold text-white hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-70"
+                          className="mt-2 rounded-lg border border-red-200 px-4 py-2 text-sm font-semibold text-red-600 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-70"
                         >
-                          {actionId === property.id ? "Processing..." : "Approve"}
+                          {actionId === property.id
+                            ? "Processing..."
+                            : "Delete"}
                         </button>
-                      )}
-
-                      {property.status !== "rejected" && (
-                        <button
-                          onClick={() => updateStatus(property.id, "rejected")}
-                          disabled={actionId === property.id}
-                          className="rounded-lg bg-red-600 px-4 py-2 text-sm font-semibold text-white hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-70"
-                        >
-                          {actionId === property.id ? "Processing..." : "Reject"}
-                        </button>
-                      )}
-
-                      {property.status !== "pending" && (
-                        <button
-                          onClick={() => updateStatus(property.id, "pending")}
-                          disabled={actionId === property.id}
-                          className="rounded-lg bg-yellow-500 px-4 py-2 text-sm font-semibold text-white hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-70"
-                        >
-                          {actionId === property.id ? "Processing..." : "Mark Pending"}
-                        </button>
-                      )}
-
-                      <button
-                        onClick={() => deleteProperty(property.id)}
-                        disabled={actionId === property.id}
-                        className="mt-2 rounded-lg border border-red-200 px-4 py-2 text-sm font-semibold text-red-600 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-70"
-                      >
-                        {actionId === property.id ? "Processing..." : "Delete"}
-                      </button>
+                      </div>
                     </div>
                   </div>
                 </div>
               </div>
-            </div>
-          ))
+            );
+          })
         )}
       </div>
     </main>
