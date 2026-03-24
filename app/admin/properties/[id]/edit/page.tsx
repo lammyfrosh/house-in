@@ -597,42 +597,36 @@ export default function AdminEditPropertyPage() {
               </div>
 
               {imagePreviews.length > 0 && (
-                <div className="mt-4">
-                  <div className="mb-3 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-xs text-amber-700">
-                    New images selected. You can remove any one before saving.
-                    With your current backend structure, the first image becomes
-                    the main saved image.
-                  </div>
+  <div className="mt-4">
+    <div className="grid grid-cols-2 gap-3">
+      {imagePreviews.map((src, index) => (
+        <div
+          key={`${src}-${index}`}
+          className="relative overflow-hidden rounded-2xl border border-[var(--color-border)] bg-[#f8fafc]"
+        >
+          <img
+            src={src}
+            alt={`Selected image ${index + 1}`}
+            className="h-36 w-full object-cover"
+          />
 
-                  <div className="grid grid-cols-2 gap-3">
-                    {imagePreviews.map((src, index) => (
-                      <div
-                        key={`${src}-${index}`}
-                        className="relative overflow-hidden rounded-2xl border border-[var(--color-border)] bg-[#f8fafc]"
-                      >
-                        <img
-                          src={src}
-                          alt={`Selected image ${index + 1}`}
-                          className="h-36 w-full object-cover"
-                        />
+          <button
+            type="button"
+            onClick={() => removeSelectedImage(index)}
+            className="absolute right-2 top-2 flex h-8 w-8 items-center justify-center rounded-full bg-black/70 text-white shadow-sm transition hover:bg-black/80"
+            aria-label={`Remove image ${index + 1}`}
+          >
+            <X size={14} />
+          </button>
 
-                        <button
-                          type="button"
-                          onClick={() => removeSelectedImage(index)}
-                          className="absolute right-2 top-2 flex h-8 w-8 items-center justify-center rounded-full bg-black/70 text-white shadow-sm transition hover:bg-black/80"
-                          aria-label={`Remove image ${index + 1}`}
-                        >
-                          <X size={14} />
-                        </button>
-
-                        <div className="bg-white px-3 py-2 text-xs font-semibold text-[var(--color-text-main)]">
-                          {index === 0 ? "Primary image" : `Image ${index + 1}`}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
+          <div className="bg-white px-3 py-2 text-xs font-semibold text-[var(--color-text-main)]">
+            {index === 0 ? "Primary image" : `Image ${index + 1}`}
+          </div>
+        </div>
+      ))}
+    </div>
+  </div>
+)}
             </section>
 
             <section className="rounded-3xl border border-[var(--color-border)] bg-white p-5 shadow-sm sm:p-6">
