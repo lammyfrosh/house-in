@@ -24,7 +24,6 @@ export type Property = {
   created_by_name?: string;
   gallery_images?: string[];
 
-  // compatibility helpers for old UI pieces
   imageUrl?: string;
   propertyType?: string;
   listedAtText?: string;

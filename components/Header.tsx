@@ -1,7 +1,7 @@
 "use client";
 
-import Link from "next/link";
 import Image from "next/image";
+import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { Menu, X, UserCircle2, LogOut, PlusCircle } from "lucide-react";
@@ -71,7 +71,7 @@ export default function Header() {
 
   const roleLabel =
     normalizedRole === "superadmin" || normalizedRole === "super_admin"
-      ? "Super Admin"
+      ? "Super"
       : normalizedRole === "admin"
       ? "Admin"
       : "User";
@@ -98,13 +98,13 @@ export default function Header() {
 
   return (
     <header className="sticky top-0 z-50 border-b border-white/10 bg-[var(--color-primary-dark)] text-white shadow-sm">
-      <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
+      <div className="mx-auto flex max-w-7xl items-center justify-between gap-6 px-4 py-4 sm:px-6 lg:px-8">
         <Link
           href="/"
-          className="flex items-center gap-3 text-white"
+          className="shrink-0"
           aria-label="House-In Home"
         >
-          <div className="relative h-11 w-[170px] sm:h-12 sm:w-[200px]">
+          <div className="relative h-12 w-[190px] sm:h-14 sm:w-[240px]">
             <Image
               src="/logo-light.png"
               alt="House-In"
@@ -144,10 +144,10 @@ export default function Header() {
 
               <Link
                 href={addPropertyHref}
-                className="inline-flex items-center gap-2 rounded-xl bg-white px-4 py-2 text-sm font-semibold text-[#0f766e] transition hover:opacity-90"
+                className="inline-flex items-center gap-2 rounded-xl bg-white px-4 py-2 text-sm font-semibold text-[var(--color-primary-dark)] transition hover:opacity-90"
               >
                 <PlusCircle size={16} />
-                Add Property
+                <span>Add Property</span>
               </Link>
 
               <div className="inline-flex items-center gap-2 rounded-xl border border-white/20 px-4 py-2 text-sm font-semibold text-white">
@@ -174,7 +174,7 @@ export default function Header() {
 
               <Link
                 href="/register"
-                className="rounded-xl bg-white px-4 py-2 text-sm font-semibold text-[#0f766e] transition hover:opacity-90"
+                className="rounded-xl bg-white px-4 py-2 text-sm font-semibold text-[var(--color-primary-dark)] transition hover:opacity-90"
               >
                 Sign Up
               </Link>
@@ -199,7 +199,7 @@ export default function Header() {
         <div className="border-t border-white/10 bg-[var(--color-primary-dark)] md:hidden">
           <div className="mx-auto max-w-7xl px-4 py-4 sm:px-6">
             <div className="mb-4">
-              <div className="relative h-10 w-[170px]">
+              <div className="relative h-10 w-[180px]">
                 <Image
                   src="/logo-light.png"
                   alt="House-In"
@@ -231,7 +231,7 @@ export default function Header() {
 
                   <Link
                     href={addPropertyHref}
-                    className="block rounded-xl bg-white px-3 py-3 text-sm font-semibold text-[#0f766e] transition hover:opacity-90"
+                    className="block rounded-xl bg-white px-3 py-3 text-sm font-semibold text-[var(--color-primary-dark)] transition hover:opacity-90"
                   >
                     Add Property
                   </Link>
@@ -259,7 +259,7 @@ export default function Header() {
 
                   <Link
                     href="/register"
-                    className="block rounded-xl bg-white px-3 py-3 text-sm font-semibold text-[#0f766e] transition hover:opacity-90"
+                    className="block rounded-xl bg-white px-3 py-3 text-sm font-semibold text-[var(--color-primary-dark)] transition hover:opacity-90"
                   >
                     Sign Up
                   </Link>

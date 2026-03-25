@@ -1,19 +1,7 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import Image from "next/image";
-import {
-  Bath,
-  BedDouble,
-  MapPin,
-  SearchX,
-  SlidersHorizontal,
-} from "lucide-react";
-import { MapContainer, Marker, Popup, TileLayer, useMap } from "react-leaflet";
-import L from "leaflet";
-import "leaflet/dist/leaflet.css";
-import { formatNaira } from "@/lib/money";
+import { Filter, MapPin, BedDouble, Bath } from "lucide-react";
 
 export type MapProperty = {
   id: string;
@@ -28,46 +16,49 @@ export type MapProperty = {
   area: string;
   city: string;
   imageUrl: string;
-  listedAtText: string;
+  listedAtText?: string;
   lat: number;
   lng: number;
 };
 
-type SearchSummary = {
-  state: string;
-  area: string;
-  purpose: string;
-  propertyType: string;
-  beds: string;
-  baths: string;
-  minPrice: number;
-  maxPrice: number;
+export type SearchSummary = {
+  state?: string;
+  area?: string;
+  purpose?: string;
+  propertyType?: string;
+  beds?: string;
+  baths?: string;
+  minPrice?: number;
+  maxPrice?: number;
 };
 
-const markerIcon = new L.Icon({
-  iconUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
-  iconRetinaUrl:
-    "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
-  shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
-  iconSize: [25, 41],
-  iconAnchor: [12, 41],
-});
-
-function FlyToSelected({ lat, lng }: { lat: number; lng: number }) {
-  const map = useMap();
-
-  useEffect(() => {
-    map.flyTo([lat, lng], 12, { duration: 1.2 });
-  }, [lat, lng, map]);
-
-  return null;
+function money(value: number) {
+  return new Intl.NumberFormat("en-NG", {
+    style: "currency",
+    currency: "NGN",
+    maximumFractionDigits: 0,
+  }).format(value || 0);
 }
 
-function purposeLabel(value: string) {
-  if (value === "rent") return "For Rent";
-  if (value === "sale") return "For Sale";
-  if (value === "shortlet") return "Shortlet";
-  return value;
+function purposeLabel(purpose: string) {
+  if (purpose === "rent") return "For Rent";
+  if (purpose === "sale") return "For Sale";
+  return "Shortlet";
+}
+
+function buildFilterChips(summary: SearchSummary) {
+  const chips: string[] = [];
+
+  if (summary.state) chips.push(`State: ${summary.state}`);
+  if (summary.area) chips.push(`Location: ${summary.area}`);
+  if (summary.purpose) chips.push(`Purpose: ${purposeLabel(summary.purpose)}`);
+  if (summary.propertyType) chips.push(`Type: ${summary.propertyType}`);
+  if (summary.beds) chips.push(`Beds: ${summary.beds}+`);
+  if (summary.baths) chips.push(`Baths: ${summary.baths}+`);
+  if (summary.minPrice) chips.push(`Min: ${money(summary.minPrice)}`);
+  if (summary.maxPrice) chips.push(`Max: ${money(summary.maxPrice)}`);
+
+  return chips;
 }
 
 export default function SearchResultsMapClient({
@@ -79,264 +70,168 @@ export default function SearchResultsMapClient({
   defaultCenter: { lat: number; lng: number };
   searchSummary: SearchSummary;
 }) {
-  const [selectedId, setSelectedId] = useState<string | null>(
-    results[0]?.id ?? null
-  );
-
-  const selectedProperty = useMemo(
-    () => results.find((p) => p.id === selectedId) ?? results[0] ?? null,
-    [results, selectedId]
-  );
-
-  useEffect(() => {
-    if (results.length > 0 && !selectedId) {
-      setSelectedId(results[0].id);
-    }
-  }, [results, selectedId]);
-
-  const chips = [
-    searchSummary.purpose ? purposeLabel(searchSummary.purpose) : "",
-    searchSummary.state || "",
-    searchSummary.area ? `Area: ${searchSummary.area}` : "",
-    searchSummary.propertyType ? `Type: ${searchSummary.propertyType}` : "",
-    searchSummary.beds ? `${searchSummary.beds}+ Beds` : "",
-    searchSummary.baths ? `${searchSummary.baths}+ Baths` : "",
-    searchSummary.minPrice ? `Min ${formatNaira(searchSummary.minPrice)}` : "",
-    searchSummary.maxPrice ? `Max ${formatNaira(searchSummary.maxPrice)}` : "",
-  ].filter(Boolean);
+  const activeFilters = buildFilterChips(searchSummary);
 
   return (
-    <main className="bg-[#fafafa]">
-      <div className="grid lg:grid-cols-[1.05fr_0.95fr]">
-        <section className="hidden lg:block">
-          <div className="sticky top-[72px] h-[calc(100vh-72px)] border-r border-[var(--color-border)] bg-white">
-            <div className="absolute left-4 top-4 z-[500] rounded-2xl bg-white/95 px-4 py-3 shadow-lg backdrop-blur">
-              <p className="text-xs font-extrabold uppercase tracking-widest text-[var(--color-primary-dark)]">
-                Search Map View
+    <main className="bg-[#f7f9fc]">
+      <section className="border-b border-[var(--color-border)] bg-white">
+        <div className="mx-auto max-w-7xl px-4 py-8">
+          <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
+            <div className="max-w-3xl">
+              <p className="text-xs font-extrabold uppercase tracking-[0.25em] text-[var(--color-primary-dark)]">
+                Property Search
               </p>
-              <p className="mt-1 text-sm font-semibold text-[var(--color-text-main)]">
-                {results.length} listing{results.length === 1 ? "" : "s"} found
+
+              <h1 className="mt-2 text-3xl font-bold text-[var(--color-text-main)] sm:text-4xl">
+                Results for Your Search
+              </h1>
+
+              <p className="mt-3 text-sm leading-7 text-[var(--color-text-muted)]">
+                Browse all matching listings and highlight approximate locations
+                on the map.
               </p>
-            </div>
 
-            <MapContainer
-              center={[defaultCenter.lat, defaultCenter.lng]}
-              zoom={11}
-              scrollWheelZoom
-              className="h-full w-full"
-            >
-              <TileLayer
-                {...({
-                  url: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
-                  attribution:
-                    '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
-                } as any)}
-              />
-
-              {selectedProperty && (
-                <FlyToSelected
-                  lat={selectedProperty.lat}
-                  lng={selectedProperty.lng}
-                />
-              )}
-
-              {results.map((property) => (
-                <Marker
-                  key={property.id}
-                  position={[property.lat, property.lng]}
-                  icon={markerIcon}
-                  eventHandlers={{
-                    click: () => setSelectedId(property.id),
-                  }}
-                >
-                  <Popup>
-                    <div className="min-w-[180px]">
-                      <p className="font-semibold">{property.title}</p>
-                      <p className="mt-1 text-sm text-gray-600">
-                        {property.area}, {property.city}, {property.state}
-                      </p>
-                      <p className="mt-2 font-bold">
-                        {formatNaira(property.price)}
-                      </p>
-                    </div>
-                  </Popup>
-                </Marker>
-              ))}
-            </MapContainer>
-          </div>
-        </section>
-
-        <section className="min-h-screen">
-          <div className="border-b border-[var(--color-border)] bg-white px-4 py-4 sm:px-5">
-            <div className="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
-              <div>
-                <p className="text-xs font-extrabold uppercase tracking-widest text-[var(--color-primary-dark)]">
-                  Property Search
-                </p>
-                <h1 className="mt-1 text-2xl font-bold text-[var(--color-text-main)]">
-                  Results for Your Search
-                </h1>
-                <p className="mt-1 text-sm text-[var(--color-text-muted)]">
-                  Browse all matching listings and highlight approximate
-                  locations on the map.
-                </p>
-              </div>
-
-              <div className="flex flex-wrap gap-2">
-                <Link
-                  href="/"
-                  className="rounded-xl border border-[var(--color-border)] px-4 py-2 text-sm font-semibold text-[var(--color-text-main)] hover:bg-gray-50"
-                >
-                  Back Home
-                </Link>
-                <Link
-                  href="/search"
-                  className="rounded-xl bg-[var(--color-primary-dark)] px-4 py-2 text-sm font-semibold text-white hover:opacity-90"
-                >
-                  View All
-                </Link>
-              </div>
-            </div>
-
-            <div className="mt-4 flex flex-wrap items-center gap-2">
-              <span className="inline-flex items-center gap-2 rounded-full bg-gray-100 px-3 py-1 text-xs font-semibold text-gray-700">
-                <SlidersHorizontal size={14} />
-                Active Filters
-              </span>
-
-              {chips.length === 0 ? (
-                <span className="rounded-full bg-[var(--color-primary)]/20 px-3 py-1 text-xs font-semibold text-[var(--color-primary-dark)]">
-                  No filters applied
+              <div className="mt-5 flex flex-wrap items-center gap-3">
+                <span className="inline-flex items-center gap-2 rounded-full bg-slate-100 px-4 py-2 text-sm font-semibold text-slate-700">
+                  <Filter size={16} />
+                  Active Filters
                 </span>
-              ) : (
-                chips.map((chip) => (
-                  <span
-                    key={chip}
-                    className="rounded-full bg-[var(--color-primary)]/20 px-3 py-1 text-xs font-semibold text-[var(--color-primary-dark)]"
-                  >
-                    {chip}
+
+                {activeFilters.length > 0 ? (
+                  activeFilters.map((chip) => (
+                    <span
+                      key={chip}
+                      className="rounded-full bg-[var(--color-primary)]/15 px-4 py-2 text-sm font-semibold text-[var(--color-primary-dark)]"
+                    >
+                      {chip}
+                    </span>
+                  ))
+                ) : (
+                  <span className="rounded-full bg-slate-100 px-4 py-2 text-sm font-semibold text-slate-600">
+                    No filters applied
                   </span>
-                ))
-              )}
+                )}
+              </div>
+            </div>
+
+            <div className="flex flex-col gap-3 sm:flex-row lg:flex-col">
+              <Link
+                href="/"
+                className="inline-flex items-center justify-center rounded-2xl border border-[var(--color-border)] px-5 py-3 text-sm font-semibold text-[var(--color-text-main)] transition hover:bg-gray-50"
+              >
+                Back Home
+              </Link>
+
+              <Link
+                href="/search"
+                className="inline-flex items-center justify-center rounded-2xl bg-[var(--color-primary-dark)] px-5 py-3 text-sm font-semibold text-white transition hover:opacity-95"
+              >
+                View All
+              </Link>
             </div>
           </div>
+        </div>
+      </section>
 
-          <div className="px-4 py-5 sm:px-5">
-            {results.length === 0 ? (
-              <div className="rounded-2xl border border-[var(--color-border)] bg-white p-10 text-center">
-                <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-[var(--color-primary)]/20 text-[var(--color-primary-dark)]">
-                  <SearchX size={24} />
+      <section className="mx-auto max-w-7xl px-4 py-6">
+        <div className="rounded-2xl border border-[var(--color-border)] bg-white px-5 py-4 text-lg font-semibold text-[var(--color-text-main)] shadow-sm">
+          Showing {results.length} {results.length === 1 ? "property" : "properties"}
+        </div>
+      </section>
+
+      <section className="mx-auto grid max-w-7xl gap-6 px-4 pb-14 xl:grid-cols-[1.25fr_0.75fr]">
+        <div className="space-y-5">
+          {results.length === 0 ? (
+            <div className="rounded-3xl border border-[var(--color-border)] bg-white p-8 text-center shadow-sm">
+              <h2 className="text-xl font-bold text-[var(--color-text-main)]">
+                No matching properties found
+              </h2>
+              <p className="mt-2 text-sm text-[var(--color-text-muted)]">
+                Try adjusting your state, location, price, or property filters.
+              </p>
+            </div>
+          ) : (
+            results.map((property) => (
+              <Link
+                key={property.id}
+                href={`/property/${property.slug}`}
+                className="overflow-hidden rounded-3xl border border-[var(--color-border)] bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-md"
+              >
+                <div className="grid gap-0 md:grid-cols-[260px_1fr]">
+                  <div className="bg-slate-100">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={property.imageUrl}
+                      alt={property.title}
+                      className="h-60 w-full object-cover md:h-full"
+                    />
+                  </div>
+
+                  <div className="p-5">
+                    <div className="flex flex-wrap items-center gap-3">
+                      <span className="rounded-full bg-[var(--color-primary-dark)]/10 px-3 py-1 text-xs font-bold uppercase text-[var(--color-primary-dark)]">
+                        {purposeLabel(property.purpose)}
+                      </span>
+
+                      <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-bold uppercase text-slate-600">
+                        {property.propertyType}
+                      </span>
+                    </div>
+
+                    <h2 className="mt-3 text-xl font-semibold text-[var(--color-text-main)]">
+                      {property.title}
+                    </h2>
+
+                    <p className="mt-2 flex items-center gap-2 text-sm text-[var(--color-text-muted)]">
+                      <MapPin size={16} />
+                      {property.area}, {property.city}, {property.state}
+                    </p>
+
+                    <p className="mt-4 text-2xl font-bold text-[var(--color-text-main)]">
+                      {money(property.price)}
+                    </p>
+
+                    <div className="mt-4 flex flex-wrap gap-4 text-sm text-[var(--color-text-muted)]">
+                      <span className="inline-flex items-center gap-2">
+                        <BedDouble size={16} />
+                        {property.bedrooms} Beds
+                      </span>
+
+                      <span className="inline-flex items-center gap-2">
+                        <Bath size={16} />
+                        {property.bathrooms} Baths
+                      </span>
+                    </div>
+                  </div>
                 </div>
-                <h2 className="mt-4 text-xl font-bold text-[var(--color-text-main)]">
-                  No properties found
-                </h2>
-                <p className="mx-auto mt-2 max-w-md text-sm text-[var(--color-text-muted)]">
-                  Try broadening your search area, changing the property type, or
-                  adjusting the price range.
-                </p>
-              </div>
-            ) : (
-              <>
-                <div className="mb-4 rounded-2xl border border-[var(--color-border)] bg-white px-4 py-3">
-                  <p className="text-sm font-semibold text-[var(--color-text-main)]">
-                    Showing {results.length} propert
-                    {results.length === 1 ? "y" : "ies"}
-                  </p>
-                </div>
+              </Link>
+            ))
+          )}
+        </div>
 
-                <div className="space-y-4">
-                  {results.map((property) => {
-                    const active = property.id === selectedProperty?.id;
-                    const badge =
-                      property.purpose === "rent"
-                        ? "For Rent"
-                        : property.purpose === "sale"
-                        ? "For Sale"
-                        : "Shortlet";
+        <aside className="rounded-3xl border border-[var(--color-border)] bg-white p-6 shadow-sm">
+          <h2 className="text-lg font-bold text-[var(--color-text-main)]">
+            Approximate Map Area
+          </h2>
 
-                    return (
-                      <Link
-                        key={property.id}
-                        href={`/property/${encodeURIComponent(property.slug)}`}
-                        onMouseEnter={() => setSelectedId(property.id)}
-                        className={`block overflow-hidden rounded-2xl border bg-white transition duration-300 hover:shadow-lg ${
-                          active
-                            ? "border-[var(--color-primary-dark)] shadow-md"
-                            : "border-[var(--color-border)]"
-                        }`}
-                      >
-                        <div className="grid md:grid-cols-[260px_1fr]">
-                          <div className="relative min-h-[220px] overflow-hidden">
-                            <Image
-                              src={property.imageUrl}
-                              alt={property.title}
-                              fill
-                              unoptimized
-                              className="object-cover"
-                            />
-                          </div>
+          <p className="mt-2 text-sm leading-6 text-[var(--color-text-muted)]">
+            Centered around:
+          </p>
 
-                          <div className="p-5">
-                            <div className="flex flex-wrap items-start justify-between gap-3">
-                              <div className="min-w-0">
-                                <p className="text-2xl font-bold text-[var(--color-text-main)]">
-                                  {formatNaira(property.price)}
-                                </p>
-
-                                <h3 className="mt-2 line-clamp-2 text-lg font-semibold text-[var(--color-text-main)]">
-                                  {property.title}
-                                </h3>
-
-                                <p className="mt-2 flex items-center gap-2 text-sm text-[var(--color-text-muted)]">
-                                  <MapPin size={16} />
-                                  {property.area}, {property.city},{" "}
-                                  {property.state}
-                                </p>
-                              </div>
-
-                              <span className="inline-flex h-8 items-center justify-center rounded-full bg-[var(--color-primary-dark)] px-4 text-xs font-extrabold uppercase tracking-widest text-white">
-                                {badge}
-                              </span>
-                            </div>
-
-                            <div className="mt-5 flex flex-wrap items-center gap-5 text-sm text-gray-700">
-                              <span className="inline-flex items-center gap-2">
-                                <BedDouble size={16} />
-                                {property.bedrooms} bed
-                              </span>
-
-                              <span className="inline-flex items-center gap-2">
-                                <Bath size={16} />
-                                {property.bathrooms} bath
-                              </span>
-
-                              <span className="text-xs text-gray-500">
-                                {property.listedAtText}
-                              </span>
-                            </div>
-
-                            <div className="mt-5 flex items-center justify-between">
-                              <p className="text-sm text-[var(--color-primary-dark)]">
-                                {active
-                                  ? "Highlighted on map"
-                                  : "Hover to show on map"}
-                              </p>
-
-                              <span className="text-sm font-semibold text-[var(--color-primary-dark)]">
-                                View Property →
-                              </span>
-                            </div>
-                          </div>
-                        </div>
-                      </Link>
-                    );
-                  })}
-                </div>
-              </>
-            )}
+          <div className="mt-4 rounded-2xl bg-slate-50 p-4 text-sm text-[var(--color-text-main)]">
+            <p>
+              <span className="font-semibold">Latitude:</span> {defaultCenter.lat}
+            </p>
+            <p className="mt-2">
+              <span className="font-semibold">Longitude:</span> {defaultCenter.lng}
+            </p>
           </div>
-        </section>
-      </div>
+
+          <div className="mt-5 rounded-2xl bg-[var(--color-primary)]/10 p-4 text-sm text-[var(--color-primary-dark)]">
+            The search filters above are active on this results page.
+          </div>
+        </aside>
+      </section>
     </main>
   );
 }

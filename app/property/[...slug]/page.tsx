@@ -87,14 +87,14 @@ Thank you.`;
   return (
     <main className="bg-[#f7f9fc]">
       <section className="border-b border-[var(--color-border)] bg-white">
-        <div className="mx-auto max-w-6xl px-4 py-8">
+        <div className="mx-auto max-w-7xl px-4 py-8">
           <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
             <div className="min-w-0 flex-1">
               <span className="inline-flex rounded-full bg-[var(--color-primary-dark)] px-4 py-1 text-xs font-bold text-white">
                 {badge}
               </span>
 
-              <h1 className="mt-4 text-3xl font-bold text-[var(--color-text-main)] sm:text-4xl">
+              <h1 className="mt-4 text-3xl font-bold text-[var(--color-text-main)] sm:text-4xl xl:text-5xl">
                 {property.title}
               </h1>
 
@@ -116,69 +116,48 @@ Thank you.`;
         </div>
       </section>
 
-      <section className="mx-auto grid max-w-6xl gap-8 px-4 py-8 lg:grid-cols-[1fr_340px]">
+      <section className="mx-auto grid max-w-7xl gap-6 px-4 py-8 xl:grid-cols-[1.75fr_0.95fr_1.05fr]">
+        <div>
+          <PropertyGallery title={property.title} images={galleryImages} />
+        </div>
+
         <div className="space-y-6">
-          <div className="grid gap-6 xl:grid-cols-[1.2fr_0.8fr]">
-            <PropertyGallery
-              title={property.title}
-              images={galleryImages}
-            />
+          <div className="rounded-3xl border border-[var(--color-border)] bg-white p-6 shadow-sm">
+            <p className="flex items-center gap-2 text-xs font-extrabold uppercase tracking-widest text-gray-500">
+              <BadgeDollarSign size={14} />
+              Property Details
+            </p>
 
-            <div className="space-y-6">
-              <div className="rounded-3xl border border-[var(--color-border)] bg-white p-6 shadow-sm">
-                <p className="flex items-center gap-2 text-xs font-extrabold uppercase tracking-widest text-gray-500">
-                  <BadgeDollarSign size={14} />
-                  Property Details
-                </p>
+            <div className="mt-6 grid gap-4 text-sm text-gray-700">
+              <span className="flex items-center gap-2">
+                <BedDouble size={18} />
+                {property.bedrooms ?? 0} Bedrooms
+              </span>
 
-                <div className="mt-6 grid gap-4 text-sm text-gray-700 sm:grid-cols-2 xl:grid-cols-1">
-                  <span className="flex items-center gap-2">
-                    <BedDouble size={18} />
-                    {property.bedrooms ?? 0} Bedrooms
-                  </span>
+              <span className="flex items-center gap-2">
+                <Bath size={18} />
+                {property.bathrooms ?? 0} Bathrooms
+              </span>
 
-                  <span className="flex items-center gap-2">
-                    <Bath size={18} />
-                    {property.bathrooms ?? 0} Bathrooms
-                  </span>
+              <span className="flex items-center gap-2">
+                <Toilet size={18} />
+                {property.toilets ?? 0} Toilets
+              </span>
 
-                  <span className="flex items-center gap-2">
-                    <Toilet size={18} />
-                    {property.toilets ?? 0} Toilets
-                  </span>
+              <span className="flex items-center gap-2">
+                <Car size={18} />
+                {property.parking_spaces ?? 0} Parking Spaces
+              </span>
 
-                  <span className="flex items-center gap-2">
-                    <Car size={18} />
-                    {property.parking_spaces ?? 0} Parking Spaces
-                  </span>
+              <span className="flex items-center gap-2">
+                <Ruler size={18} />
+                {property.size || "N/A"}
+              </span>
 
-                  <span className="flex items-center gap-2">
-                    <Ruler size={18} />
-                    {property.size || "N/A"}
-                  </span>
-
-                  <span className="flex items-center gap-2">
-                    <BadgeDollarSign size={18} />
-                    {property.property_type}
-                  </span>
-                </div>
-              </div>
-
-              {property.video_url && (
-                <div className="rounded-3xl border border-[var(--color-border)] bg-white p-6 shadow-sm">
-                  <h2 className="text-lg font-bold text-[var(--color-text-main)]">
-                    Property Video
-                  </h2>
-
-                  <video
-                    controls
-                    className="mt-4 w-full rounded-2xl border border-[var(--color-border)] bg-black"
-                  >
-                    <source src={property.video_url} />
-                    Your browser does not support the video tag.
-                  </video>
-                </div>
-              )}
+              <span className="flex items-center gap-2">
+                <BadgeDollarSign size={18} />
+                {property.property_type}
+              </span>
             </div>
           </div>
 
@@ -192,6 +171,22 @@ Thank you.`;
                 "No description available for this property yet."}
             </p>
           </div>
+
+          {property.video_url && (
+            <div className="rounded-3xl border border-[var(--color-border)] bg-white p-6 shadow-sm">
+              <h2 className="text-lg font-bold text-[var(--color-text-main)]">
+                Property Video
+              </h2>
+
+              <video
+                controls
+                className="mt-4 w-full rounded-2xl border border-[var(--color-border)] bg-black"
+              >
+                <source src={property.video_url} />
+                Your browser does not support the video tag.
+              </video>
+            </div>
+          )}
         </div>
 
         <aside className="h-fit rounded-3xl border border-[var(--color-border)] bg-white p-6 shadow-sm">
@@ -231,7 +226,7 @@ Thank you.`;
       </section>
 
       {similar.length > 0 && (
-        <section className="mx-auto max-w-6xl px-4 pb-16">
+        <section className="mx-auto max-w-7xl px-4 pb-16">
           <div className="mb-5 flex items-center justify-between">
             <h2 className="text-xl font-semibold text-[var(--color-text-main)]">
               Similar Properties

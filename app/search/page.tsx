@@ -1,5 +1,6 @@
 import SearchResultsMapClient, {
   type MapProperty,
+  type SearchSummary,
 } from "@/components/SearchResultsMapClient";
 import { getApprovedProperties } from "@/lib/api";
 
@@ -15,7 +16,7 @@ function toNumber(v: string) {
 }
 
 function norm(s: string) {
-  return s.trim().toLowerCase();
+  return String(s || "").trim().toLowerCase();
 }
 
 const AREA_COORDS: Record<string, { lat: number; lng: number }> = {
@@ -46,8 +47,8 @@ const STATE_CENTERS: Record<string, { lat: number; lng: number }> = {
 };
 
 function getCoords(area: string, city: string, state: string) {
-  const areaKey = norm(area || "");
-  const cityKey = norm(city || "");
+  const areaKey = norm(area);
+  const cityKey = norm(city);
 
   if (AREA_COORDS[areaKey]) return AREA_COORDS[areaKey];
   if (AREA_COORDS[cityKey]) return AREA_COORDS[cityKey];
@@ -76,20 +77,20 @@ export default async function SearchPage({
   let results = await getApprovedProperties();
 
   if (purpose === "rent" || purpose === "sale" || purpose === "shortlet") {
-    results = results.filter((p) => p.purpose === purpose);
+    results = results.filter((p) => norm(p.purpose) === norm(purpose));
   }
 
   if (state) {
-    results = results.filter((p) => norm(p.state || "") === norm(state));
+    results = results.filter((p) => norm(p.state) === norm(state));
   }
 
   if (area) {
     const q = norm(area);
     results = results.filter(
       (p) =>
-        norm(p.area || "").includes(q) ||
-        norm(p.city || "").includes(q) ||
-        norm(p.state || "").includes(q)
+        norm(p.area).includes(q) ||
+        norm(p.city).includes(q) ||
+        norm(p.state).includes(q)
     );
   }
 
@@ -159,20 +160,22 @@ export default async function SearchPage({
       ? STATE_CENTERS[state]
       : { lat: 6.5244, lng: 3.3792 };
 
+  const summary: SearchSummary = {
+    state,
+    area,
+    purpose,
+    propertyType,
+    beds: bedsStr,
+    baths: bathsStr,
+    minPrice,
+    maxPrice,
+  };
+
   return (
     <SearchResultsMapClient
       results={mappedResults}
       defaultCenter={defaultCenter}
-      searchSummary={{
-        state,
-        area,
-        purpose,
-        propertyType,
-        beds: bedsStr,
-        baths: bathsStr,
-        minPrice,
-        maxPrice,
-      }}
+      searchSummary={summary}
     />
   );
 }
