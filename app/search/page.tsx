@@ -4,15 +4,8 @@ import SearchResultsMapClient, {
 } from "@/components/SearchResultsMapClient";
 import { getApprovedProperties } from "@/lib/api";
 
-type SortMode = "newest" | "price_low" | "price_high";
-
 function asString(v: string | string[] | undefined) {
   return Array.isArray(v) ? v[0] ?? "" : v ?? "";
-}
-
-function toNumber(v: string) {
-  const n = Number(v);
-  return Number.isFinite(n) ? n : 0;
 }
 
 function norm(s: string) {
@@ -64,74 +57,20 @@ export default async function SearchPage({
 }) {
   const sp = await searchParams;
 
-  const state = asString(sp.state);
-  const area = asString(sp.area);
-  const purpose = asString(sp.purpose);
-  const propertyType = asString(sp.propertyType);
-  const bedsStr = asString(sp.beds);
-  const bathsStr = asString(sp.baths);
-  const minPrice = toNumber(asString(sp.minPrice));
-  const maxPrice = toNumber(asString(sp.maxPrice));
-  const sort = (asString(sp.sort) || "newest") as SortMode;
+  const summary: SearchSummary = {
+    state: asString(sp.state),
+    area: asString(sp.area),
+    purpose: asString(sp.purpose),
+    propertyType: asString(sp.propertyType),
+    beds: asString(sp.beds),
+    baths: asString(sp.baths),
+    minPrice: Number(asString(sp.minPrice) || 0),
+    maxPrice: Number(asString(sp.maxPrice) || 0),
+  };
 
-  let results = await getApprovedProperties();
+  const properties = await getApprovedProperties();
 
-  if (purpose === "rent" || purpose === "sale" || purpose === "shortlet") {
-    results = results.filter((p) => norm(p.purpose) === norm(purpose));
-  }
-
-  if (state) {
-    results = results.filter((p) => norm(p.state) === norm(state));
-  }
-
-  if (area) {
-    const q = norm(area);
-    results = results.filter(
-      (p) =>
-        norm(p.area).includes(q) ||
-        norm(p.city).includes(q) ||
-        norm(p.state).includes(q)
-    );
-  }
-
-  if (propertyType) {
-    const normalizedPropertyType = norm(propertyType);
-    results = results.filter(
-      (p) =>
-        norm(p.property_type || p.propertyType || "") ===
-        normalizedPropertyType
-    );
-  }
-
-  if (bedsStr) {
-    const minBeds = toNumber(bedsStr);
-    if (minBeds > 0) {
-      results = results.filter((p) => Number(p.bedrooms) >= minBeds);
-    }
-  }
-
-  if (bathsStr) {
-    const minBaths = toNumber(bathsStr);
-    if (minBaths > 0) {
-      results = results.filter((p) => Number(p.bathrooms) >= minBaths);
-    }
-  }
-
-  if (minPrice > 0) {
-    results = results.filter((p) => Number(p.price) >= minPrice);
-  }
-
-  if (maxPrice > 0) {
-    results = results.filter((p) => Number(p.price) <= maxPrice);
-  }
-
-  results.sort((a, b) => {
-    if (sort === "price_low") return Number(a.price) - Number(b.price);
-    if (sort === "price_high") return Number(b.price) - Number(a.price);
-    return Number(b.id) - Number(a.id);
-  });
-
-  const mappedResults: MapProperty[] = results.map((p) => {
+  const results: MapProperty[] = properties.map((p) => {
     const coords = getCoords(p.area, p.city, p.state);
 
     return {
@@ -153,28 +92,10 @@ export default async function SearchPage({
     };
   });
 
-  const defaultCenter =
-    mappedResults.length > 0
-      ? { lat: mappedResults[0].lat, lng: mappedResults[0].lng }
-      : state && STATE_CENTERS[state]
-      ? STATE_CENTERS[state]
-      : { lat: 6.5244, lng: 3.3792 };
-
-  const summary: SearchSummary = {
-    state,
-    area,
-    purpose,
-    propertyType,
-    beds: bedsStr,
-    baths: bathsStr,
-    minPrice,
-    maxPrice,
-  };
-
   return (
     <SearchResultsMapClient
-      results={mappedResults}
-      defaultCenter={defaultCenter}
+      results={results}
+      defaultCenter={{ lat: 6.5244, lng: 3.3792 }}
       searchSummary={summary}
     />
   );
