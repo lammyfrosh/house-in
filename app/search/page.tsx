@@ -46,8 +46,8 @@ const STATE_CENTERS: Record<string, { lat: number; lng: number }> = {
 };
 
 function getCoords(area: string, city: string, state: string) {
-  const areaKey = norm(area);
-  const cityKey = norm(city);
+  const areaKey = norm(area || "");
+  const cityKey = norm(city || "");
 
   if (AREA_COORDS[areaKey]) return AREA_COORDS[areaKey];
   if (AREA_COORDS[cityKey]) return AREA_COORDS[cityKey];
@@ -80,13 +80,16 @@ export default async function SearchPage({
   }
 
   if (state) {
-    results = results.filter((p) => p.state === state);
+    results = results.filter((p) => norm(p.state || "") === norm(state));
   }
 
   if (area) {
     const q = norm(area);
     results = results.filter(
-      (p) => norm(p.area).includes(q) || norm(p.city).includes(q)
+      (p) =>
+        norm(p.area || "").includes(q) ||
+        norm(p.city || "").includes(q) ||
+        norm(p.state || "").includes(q)
     );
   }
 

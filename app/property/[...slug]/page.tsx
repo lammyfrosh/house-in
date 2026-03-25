@@ -1,4 +1,3 @@
-import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import {
@@ -16,6 +15,7 @@ import {
   getApprovedProperties,
   getApprovedPropertyBySlug,
 } from "@/lib/api";
+import PropertyGallery from "@/components/PropertyGallery";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -27,17 +27,16 @@ function getPurposeBadge(purpose: string) {
   return "SHORTLET";
 }
 
-const ADMIN_WHATSAPP_NUMBER = "+23408075990912";
+const ADMIN_WHATSAPP_NUMBER = "2348075990912";
 const CONTACT_EMAIL = "contact@house-in.online";
 
 export default async function PropertyPage({
   params,
 }: {
-  params: Promise<{ slug: string[] }>;
+  params: Promise<{ slug: string }>;
 }) {
   const resolvedParams = await params;
-  const slugParts = resolvedParams?.slug || [];
-  const rawSlug = Array.isArray(slugParts) ? slugParts.join("/") : slugParts;
+  const rawSlug = resolvedParams?.slug;
 
   if (!rawSlug) notFound();
 
@@ -57,6 +56,11 @@ export default async function PropertyPage({
     .slice(0, 3);
 
   const badge = getPurposeBadge(property.purpose);
+
+  const galleryImages =
+    property.gallery_images && property.gallery_images.length > 0
+      ? property.gallery_images
+      : [property.image_url || "/placeholder-property.jpg"];
 
   const whatsappMessage = `Hello, I am interested in this property: ${property.title} in ${property.area}, ${property.city}, ${property.state}. Please share more details.`;
   const whatsappHref = `https://wa.me/${ADMIN_WHATSAPP_NUMBER}?text=${encodeURIComponent(
@@ -82,80 +86,103 @@ Thank you.`;
 
   return (
     <main className="bg-[#f7f9fc]">
-      <section className="relative h-[420px] w-full overflow-hidden">
-        <Image
-          src={property.image_url || "/placeholder-property.jpg"}
-          alt={property.title}
-          fill
-          className="object-cover"
-          unoptimized
-          priority
-        />
+      <section className="border-b border-[var(--color-border)] bg-white">
+        <div className="mx-auto max-w-6xl px-4 py-8">
+          <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+            <div className="min-w-0 flex-1">
+              <span className="inline-flex rounded-full bg-[var(--color-primary-dark)] px-4 py-1 text-xs font-bold text-white">
+                {badge}
+              </span>
 
-        <div className="absolute inset-0 bg-black/45" />
+              <h1 className="mt-4 text-3xl font-bold text-[var(--color-text-main)] sm:text-4xl">
+                {property.title}
+              </h1>
 
-        <div className="absolute bottom-6 left-1/2 w-full max-w-6xl -translate-x-1/2 px-4 text-white">
-          <span className="rounded-full bg-[var(--color-primary-dark)] px-4 py-1 text-xs font-bold">
-            {badge}
-          </span>
+              <p className="mt-3 flex items-center gap-2 text-sm text-[var(--color-text-muted)]">
+                <MapPin size={16} />
+                {property.area}, {property.city}, {property.state}
+              </p>
+            </div>
 
-          <h1 className="mt-3 text-3xl font-bold sm:text-4xl">
-            {property.title}
-          </h1>
-
-          <p className="mt-2 flex items-center gap-2 text-sm text-white/90">
-            <MapPin size={16} />
-            {property.area}, {property.city}, {property.state}
-          </p>
+            <div className="shrink-0 rounded-2xl bg-[var(--color-primary)]/10 px-5 py-4 text-left lg:min-w-[220px]">
+              <p className="text-xs font-extrabold uppercase tracking-widest text-[var(--color-primary-dark)]">
+                Price
+              </p>
+              <p className="mt-2 text-3xl font-bold text-[var(--color-text-main)]">
+                ₦{Number(property.price || 0).toLocaleString()}
+              </p>
+            </div>
+          </div>
         </div>
       </section>
 
-      <section className="mx-auto grid max-w-6xl gap-8 px-4 py-10 lg:grid-cols-[1fr_360px]">
-        <div>
-          <div className="rounded-3xl border border-[var(--color-border)] bg-white p-6 shadow-sm">
-            <p className="flex items-center gap-2 text-xs font-extrabold uppercase tracking-widest text-gray-500">
-              <BadgeDollarSign size={14} />
-              Price
-            </p>
+      <section className="mx-auto grid max-w-6xl gap-8 px-4 py-8 lg:grid-cols-[1fr_340px]">
+        <div className="space-y-6">
+          <div className="grid gap-6 xl:grid-cols-[1.2fr_0.8fr]">
+            <PropertyGallery
+              title={property.title}
+              images={galleryImages}
+            />
 
-            <p className="mt-2 text-3xl font-bold text-[var(--color-text-main)]">
-              ₦{Number(property.price || 0).toLocaleString()}
-            </p>
+            <div className="space-y-6">
+              <div className="rounded-3xl border border-[var(--color-border)] bg-white p-6 shadow-sm">
+                <p className="flex items-center gap-2 text-xs font-extrabold uppercase tracking-widest text-gray-500">
+                  <BadgeDollarSign size={14} />
+                  Property Details
+                </p>
 
-            <div className="mt-6 grid gap-4 text-sm text-gray-700 sm:grid-cols-2 lg:grid-cols-3">
-              <span className="flex items-center gap-2">
-                <BedDouble size={18} />
-                {property.bedrooms ?? 0} Bedrooms
-              </span>
+                <div className="mt-6 grid gap-4 text-sm text-gray-700 sm:grid-cols-2 xl:grid-cols-1">
+                  <span className="flex items-center gap-2">
+                    <BedDouble size={18} />
+                    {property.bedrooms ?? 0} Bedrooms
+                  </span>
 
-              <span className="flex items-center gap-2">
-                <Bath size={18} />
-                {property.bathrooms ?? 0} Bathrooms
-              </span>
+                  <span className="flex items-center gap-2">
+                    <Bath size={18} />
+                    {property.bathrooms ?? 0} Bathrooms
+                  </span>
 
-              <span className="flex items-center gap-2">
-                <Toilet size={18} />
-                {property.toilets ?? 0} Toilets
-              </span>
+                  <span className="flex items-center gap-2">
+                    <Toilet size={18} />
+                    {property.toilets ?? 0} Toilets
+                  </span>
 
-              <span className="flex items-center gap-2">
-                <Car size={18} />
-                {property.parking_spaces ?? 0} Parking Spaces
-              </span>
+                  <span className="flex items-center gap-2">
+                    <Car size={18} />
+                    {property.parking_spaces ?? 0} Parking Spaces
+                  </span>
 
-              <span className="flex items-center gap-2">
-                <Ruler size={18} />
-                {property.size || "N/A"}
-              </span>
+                  <span className="flex items-center gap-2">
+                    <Ruler size={18} />
+                    {property.size || "N/A"}
+                  </span>
 
-              <span className="flex items-center gap-2">
-                <BadgeDollarSign size={18} />
-                {property.property_type}
-              </span>
+                  <span className="flex items-center gap-2">
+                    <BadgeDollarSign size={18} />
+                    {property.property_type}
+                  </span>
+                </div>
+              </div>
+
+              {property.video_url && (
+                <div className="rounded-3xl border border-[var(--color-border)] bg-white p-6 shadow-sm">
+                  <h2 className="text-lg font-bold text-[var(--color-text-main)]">
+                    Property Video
+                  </h2>
+
+                  <video
+                    controls
+                    className="mt-4 w-full rounded-2xl border border-[var(--color-border)] bg-black"
+                  >
+                    <source src={property.video_url} />
+                    Your browser does not support the video tag.
+                  </video>
+                </div>
+              )}
             </div>
           </div>
 
-          <div className="mt-6 rounded-3xl border border-[var(--color-border)] bg-white p-6 shadow-sm">
+          <div className="rounded-3xl border border-[var(--color-border)] bg-white p-6 shadow-sm">
             <h2 className="text-lg font-bold text-[var(--color-text-main)]">
               Property Description
             </h2>
@@ -165,22 +192,6 @@ Thank you.`;
                 "No description available for this property yet."}
             </p>
           </div>
-
-          {property.video_url && (
-            <div className="mt-6 rounded-3xl border border-[var(--color-border)] bg-white p-6 shadow-sm">
-              <h2 className="text-lg font-bold text-[var(--color-text-main)]">
-                Property Video
-              </h2>
-
-              <video
-                controls
-                className="mt-4 w-full rounded-2xl border border-[var(--color-border)] bg-black"
-              >
-                <source src={property.video_url} />
-                Your browser does not support the video tag.
-              </video>
-            </div>
-          )}
         </div>
 
         <aside className="h-fit rounded-3xl border border-[var(--color-border)] bg-white p-6 shadow-sm">
@@ -242,12 +253,11 @@ Thank you.`;
                 className="overflow-hidden rounded-3xl border border-[var(--color-border)] bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-md"
               >
                 <div className="relative h-56 w-full">
-                  <Image
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
                     src={p.image_url || "/placeholder-property.jpg"}
                     alt={p.title}
-                    fill
-                    className="object-cover"
-                    unoptimized
+                    className="h-full w-full object-cover"
                   />
                 </div>
 

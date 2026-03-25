@@ -22,6 +22,7 @@ export type Property = {
   featured?: number | boolean;
   status?: "pending" | "approved" | "rejected";
   created_by_name?: string;
+  gallery_images?: string[];
 
   // compatibility helpers for old UI pieces
   imageUrl?: string;
@@ -30,9 +31,17 @@ export type Property = {
 };
 
 function normalizeProperty(property: Property): Property {
+  const gallery =
+    property.gallery_images && property.gallery_images.length > 0
+      ? property.gallery_images
+      : property.image_url
+      ? [property.image_url]
+      : ["/placeholder-property.jpg"];
+
   return {
     ...property,
-    imageUrl: property.image_url || "/placeholder-property.jpg",
+    gallery_images: gallery,
+    imageUrl: property.image_url || gallery[0] || "/placeholder-property.jpg",
     propertyType: property.property_type,
     listedAtText: "Live listing",
   };
