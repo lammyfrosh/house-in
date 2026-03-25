@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useMemo, useState } from "react";
-import { Filter, MapPin, BedDouble, Bath } from "lucide-react";
+import { ChevronDown, ChevronUp, Filter, MapPin, BedDouble, Bath } from "lucide-react";
 
 export type MapProperty = {
   id: string;
@@ -56,8 +56,8 @@ function buildFilterChips(summary: SearchSummary) {
   if (summary.propertyType) chips.push(`Type: ${summary.propertyType}`);
   if (summary.beds) chips.push(`Beds: ${summary.beds}+`);
   if (summary.baths) chips.push(`Baths: ${summary.baths}+`);
-  if (summary.minPrice) chips.push(`Min: ${money(summary.minPrice)}`);
-  if (summary.maxPrice) chips.push(`Max: ${money(summary.maxPrice)}`);
+  if (summary.minPrice) chips.push(`Min Price: ${money(summary.minPrice)}`);
+  if (summary.maxPrice) chips.push(`Max Price: ${money(summary.maxPrice)}`);
 
   return chips;
 }
@@ -76,6 +76,7 @@ export default function SearchResultsMapClient({
   searchSummary: SearchSummary;
 }) {
   const activeFilters = buildFilterChips(searchSummary);
+  const [showFilters, setShowFilters] = useState(false);
 
   const initialSelected = useMemo(() => {
     if (results.length > 0) return results[0];
@@ -108,25 +109,34 @@ export default function SearchResultsMapClient({
                 on the map.
               </p>
 
-              <div className="mt-5 flex flex-wrap items-center gap-3">
-                <span className="inline-flex items-center gap-2 rounded-full bg-slate-100 px-4 py-2 text-sm font-semibold text-slate-700">
+              <div className="mt-5">
+                <button
+                  type="button"
+                  onClick={() => setShowFilters((prev) => !prev)}
+                  className="inline-flex items-center gap-2 rounded-full bg-slate-100 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-200"
+                >
                   <Filter size={16} />
                   Active Filters
-                </span>
+                  {showFilters ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+                </button>
 
-                {activeFilters.length > 0 ? (
-                  activeFilters.map((chip) => (
-                    <span
-                      key={chip}
-                      className="rounded-full bg-[var(--color-primary)]/15 px-4 py-2 text-sm font-semibold text-[var(--color-primary-dark)]"
-                    >
-                      {chip}
-                    </span>
-                  ))
-                ) : (
-                  <span className="rounded-full bg-slate-100 px-4 py-2 text-sm font-semibold text-slate-600">
-                    No filters applied
-                  </span>
+                {showFilters && (
+                  <div className="mt-4 flex flex-wrap gap-3">
+                    {activeFilters.length > 0 ? (
+                      activeFilters.map((chip) => (
+                        <span
+                          key={chip}
+                          className="rounded-full bg-[var(--color-primary)]/15 px-4 py-2 text-sm font-semibold text-[var(--color-primary-dark)]"
+                        >
+                          {chip}
+                        </span>
+                      ))
+                    ) : (
+                      <span className="rounded-full bg-slate-100 px-4 py-2 text-sm font-semibold text-slate-600">
+                        No filters applied
+                      </span>
+                    )}
+                  </div>
                 )}
               </div>
             </div>
@@ -156,7 +166,6 @@ export default function SearchResultsMapClient({
         </div>
       </section>
 
-      {/* Mobile map */}
       <section className="mx-auto block max-w-7xl px-4 pb-6 xl:hidden">
         <div className="overflow-hidden rounded-3xl border border-[var(--color-border)] bg-white shadow-sm">
           <div className="border-b border-[var(--color-border)] px-5 py-4">
@@ -164,7 +173,7 @@ export default function SearchResultsMapClient({
               Map View
             </h2>
             <p className="mt-1 text-sm text-[var(--color-text-muted)]">
-              Tap a property card below or hover on desktop to update the map area.
+              Tap a property card below to update the map area.
             </p>
           </div>
 
@@ -177,21 +186,10 @@ export default function SearchResultsMapClient({
               referrerPolicy="no-referrer-when-downgrade"
             />
           </div>
-
-          <div className="border-t border-[var(--color-border)] px-5 py-4 text-sm text-[var(--color-text-muted)]">
-            {selectedProperty ? (
-              <span>
-                Showing map focus for <strong>{selectedProperty.title}</strong> in{" "}
-                {selectedProperty.area}, {selectedProperty.city}
-              </span>
-            ) : (
-              <span>Showing default map center.</span>
-            )}
-          </div>
         </div>
       </section>
 
-      <section className="mx-auto grid max-w-7xl gap-6 px-4 pb-14 xl:grid-cols-[1.25fr_0.75fr]">
+      <section className="mx-auto grid max-w-7xl gap-6 px-4 pb-14 xl:grid-cols-[1.15fr_0.85fr]">
         <div className="space-y-5">
           {results.length === 0 ? (
             <div className="rounded-3xl border border-[var(--color-border)] bg-white p-8 text-center shadow-sm">
@@ -208,15 +206,16 @@ export default function SearchResultsMapClient({
                 key={property.id}
                 href={`/property/${property.slug}`}
                 onMouseEnter={() => setSelectedProperty(property)}
+                onClick={() => setSelectedProperty(property)}
                 className="overflow-hidden rounded-3xl border border-[var(--color-border)] bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-md"
               >
-                <div className="grid gap-0 md:grid-cols-[260px_1fr]">
+                <div className="grid gap-0 md:grid-cols-[320px_1fr]">
                   <div className="bg-slate-100">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
                       src={property.imageUrl}
                       alt={property.title}
-                      className="h-60 w-full object-cover md:h-full"
+                      className="h-64 w-full object-cover md:h-full"
                     />
                   </div>
 
@@ -231,7 +230,7 @@ export default function SearchResultsMapClient({
                       </span>
                     </div>
 
-                    <h2 className="mt-3 text-xl font-semibold text-[var(--color-text-main)]">
+                    <h2 className="mt-3 text-2xl font-semibold text-[var(--color-text-main)]">
                       {property.title}
                     </h2>
 
@@ -262,7 +261,6 @@ export default function SearchResultsMapClient({
           )}
         </div>
 
-        {/* Desktop map */}
         <aside className="hidden xl:block">
           <div className="sticky top-28 overflow-hidden rounded-3xl border border-[var(--color-border)] bg-white shadow-sm">
             <div className="border-b border-[var(--color-border)] px-6 py-5">
@@ -302,7 +300,7 @@ export default function SearchResultsMapClient({
                     {selectedProperty.area}, {selectedProperty.city}
                   </span>
                 ) : (
-                  <span>The search filters above are active on this results page.</span>
+                  <span>The map is ready for your search results.</span>
                 )}
               </div>
             </div>
