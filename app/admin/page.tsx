@@ -100,10 +100,17 @@ export default function AdminPage() {
       badge: "Manage",
     },
     {
+      title: "Manage Users",
+      text: "View all registered users and see every property uploaded by each user.",
+      href: "/admin/users",
+      icon: Users,
+      badge: "Users",
+    },
+    {
       title: "Manage Admins",
       text: "Control admin access and manage trusted team members.",
       href: "/admin/admins",
-      icon: Users,
+      icon: ShieldCheck,
       badge: "Access",
     },
     {
@@ -134,7 +141,7 @@ export default function AdminPage() {
                 </h2>
 
                 <p className="mt-3 max-w-2xl text-sm leading-6 text-white/85 sm:text-base">
-                  Manage listings, admin access, and key platform operations from one central dashboard.
+                  Manage listings, users, admin access, and key platform operations from one central dashboard.
                 </p>
               </div>
 
@@ -148,10 +155,10 @@ export default function AdminPage() {
                 </Link>
 
                 <Link
-                  href="/admin/properties"
+                  href="/admin/users"
                   className="inline-flex items-center justify-center gap-2 rounded-2xl border border-white/20 bg-white/10 px-5 py-3 text-sm font-semibold text-white backdrop-blur transition hover:bg-white/15"
                 >
-                  Open Listings
+                  Open Users
                   <ArrowRight size={16} />
                 </Link>
               </div>
@@ -195,7 +202,7 @@ export default function AdminPage() {
           </p>
 
           <p className="mt-1 text-sm text-slate-500">
-            Property and admin management access
+            Property, user, and admin management access
           </p>
         </div>
 
@@ -237,7 +244,7 @@ export default function AdminPage() {
           </div>
         </div>
 
-        <div className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+        <div className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-5">
           {quickModules.map((card) => {
             const Icon = card.icon;
 
@@ -290,7 +297,7 @@ export default function AdminPage() {
 
           <div className="mt-4 space-y-3 text-sm leading-6 text-slate-500">
             <p>
-              This dashboard is designed to help admins manage listings and platform access without unnecessary complexity.
+              This dashboard is designed to help admins manage listings, users, and platform access without unnecessary complexity.
             </p>
             <p>
               The most important actions are easy to find, the layout is clear, and the navigation stays straightforward.
@@ -324,6 +331,14 @@ export default function AdminPage() {
             </Link>
 
             <Link
+              href="/admin/users"
+              className="flex items-center justify-between rounded-2xl border border-slate-200 px-4 py-4 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+            >
+              <span>View all users</span>
+              <ArrowRight size={16} />
+            </Link>
+
+            <Link
               href="/admin/admins"
               className="flex items-center justify-between rounded-2xl border border-slate-200 px-4 py-4 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
             >
@@ -351,7 +366,7 @@ export default function AdminPage() {
                   Admin tools ready
                 </p>
                 <p className="mt-1 text-sm leading-6 text-slate-600">
-                  Property management, admin control, and core navigation are all available from this dashboard.
+                  Property management, user oversight, admin control, and core navigation are all available from this dashboard.
                 </p>
               </div>
             </div>
