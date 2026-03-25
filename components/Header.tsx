@@ -69,16 +69,9 @@ export default function Header() {
   const dashboardHref = isAdmin ? "/admin" : "/dashboard";
   const addPropertyHref = "/add-property";
 
-  const roleLabel =
-    normalizedRole === "superadmin" || normalizedRole === "super_admin"
-      ? "Super"
-      : normalizedRole === "admin"
-      ? "Admin"
-      : "User";
-
   const shortName = user?.full_name?.trim()
     ? user.full_name.trim().split(" ")[0]
-    : roleLabel;
+    : "User";
 
   function handleLogout() {
     localStorage.removeItem("housein_token");
@@ -99,11 +92,7 @@ export default function Header() {
   return (
     <header className="sticky top-0 z-50 border-b border-white/10 bg-[var(--color-primary-dark)] text-white shadow-sm">
       <div className="mx-auto flex max-w-7xl items-center justify-between gap-6 px-4 py-4 sm:px-6 lg:px-8">
-        <Link
-          href="/"
-          className="shrink-0"
-          aria-label="House-In Home"
-        >
+        <Link href="/" className="shrink-0" aria-label="House-In Home">
           <div className="relative h-12 w-[190px] sm:h-14 sm:w-[240px]">
             <Image
               src="/logo-light.png"
@@ -144,7 +133,7 @@ export default function Header() {
 
               <Link
                 href={addPropertyHref}
-                className="inline-flex items-center gap-2 rounded-xl bg-white px-4 py-2 text-sm font-semibold text-[var(--color-primary-dark)] transition hover:opacity-90"
+                className="inline-flex items-center gap-2 rounded-xl bg-white px-4 py-2 text-sm font-semibold text-teal-700 transition hover:opacity-90"
               >
                 <PlusCircle size={16} />
                 <span>Add Property</span>
@@ -174,7 +163,7 @@ export default function Header() {
 
               <Link
                 href="/register"
-                className="rounded-xl bg-white px-4 py-2 text-sm font-semibold text-[var(--color-primary-dark)] transition hover:opacity-90"
+                className="rounded-xl bg-white px-4 py-2 text-sm font-semibold text-teal-700 transition hover:opacity-90"
               >
                 Sign Up
               </Link>
@@ -231,7 +220,7 @@ export default function Header() {
 
                   <Link
                     href={addPropertyHref}
-                    className="block rounded-xl bg-white px-3 py-3 text-sm font-semibold text-[var(--color-primary-dark)] transition hover:opacity-90"
+                    className="block rounded-xl bg-white px-3 py-3 text-sm font-semibold text-teal-700 transition hover:opacity-90"
                   >
                     Add Property
                   </Link>
@@ -259,7 +248,7 @@ export default function Header() {
 
                   <Link
                     href="/register"
-                    className="block rounded-xl bg-white px-3 py-3 text-sm font-semibold text-[var(--color-primary-dark)] transition hover:opacity-90"
+                    className="block rounded-xl bg-white px-3 py-3 text-sm font-semibold text-teal-700 transition hover:opacity-90"
                   >
                     Sign Up
                   </Link>

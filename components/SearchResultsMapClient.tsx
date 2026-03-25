@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useMemo, useState } from "react";
 import { Filter, MapPin, BedDouble, Bath } from "lucide-react";
 
 export type MapProperty = {
@@ -61,6 +62,10 @@ function buildFilterChips(summary: SearchSummary) {
   return chips;
 }
 
+function buildMapUrl(lat: number, lng: number) {
+  return `https://www.google.com/maps?q=${lat},${lng}&z=14&output=embed`;
+}
+
 export default function SearchResultsMapClient({
   results,
   defaultCenter,
@@ -71,6 +76,18 @@ export default function SearchResultsMapClient({
   searchSummary: SearchSummary;
 }) {
   const activeFilters = buildFilterChips(searchSummary);
+
+  const initialSelected = useMemo(() => {
+    if (results.length > 0) return results[0];
+    return null;
+  }, [results]);
+
+  const [selectedProperty, setSelectedProperty] = useState<MapProperty | null>(
+    initialSelected
+  );
+
+  const selectedLat = selectedProperty?.lat ?? defaultCenter.lat;
+  const selectedLng = selectedProperty?.lng ?? defaultCenter.lng;
 
   return (
     <main className="bg-[#f7f9fc]">
@@ -139,6 +156,41 @@ export default function SearchResultsMapClient({
         </div>
       </section>
 
+      {/* Mobile map */}
+      <section className="mx-auto block max-w-7xl px-4 pb-6 xl:hidden">
+        <div className="overflow-hidden rounded-3xl border border-[var(--color-border)] bg-white shadow-sm">
+          <div className="border-b border-[var(--color-border)] px-5 py-4">
+            <h2 className="text-lg font-bold text-[var(--color-text-main)]">
+              Map View
+            </h2>
+            <p className="mt-1 text-sm text-[var(--color-text-muted)]">
+              Tap a property card below or hover on desktop to update the map area.
+            </p>
+          </div>
+
+          <div className="h-[320px] w-full">
+            <iframe
+              title="Property search map"
+              src={buildMapUrl(selectedLat, selectedLng)}
+              className="h-full w-full border-0"
+              loading="lazy"
+              referrerPolicy="no-referrer-when-downgrade"
+            />
+          </div>
+
+          <div className="border-t border-[var(--color-border)] px-5 py-4 text-sm text-[var(--color-text-muted)]">
+            {selectedProperty ? (
+              <span>
+                Showing map focus for <strong>{selectedProperty.title}</strong> in{" "}
+                {selectedProperty.area}, {selectedProperty.city}
+              </span>
+            ) : (
+              <span>Showing default map center.</span>
+            )}
+          </div>
+        </div>
+      </section>
+
       <section className="mx-auto grid max-w-7xl gap-6 px-4 pb-14 xl:grid-cols-[1.25fr_0.75fr]">
         <div className="space-y-5">
           {results.length === 0 ? (
@@ -155,6 +207,7 @@ export default function SearchResultsMapClient({
               <Link
                 key={property.id}
                 href={`/property/${property.slug}`}
+                onMouseEnter={() => setSelectedProperty(property)}
                 className="overflow-hidden rounded-3xl border border-[var(--color-border)] bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-md"
               >
                 <div className="grid gap-0 md:grid-cols-[260px_1fr]">
@@ -209,26 +262,50 @@ export default function SearchResultsMapClient({
           )}
         </div>
 
-        <aside className="rounded-3xl border border-[var(--color-border)] bg-white p-6 shadow-sm">
-          <h2 className="text-lg font-bold text-[var(--color-text-main)]">
-            Approximate Map Area
-          </h2>
+        {/* Desktop map */}
+        <aside className="hidden xl:block">
+          <div className="sticky top-28 overflow-hidden rounded-3xl border border-[var(--color-border)] bg-white shadow-sm">
+            <div className="border-b border-[var(--color-border)] px-6 py-5">
+              <h2 className="text-lg font-bold text-[var(--color-text-main)]">
+                Interactive Map Area
+              </h2>
 
-          <p className="mt-2 text-sm leading-6 text-[var(--color-text-muted)]">
-            Centered around:
-          </p>
+              <p className="mt-2 text-sm leading-6 text-[var(--color-text-muted)]">
+                Hover over any property card to update the map focus.
+              </p>
+            </div>
 
-          <div className="mt-4 rounded-2xl bg-slate-50 p-4 text-sm text-[var(--color-text-main)]">
-            <p>
-              <span className="font-semibold">Latitude:</span> {defaultCenter.lat}
-            </p>
-            <p className="mt-2">
-              <span className="font-semibold">Longitude:</span> {defaultCenter.lng}
-            </p>
-          </div>
+            <div className="h-[420px] w-full">
+              <iframe
+                title="Property search map"
+                src={buildMapUrl(selectedLat, selectedLng)}
+                className="h-full w-full border-0"
+                loading="lazy"
+                referrerPolicy="no-referrer-when-downgrade"
+              />
+            </div>
 
-          <div className="mt-5 rounded-2xl bg-[var(--color-primary)]/10 p-4 text-sm text-[var(--color-primary-dark)]">
-            The search filters above are active on this results page.
+            <div className="border-t border-[var(--color-border)] px-6 py-5">
+              <div className="rounded-2xl bg-slate-50 p-4 text-sm text-[var(--color-text-main)]">
+                <p>
+                  <span className="font-semibold">Latitude:</span> {selectedLat}
+                </p>
+                <p className="mt-2">
+                  <span className="font-semibold">Longitude:</span> {selectedLng}
+                </p>
+              </div>
+
+              <div className="mt-4 rounded-2xl bg-[var(--color-primary)]/10 p-4 text-sm text-[var(--color-primary-dark)]">
+                {selectedProperty ? (
+                  <span>
+                    Focused on <strong>{selectedProperty.title}</strong> in{" "}
+                    {selectedProperty.area}, {selectedProperty.city}
+                  </span>
+                ) : (
+                  <span>The search filters above are active on this results page.</span>
+                )}
+              </div>
+            </div>
           </div>
         </aside>
       </section>
