@@ -7,11 +7,93 @@ import { usePathname, useRouter } from "next/navigation";
 import { Menu, X, UserCircle2, LogOut, PlusCircle } from "lucide-react";
 
 type StoredUser = {
-  id: number;
+  id: number | string;
   full_name: string;
   email: string;
   role: string;
 };
+
+function parseJsonSafely(value: string | null) {
+  if (!value) return null;
+  try {
+    return JSON.parse(value);
+  } catch {
+    return null;
+  }
+}
+
+function normalizeUser(candidate: any): StoredUser | null {
+  if (!candidate || typeof candidate !== "object") return null;
+
+  const id =
+    candidate.id ??
+    candidate.user_id ??
+    candidate.userId ??
+    candidate._id ??
+    "";
+
+  const full_name =
+    candidate.full_name ??
+    candidate.fullName ??
+    candidate.name ??
+    candidate.username ??
+    "";
+
+  const email = candidate.email ?? "";
+  const role = candidate.role ?? candidate.user_role ?? "user";
+
+  if (!id && !full_name && !email) return null;
+
+  return {
+    id,
+    full_name: String(full_name || "").trim(),
+    email: String(email || "").trim(),
+    role: String(role || "user").trim(),
+  };
+}
+
+function getStoredAuthUser(): StoredUser | null {
+  if (typeof window === "undefined") return null;
+
+  const possibleUserKeys = [
+    "housein_user",
+    "user",
+    "auth_user",
+    "currentUser",
+    "house_in_user",
+  ];
+
+  const possibleTokenKeys = [
+    "housein_token",
+    "token",
+    "auth_token",
+    "accessToken",
+    "house_in_token",
+  ];
+
+  const token = possibleTokenKeys
+    .map((key) => localStorage.getItem(key))
+    .find(Boolean);
+
+  if (!token) return null;
+
+  for (const key of possibleUserKeys) {
+    const raw = localStorage.getItem(key);
+    const parsed = parseJsonSafely(raw);
+
+    const normalizedDirect = normalizeUser(parsed);
+    if (normalizedDirect) return normalizedDirect;
+
+    const normalizedNested =
+      normalizeUser(parsed?.user) ||
+      normalizeUser(parsed?.data?.user) ||
+      normalizeUser(parsed?.data);
+
+    if (normalizedNested) return normalizedNested;
+  }
+
+  return null;
+}
 
 export default function Header() {
   const router = useRouter();
@@ -22,27 +104,15 @@ export default function Header() {
 
   useEffect(() => {
     function loadUser() {
-      try {
-        const storedUser = localStorage.getItem("housein_user");
-        const storedToken = localStorage.getItem("housein_token");
-
-        if (!storedUser || !storedToken) {
-          setUser(null);
-          return;
-        }
-
-        const parsedUser: StoredUser = JSON.parse(storedUser);
-        setUser(parsedUser);
-      } catch (error) {
-        console.error(error);
-        setUser(null);
-      }
+      const resolvedUser = getStoredAuthUser();
+      setUser(resolvedUser);
     }
 
     loadUser();
 
     window.addEventListener("storage", loadUser);
     window.addEventListener("housein-auth-changed", loadUser as EventListener);
+    window.addEventListener("focus", loadUser);
 
     return () => {
       window.removeEventListener("storage", loadUser);
@@ -50,11 +120,13 @@ export default function Header() {
         "housein-auth-changed",
         loadUser as EventListener
       );
+      window.removeEventListener("focus", loadUser);
     };
   }, []);
 
   useEffect(() => {
     setMobileOpen(false);
+    setUser(getStoredAuthUser());
   }, [pathname]);
 
   const normalizedRole = useMemo(() => {
@@ -69,13 +141,32 @@ export default function Header() {
   const dashboardHref = isAdmin ? "/admin" : "/dashboard";
   const addPropertyHref = "/add-property";
 
-  const shortName = user?.full_name?.trim()
-    ? user.full_name.trim().split(" ")[0]
-    : "User";
+  const shortName = useMemo(() => {
+    const rawName =
+      user?.full_name?.trim() ||
+      user?.email?.trim()?.split("@")[0] ||
+      "Account";
+
+    const first = rawName.split(" ")[0]?.trim();
+    return first || "Account";
+  }, [user]);
 
   function handleLogout() {
-    localStorage.removeItem("housein_token");
-    localStorage.removeItem("housein_user");
+    const keysToRemove = [
+      "housein_token",
+      "token",
+      "auth_token",
+      "accessToken",
+      "house_in_token",
+      "housein_user",
+      "user",
+      "auth_user",
+      "currentUser",
+      "house_in_user",
+    ];
+
+    keysToRemove.forEach((key) => localStorage.removeItem(key));
+
     window.dispatchEvent(new Event("housein-auth-changed"));
     setUser(null);
     router.push("/");
@@ -91,9 +182,9 @@ export default function Header() {
 
   return (
     <header className="sticky top-0 z-50 border-b border-white/10 bg-[var(--color-primary-dark)] text-white shadow-sm">
-      <div className="mx-auto flex max-w-7xl items-center justify-between gap-6 px-4 py-4 sm:px-6 lg:px-8">
+      <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-4 sm:px-6 lg:px-8">
         <Link href="/" className="shrink-0" aria-label="House-In Home">
-          <div className="relative h-14 w-[280px] sm:h-16 sm:w-[360px]">
+          <div className="relative h-14 w-[220px] sm:h-16 sm:w-[300px] lg:w-[340px]">
             <Image
               src="/logo-light.png"
               alt="House-In"
@@ -121,7 +212,7 @@ export default function Header() {
           })}
         </nav>
 
-        <div className="hidden items-center gap-3 md:flex">
+        <div className="hidden items-center gap-3 md:flex md:shrink-0">
           {user ? (
             <>
               <Link
@@ -133,16 +224,24 @@ export default function Header() {
 
               <Link
                 href={addPropertyHref}
-                className="inline-flex items-center gap-2 rounded-xl bg-white px-4 py-2 text-sm font-semibold text-slate-900 transition hover:opacity-90"
+                className="inline-flex min-w-[140px] items-center justify-center gap-2 rounded-xl bg-white px-4 py-2 text-sm font-semibold transition hover:opacity-90"
+                style={{ color: "#0f172a" }}
               >
                 <PlusCircle size={16} />
-                <span>Add Property</span>
+                <span style={{ color: "#0f172a" }}>Add Property</span>
               </Link>
 
-              <div className="inline-flex items-center gap-2 rounded-xl border border-white/20 px-4 py-2 text-sm font-semibold text-white">
+              <Link
+                href={dashboardHref}
+                className="inline-flex min-w-[130px] items-center justify-center gap-2 rounded-xl border border-white/20 px-4 py-2 text-sm font-semibold transition hover:bg-white/10"
+                style={{ color: "#ffffff" }}
+                title={user.full_name || user.email || "My Account"}
+              >
                 <UserCircle2 size={17} className="text-white/80" />
-                <span>{shortName}</span>
-              </div>
+                <span className="max-w-[120px] truncate" style={{ color: "#ffffff" }}>
+                  {shortName}
+                </span>
+              </Link>
 
               <button
                 onClick={handleLogout}
@@ -163,9 +262,10 @@ export default function Header() {
 
               <Link
                 href="/register"
-                className="inline-flex items-center justify-center rounded-xl bg-white px-5 py-2 text-sm font-bold text-slate-900 transition hover:opacity-90"
+                className="inline-flex min-w-[118px] items-center justify-center rounded-xl bg-white px-5 py-2 text-sm font-bold transition hover:opacity-90"
+                style={{ color: "#0f172a" }}
               >
-                Sign Up
+                <span style={{ color: "#0f172a" }}>Sign Up</span>
               </Link>
             </>
           )}
@@ -188,7 +288,7 @@ export default function Header() {
         <div className="border-t border-white/10 bg-[var(--color-primary-dark)] md:hidden">
           <div className="mx-auto max-w-7xl px-4 py-4 sm:px-6">
             <div className="mb-4">
-              <div className="relative h-12 w-[240px]">
+              <div className="relative h-12 w-[220px]">
                 <Image
                   src="/logo-light.png"
                   alt="House-In"
@@ -220,14 +320,19 @@ export default function Header() {
 
                   <Link
                     href={addPropertyHref}
-                    className="block rounded-xl bg-white px-3 py-3 text-sm font-semibold text-slate-900 transition hover:opacity-90"
+                    className="block rounded-xl bg-white px-3 py-3 text-sm font-semibold transition hover:opacity-90"
+                    style={{ color: "#0f172a" }}
                   >
                     Add Property
                   </Link>
 
                   <div className="rounded-xl border border-white/20 px-3 py-3">
-                    <p className="text-sm font-semibold text-white">{shortName}</p>
-                    <p className="mt-1 text-xs text-white/70">{user.email}</p>
+                    <p className="text-sm font-semibold text-white">
+                      {user.full_name || shortName}
+                    </p>
+                    <p className="mt-1 text-xs text-white/70">
+                      {user.email || "Logged in user"}
+                    </p>
                   </div>
 
                   <button
@@ -248,7 +353,8 @@ export default function Header() {
 
                   <Link
                     href="/register"
-                    className="block rounded-xl bg-white px-3 py-3 text-sm font-semibold text-slate-900 transition hover:opacity-90"
+                    className="block rounded-xl bg-white px-3 py-3 text-sm font-semibold transition hover:opacity-90"
+                    style={{ color: "#0f172a" }}
                   >
                     Sign Up
                   </Link>

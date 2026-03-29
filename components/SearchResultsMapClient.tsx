@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
-import { MapPin, BedDouble, Bath, Search, SlidersHorizontal } from "lucide-react";
+import { MapPin, BedDouble, Bath, SlidersHorizontal } from "lucide-react";
 
 export type MapProperty = {
   id: string;
@@ -194,32 +194,9 @@ export default function SearchResultsMapClient({
 
   return (
     <main className="bg-[#f7f9fc]">
-      <section className="mx-auto max-w-7xl px-4 py-6 xl:hidden">
-        <div className="overflow-hidden rounded-3xl border border-[var(--color-border)] bg-white shadow-sm">
-          <div className="border-b border-[var(--color-border)] px-5 py-4">
-            <h2 className="text-lg font-bold text-[var(--color-text-main)]">
-              Search Map
-            </h2>
-            <p className="mt-1 text-sm text-[var(--color-text-muted)]">
-              Tap any property below to update the map focus.
-            </p>
-          </div>
-
-          <div className="h-[320px] w-full">
-            <iframe
-              title="Property search map"
-              src={buildMapUrl(selectedLat, selectedLng)}
-              className="h-full w-full border-0"
-              loading="lazy"
-              referrerPolicy="no-referrer-when-downgrade"
-            />
-          </div>
-        </div>
-      </section>
-
       <section className="xl:h-[calc(100vh-88px)] xl:overflow-hidden">
         <div className="grid xl:h-full xl:grid-cols-[1.05fr_0.95fr]">
-          {/* LEFT MAP */}
+          {/* LEFT MAP DESKTOP */}
           <aside className="hidden xl:block xl:h-full xl:border-r xl:border-[var(--color-border)] xl:bg-white">
             <div className="sticky top-[88px] h-[calc(100vh-88px)]">
               <iframe
@@ -234,6 +211,30 @@ export default function SearchResultsMapClient({
 
           {/* RIGHT PANEL */}
           <div className="xl:h-[calc(100vh-88px)] xl:overflow-y-auto">
+            {/* MOBILE STICKY MAP */}
+            <section className="sticky top-[88px] z-30 border-b border-[var(--color-border)] bg-[#f7f9fc] px-4 py-4 xl:hidden">
+              <div className="overflow-hidden rounded-3xl border border-[var(--color-border)] bg-white shadow-sm">
+                <div className="border-b border-[var(--color-border)] px-5 py-4">
+                  <h2 className="text-lg font-bold text-[var(--color-text-main)]">
+                    Search Map
+                  </h2>
+                  <p className="mt-1 text-sm text-[var(--color-text-muted)]">
+                    Tap any property below to update the map focus.
+                  </p>
+                </div>
+
+                <div className="h-[280px] w-full sm:h-[320px]">
+                  <iframe
+                    title="Property search map"
+                    src={buildMapUrl(selectedLat, selectedLng)}
+                    className="h-full w-full border-0"
+                    loading="lazy"
+                    referrerPolicy="no-referrer-when-downgrade"
+                  />
+                </div>
+              </div>
+            </section>
+
             <div className="border-b border-[var(--color-border)] bg-white px-4 py-6 sm:px-6">
               <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
                 <div className="max-w-3xl">
@@ -268,7 +269,6 @@ export default function SearchResultsMapClient({
                 </div>
               </div>
 
-              {/* FILTERS */}
               <div className="mt-6 rounded-3xl border border-[var(--color-border)] bg-[#f8fafc] p-4 shadow-sm">
                 <div className="mb-4 flex items-center gap-2">
                   <SlidersHorizontal size={18} className="text-[var(--color-primary-dark)]" />
@@ -400,7 +400,6 @@ export default function SearchResultsMapClient({
                   >
                     <div className="grid gap-0 md:grid-cols-[300px_1fr]">
                       <div className="bg-slate-100">
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img
                           src={property.imageUrl}
                           alt={property.title}
