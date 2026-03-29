@@ -3,7 +3,23 @@ import Link from "next/link";
 import type { Property } from "@/lib/api";
 import { formatNaira } from "@/lib/money";
 
-export default function PropertyCard({ p }: { p: Property }) {
+type PropertyWithDates = Property & {
+  created_at?: string;
+  createdAt?: string;
+};
+
+function isNewListing(p: PropertyWithDates) {
+  const rawDate = p.created_at || p.createdAt;
+  if (!rawDate) return false;
+
+  const createdTime = new Date(rawDate).getTime();
+  if (Number.isNaN(createdTime)) return false;
+
+  const sevenDaysMs = 7 * 24 * 60 * 60 * 1000;
+  return Date.now() - createdTime <= sevenDaysMs;
+}
+
+export default function PropertyCard({ p }: { p: PropertyWithDates }) {
   const badge =
     p.purpose === "rent"
       ? "For Rent"
@@ -13,6 +29,7 @@ export default function PropertyCard({ p }: { p: Property }) {
 
   const imageSrc = p.image_url || p.imageUrl || "/placeholder-property.jpg";
   const listedText = p.listedAtText || "Live listing";
+  const showNewBadge = isNewListing(p);
 
   return (
     <Link
@@ -28,6 +45,12 @@ export default function PropertyCard({ p }: { p: Property }) {
           className="object-cover transition-transform duration-300 group-hover:scale-[1.02]"
           sizes="(max-width: 768px) 100vw, 33vw"
         />
+
+        {showNewBadge && (
+          <div className="absolute left-3 top-3 z-10 rounded-full bg-red-600 px-3 py-1 text-[11px] font-extrabold uppercase tracking-wider text-white shadow-md">
+            New
+          </div>
+        )}
       </div>
 
       <div className="p-4">

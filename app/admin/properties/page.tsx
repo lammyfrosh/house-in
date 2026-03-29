@@ -161,51 +161,6 @@ export default function AdminPropertiesPage() {
     }
   }
 
-  async function deleteProperty(id: number) {
-    const token = localStorage.getItem("housein_token");
-
-    if (!token) return;
-    if (!window.confirm("Delete this property?")) return;
-
-    setActionId(id);
-    setMessage("");
-    setMessageType("");
-
-    try {
-      const res = await fetch(`${API}/api/properties/${id}`, {
-        method: "DELETE",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        setMessage(data.message || "Delete failed");
-        setMessageType("error");
-        return;
-      }
-
-      const deletedProperty = properties.find((p) => p.id === id);
-
-      setProperties((prev) => prev.filter((p) => p.id !== id));
-
-      if (deletedProperty && Number(deletedProperty.admin_reviewed) === 0) {
-        setUnreviewedCount((prev) => Math.max(0, prev - 1));
-      }
-
-      setMessage("Property deleted successfully.");
-      setMessageType("success");
-    } catch (error) {
-      console.error(error);
-      setMessage("Could not delete property");
-      setMessageType("error");
-    } finally {
-      setActionId(null);
-    }
-  }
-
   function openEdit(property: Property) {
     if (Number(property.admin_reviewed) === 0) {
       setProperties((prev) =>
@@ -258,8 +213,8 @@ export default function AdminPropertiesPage() {
           </h1>
 
           <p className="mt-2 max-w-2xl text-sm leading-6 text-[var(--color-text-muted)]">
-            Review all listings, manage approval status, edit property details,
-            and remove unwanted properties.
+            Review all listings and manage approval status. Click the property
+            image or title to open the property editor.
           </p>
         </div>
 
@@ -342,11 +297,13 @@ export default function AdminPropertiesPage() {
               >
                 <div className="grid gap-0 lg:grid-cols-[320px_1fr]">
                   <div
-                    className={`border-b lg:border-b-0 lg:border-r ${
+                    onClick={() => openEdit(property)}
+                    className={`cursor-pointer border-b lg:border-b-0 lg:border-r ${
                       isUnreviewed
                         ? "border-[var(--color-primary)]/15 bg-[var(--color-primary)]/5"
                         : "border-[var(--color-border)] bg-gray-50"
                     }`}
+                    title="Open property editor"
                   >
                     {property.image_url ? (
                       <img
@@ -365,9 +322,13 @@ export default function AdminPropertiesPage() {
                     <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
                       <div className="min-w-0 flex-1">
                         <div className="flex flex-wrap items-center gap-3">
-                          <h2 className="text-xl font-semibold text-[var(--color-text-main)]">
+                          <button
+                            type="button"
+                            onClick={() => openEdit(property)}
+                            className="text-left text-xl font-semibold text-[var(--color-text-main)] transition hover:text-[var(--color-primary-dark)]"
+                          >
                             {property.title}
-                          </h2>
+                          </button>
 
                           <span
                             className={`rounded-full px-3 py-1 text-xs font-bold uppercase ${statusClasses(
@@ -439,20 +400,6 @@ export default function AdminPropertiesPage() {
                       </div>
 
                       <div className="flex w-full flex-col gap-2 xl:w-48">
-                        <button
-                          onClick={() => openEdit(property)}
-                          className="rounded-lg bg-[var(--color-primary-dark)] px-4 py-2 text-sm font-semibold text-white hover:opacity-90"
-                        >
-                          Edit Property
-                        </button>
-
-                        <button
-                          onClick={() => router.push(`/property/${property.slug}`)}
-                          className="rounded-lg border border-[var(--color-border)] px-4 py-2 text-sm font-semibold text-[var(--color-text-main)] hover:bg-gray-50"
-                        >
-                          View Listing
-                        </button>
-
                         {property.status !== "approved" && (
                           <button
                             onClick={() => updateStatus(property.id, "approved")}
@@ -488,16 +435,6 @@ export default function AdminPropertiesPage() {
                               : "Mark Pending"}
                           </button>
                         )}
-
-                        <button
-                          onClick={() => deleteProperty(property.id)}
-                          disabled={actionId === property.id}
-                          className="mt-2 rounded-lg border border-red-200 px-4 py-2 text-sm font-semibold text-red-600 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-70"
-                        >
-                          {actionId === property.id
-                            ? "Processing..."
-                            : "Delete"}
-                        </button>
                       </div>
                     </div>
                   </div>
