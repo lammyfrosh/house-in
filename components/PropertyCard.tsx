@@ -3,13 +3,8 @@ import Link from "next/link";
 import type { Property } from "@/lib/api";
 import { formatNaira } from "@/lib/money";
 
-type PropertyWithDates = Property & {
-  created_at?: string;
-  createdAt?: string;
-};
-
-function isNewListing(p: PropertyWithDates) {
-  const rawDate = p.created_at || p.createdAt;
+function isNewListing(p: Property) {
+  const rawDate = p.created_at;
   if (!rawDate) return false;
 
   const createdTime = new Date(rawDate).getTime();
@@ -19,7 +14,15 @@ function isNewListing(p: PropertyWithDates) {
   return Date.now() - createdTime <= sevenDaysMs;
 }
 
-export default function PropertyCard({ p }: { p: PropertyWithDates }) {
+function isPriceOnRequest(p: Property) {
+  return (
+    p.price_on_request === true ||
+    p.price_on_request === 1 ||
+    String(p.price_on_request).toLowerCase() === "true"
+  );
+}
+
+export default function PropertyCard({ p }: { p: Property }) {
   const badge =
     p.purpose === "rent"
       ? "For Rent"
@@ -30,6 +33,7 @@ export default function PropertyCard({ p }: { p: PropertyWithDates }) {
   const imageSrc = p.image_url || p.imageUrl || "/placeholder-property.jpg";
   const listedText = p.listedAtText || "Live listing";
   const showNewBadge = isNewListing(p);
+  const showCallForPrice = isPriceOnRequest(p);
 
   return (
     <Link
@@ -56,7 +60,9 @@ export default function PropertyCard({ p }: { p: PropertyWithDates }) {
       <div className="p-4">
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
-            <p className="text-lg font-semibold">{formatNaira(p.price)}</p>
+            <p className="text-lg font-semibold">
+              {showCallForPrice ? "Call for Price" : formatNaira(p.price)}
+            </p>
             <p className="mt-1 line-clamp-1 font-medium">{p.title}</p>
             <p className="mt-1 text-sm text-gray-600">
               {p.area}, {p.city}, {p.state}

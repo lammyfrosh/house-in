@@ -13,6 +13,7 @@ type Property = {
   purpose: string;
   property_type: string;
   price: number;
+  price_on_request?: number | boolean;
   bedrooms: number;
   bathrooms: number;
   toilets?: number;
@@ -34,6 +35,7 @@ type PropertyForm = {
   purpose: string;
   propertyType: string;
   price: string;
+  priceOnRequest: boolean;
   bedrooms: string;
   bathrooms: string;
   toilets: string;
@@ -64,6 +66,7 @@ export default function AdminEditPropertyPage() {
     purpose: "rent",
     propertyType: "",
     price: "",
+    priceOnRequest: false,
     bedrooms: "",
     bathrooms: "",
     toilets: "",
@@ -115,6 +118,10 @@ export default function AdminEditPropertyPage() {
           purpose: p.purpose || "rent",
           propertyType: p.property_type || "",
           price: String(p.price ?? ""),
+          priceOnRequest:
+            p.price_on_request === true ||
+            p.price_on_request === 1 ||
+            String(p.price_on_request).toLowerCase() === "true",
           bedrooms: String(p.bedrooms ?? ""),
           bathrooms: String(p.bathrooms ?? ""),
           toilets: String(p.toilets ?? ""),
@@ -216,6 +223,12 @@ export default function AdminEditPropertyPage() {
       return;
     }
 
+    if (!form.priceOnRequest && !form.price.trim()) {
+      setMessage("Please enter a price or turn on Call for Price.");
+      setMessageType("error");
+      return;
+    }
+
     setSaving(true);
     setMessage("");
     setMessageType("");
@@ -226,7 +239,8 @@ export default function AdminEditPropertyPage() {
       formData.append("title", form.title.trim());
       formData.append("purpose", form.purpose);
       formData.append("propertyType", form.propertyType.trim());
-      formData.append("price", form.price || "0");
+      formData.append("price", form.priceOnRequest ? "0" : form.price || "0");
+      formData.append("priceOnRequest", String(form.priceOnRequest));
       formData.append("bedrooms", form.bedrooms || "0");
       formData.append("bathrooms", form.bathrooms || "0");
       formData.append("toilets", form.toilets || "0");
@@ -392,8 +406,23 @@ export default function AdminEditPropertyPage() {
                     name="price"
                     value={form.price}
                     onChange={handleChange}
-                    className="h-12 w-full rounded-xl border border-[var(--color-border)] px-4 outline-none transition focus:border-[var(--color-primary-dark)] focus:ring-2 focus:ring-[var(--color-primary)]/20"
+                    required={!form.priceOnRequest}
+                    disabled={form.priceOnRequest}
+                    className="h-12 w-full rounded-xl border border-[var(--color-border)] px-4 outline-none transition disabled:cursor-not-allowed disabled:bg-gray-100 focus:border-[var(--color-primary-dark)] focus:ring-2 focus:ring-[var(--color-primary)]/20"
                   />
+                </div>
+
+                <div className="md:col-span-2">
+                  <label className="flex items-center gap-3 rounded-2xl border border-[var(--color-border)] bg-[#f8fafc] px-4 py-3 text-sm text-[var(--color-text-main)]">
+                    <input
+                      type="checkbox"
+                      name="priceOnRequest"
+                      checked={form.priceOnRequest}
+                      onChange={handleChange}
+                      className="h-4 w-4"
+                    />
+                    Hide public price and show “Call for Price” instead
+                  </label>
                 </div>
 
                 <div>
@@ -597,36 +626,36 @@ export default function AdminEditPropertyPage() {
               </div>
 
               {imagePreviews.length > 0 && (
-  <div className="mt-4">
-    <div className="grid grid-cols-2 gap-3">
-      {imagePreviews.map((src, index) => (
-        <div
-          key={`${src}-${index}`}
-          className="relative overflow-hidden rounded-2xl border border-[var(--color-border)] bg-[#f8fafc]"
-        >
-          <img
-            src={src}
-            alt={`Selected image ${index + 1}`}
-            className="h-36 w-full object-cover"
-          />
+                <div className="mt-4">
+                  <div className="grid grid-cols-2 gap-3">
+                    {imagePreviews.map((src, index) => (
+                      <div
+                        key={`${src}-${index}`}
+                        className="relative overflow-hidden rounded-2xl border border-[var(--color-border)] bg-[#f8fafc]"
+                      >
+                        <img
+                          src={src}
+                          alt={`Selected image ${index + 1}`}
+                          className="h-36 w-full object-cover"
+                        />
 
-          <button
-            type="button"
-            onClick={() => removeSelectedImage(index)}
-            className="absolute right-2 top-2 flex h-8 w-8 items-center justify-center rounded-full bg-black/70 text-white shadow-sm transition hover:bg-black/80"
-            aria-label={`Remove image ${index + 1}`}
-          >
-            <X size={14} />
-          </button>
+                        <button
+                          type="button"
+                          onClick={() => removeSelectedImage(index)}
+                          className="absolute right-2 top-2 flex h-8 w-8 items-center justify-center rounded-full bg-black/70 text-white shadow-sm transition hover:bg-black/80"
+                          aria-label={`Remove image ${index + 1}`}
+                        >
+                          <X size={14} />
+                        </button>
 
-          <div className="bg-white px-3 py-2 text-xs font-semibold text-[var(--color-text-main)]">
-            {index === 0 ? "Primary image" : `Image ${index + 1}`}
-          </div>
-        </div>
-      ))}
-    </div>
-  </div>
-)}
+                        <div className="bg-white px-3 py-2 text-xs font-semibold text-[var(--color-text-main)]">
+                          {index === 0 ? "Primary image" : `Image ${index + 1}`}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </section>
 
             <section className="rounded-3xl border border-[var(--color-border)] bg-white p-5 shadow-sm sm:p-6">

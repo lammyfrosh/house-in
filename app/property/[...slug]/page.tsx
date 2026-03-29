@@ -27,6 +27,14 @@ function getPurposeBadge(purpose: string) {
   return "SHORTLET";
 }
 
+function isPriceOnRequest(property: { price_on_request?: number | boolean }) {
+  return (
+    property.price_on_request === true ||
+    property.price_on_request === 1 ||
+    String(property.price_on_request).toLowerCase() === "true"
+  );
+}
+
 const ADMIN_WHATSAPP_NUMBER = "2348075990912";
 const CONTACT_EMAIL = "contact@house-in.online";
 
@@ -56,19 +64,35 @@ export default async function PropertyPage({
     .slice(0, 3);
 
   const badge = getPurposeBadge(property.purpose);
+  const showCallForPrice = isPriceOnRequest(property);
 
   const galleryImages =
     property.gallery_images && property.gallery_images.length > 0
       ? property.gallery_images
       : [property.image_url || "/placeholder-property.jpg"];
 
-  const whatsappMessage = `Hello, I am interested in this property: ${property.title} in ${property.area}, ${property.city}, ${property.state}. Please share more details.`;
+  const whatsappMessage = showCallForPrice
+    ? `Hello, I am interested in this property: ${property.title} in ${property.area}, ${property.city}, ${property.state}. Please share the price and more details.`
+    : `Hello, I am interested in this property: ${property.title} in ${property.area}, ${property.city}, ${property.state}. Please share more details.`;
+
   const whatsappHref = `https://wa.me/${ADMIN_WHATSAPP_NUMBER}?text=${encodeURIComponent(
     whatsappMessage
   )}`;
 
   const emailSubject = `Inquiry about ${property.title}`;
-  const emailBody = `Hello,
+  const emailBody = showCallForPrice
+    ? `Hello,
+
+I am interested in this property:
+
+Title: ${property.title}
+Location: ${property.area}, ${property.city}, ${property.state}
+Price: Call for Price
+
+Please share the price and more details.
+
+Thank you.`
+    : `Hello,
 
 I am interested in this property:
 
@@ -109,7 +133,9 @@ Thank you.`;
                 Price
               </p>
               <p className="mt-2 text-3xl font-bold text-[var(--color-text-main)]">
-                ₦{Number(property.price || 0).toLocaleString()}
+                {showCallForPrice
+                  ? "Call for Price"
+                  : `₦${Number(property.price || 0).toLocaleString()}`}
               </p>
             </div>
           </div>
@@ -241,40 +267,45 @@ Thank you.`;
           </div>
 
           <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            {similar.map((p) => (
-              <Link
-                key={p.id}
-                href={`/property/${p.slug}`}
-                className="overflow-hidden rounded-3xl border border-[var(--color-border)] bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-md"
-              >
-                <div className="relative h-56 w-full">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={p.image_url || "/placeholder-property.jpg"}
-                    alt={p.title}
-                    className="h-full w-full object-cover"
-                  />
-                </div>
+            {similar.map((p) => {
+              const similarIsCallForPrice = isPriceOnRequest(p);
 
-                <div className="p-4">
-                  <p className="text-xs font-bold uppercase tracking-widest text-[var(--color-primary-dark)]">
-                    {getPurposeBadge(p.purpose)}
-                  </p>
+              return (
+                <Link
+                  key={p.id}
+                  href={`/property/${p.slug}`}
+                  className="overflow-hidden rounded-3xl border border-[var(--color-border)] bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-md"
+                >
+                  <div className="relative h-56 w-full">
+                    <img
+                      src={p.image_url || "/placeholder-property.jpg"}
+                      alt={p.title}
+                      className="h-full w-full object-cover"
+                    />
+                  </div>
 
-                  <h3 className="mt-2 line-clamp-2 text-lg font-semibold text-[var(--color-text-main)]">
-                    {p.title}
-                  </h3>
+                  <div className="p-4">
+                    <p className="text-xs font-bold uppercase tracking-widest text-[var(--color-primary-dark)]">
+                      {getPurposeBadge(p.purpose)}
+                    </p>
 
-                  <p className="mt-2 text-sm text-[var(--color-text-muted)]">
-                    {p.area}, {p.city}, {p.state}
-                  </p>
+                    <h3 className="mt-2 line-clamp-2 text-lg font-semibold text-[var(--color-text-main)]">
+                      {p.title}
+                    </h3>
 
-                  <p className="mt-3 text-base font-bold text-[var(--color-text-main)]">
-                    ₦{Number(p.price || 0).toLocaleString()}
-                  </p>
-                </div>
-              </Link>
-            ))}
+                    <p className="mt-2 text-sm text-[var(--color-text-muted)]">
+                      {p.area}, {p.city}, {p.state}
+                    </p>
+
+                    <p className="mt-3 text-base font-bold text-[var(--color-text-main)]">
+                      {similarIsCallForPrice
+                        ? "Call for Price"
+                        : `₦${Number(p.price || 0).toLocaleString()}`}
+                    </p>
+                  </div>
+                </Link>
+              );
+            })}
           </div>
         </section>
       )}

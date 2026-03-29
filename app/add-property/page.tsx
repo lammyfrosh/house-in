@@ -18,6 +18,7 @@ type PropertyForm = {
   purpose: string;
   propertyType: string;
   price: string;
+  priceOnRequest: boolean;
   bedrooms: string;
   bathrooms: string;
   toilets: string;
@@ -45,6 +46,7 @@ export default function AddPropertyPage() {
     purpose: "rent",
     propertyType: "",
     price: "",
+    priceOnRequest: false,
     bedrooms: "",
     bathrooms: "",
     toilets: "",
@@ -203,6 +205,12 @@ export default function AddPropertyPage() {
       return;
     }
 
+    if (!form.priceOnRequest && !form.price.trim()) {
+      setMessage("Please enter a price or turn on Call for Price.");
+      setMessageType("error");
+      return;
+    }
+
     setSaving(true);
     setMessage("");
     setMessageType("");
@@ -213,7 +221,8 @@ export default function AddPropertyPage() {
       formData.append("title", form.title.trim());
       formData.append("purpose", form.purpose);
       formData.append("propertyType", form.propertyType.trim());
-      formData.append("price", form.price || "0");
+      formData.append("price", form.priceOnRequest ? "0" : form.price || "0");
+      formData.append("priceOnRequest", String(form.priceOnRequest));
       formData.append("bedrooms", form.bedrooms || "0");
       formData.append("bathrooms", form.bathrooms || "0");
       formData.append("toilets", form.toilets || "0");
@@ -268,6 +277,7 @@ export default function AddPropertyPage() {
         purpose: "rent",
         propertyType: "",
         price: "",
+        priceOnRequest: false,
         bedrooms: "",
         bathrooms: "",
         toilets: "",
@@ -416,10 +426,26 @@ export default function AddPropertyPage() {
                     name="price"
                     value={form.price}
                     onChange={handleChange}
-                    required
-                    className="h-12 w-full rounded-xl border border-[var(--color-border)] px-4 outline-none transition focus:border-[var(--color-primary-dark)] focus:ring-2 focus:ring-[var(--color-primary)]/20"
-                    placeholder="e.g. 25000000"
+                    required={!form.priceOnRequest}
+                    disabled={form.priceOnRequest}
+                    className="h-12 w-full rounded-xl border border-[var(--color-border)] px-4 outline-none transition disabled:cursor-not-allowed disabled:bg-gray-100 focus:border-[var(--color-primary-dark)] focus:ring-2 focus:ring-[var(--color-primary)]/20"
+                    placeholder={
+                      form.priceOnRequest ? "Call for Price enabled" : "e.g. 25000000"
+                    }
                   />
+                </div>
+
+                <div className="md:col-span-2">
+                  <label className="flex items-center gap-3 rounded-2xl border border-[var(--color-border)] bg-[#f8fafc] px-4 py-3 text-sm text-[var(--color-text-main)]">
+                    <input
+                      type="checkbox"
+                      name="priceOnRequest"
+                      checked={form.priceOnRequest}
+                      onChange={handleChange}
+                      className="h-4 w-4"
+                    />
+                    Hide public price and show “Call for Price” instead
+                  </label>
                 </div>
 
                 <div>

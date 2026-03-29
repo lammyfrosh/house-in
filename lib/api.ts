@@ -8,6 +8,7 @@ export type Property = {
   purpose: string;
   property_type: string;
   price: number;
+  price_on_request?: number | boolean;
   bedrooms: number;
   bathrooms: number;
   toilets?: number;
@@ -23,6 +24,7 @@ export type Property = {
   status?: "pending" | "approved" | "rejected";
   created_by_name?: string;
   gallery_images?: string[];
+  created_at?: string;
 
   imageUrl?: string;
   propertyType?: string;
