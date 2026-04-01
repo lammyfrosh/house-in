@@ -2,7 +2,14 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowRight, CheckCircle2, Mail, ShieldCheck, Users } from "lucide-react";
+import {
+  ArrowRight,
+  CheckCircle2,
+  Mail,
+  ShieldCheck,
+  Users,
+  Trash2,
+} from "lucide-react";
 
 type AdminUser = {
   id: number;
@@ -33,6 +40,8 @@ export default function AdminUsersPage() {
   const [users, setUsers] = useState<AdminUser[]>([]);
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState("");
+  const [messageType, setMessageType] = useState<"success" | "error" | "">("");
+  const [actionId, setActionId] = useState<number | null>(null);
 
   const totals = useMemo(() => {
     return {
@@ -79,11 +88,17 @@ export default function AdminUsersPage() {
         }
 
         setSessionUser(meData.user);
-        setUsers(usersData.users || []);
-        setMessage("All users loaded successfully.");
+        setUsers(
+          (usersData.users || []).filter(
+            (user: AdminUser) => String(user.role).toLowerCase() === "user"
+          )
+        );
+        setMessage("All external users loaded successfully.");
+        setMessageType("success");
       } catch (error) {
         console.error(error);
         setMessage("Could not load platform users.");
+        setMessageType("error");
       } finally {
         setLoading(false);
       }
@@ -112,6 +127,55 @@ export default function AdminUsersPage() {
     });
   }
 
+  async function deleteUser(user: AdminUser) {
+    const token = localStorage.getItem("housein_token");
+    if (!token) {
+      router.push("/signin");
+      return;
+    }
+
+    const confirmed = window.confirm(
+      `Delete ${user.full_name}?\n\nThis will also permanently delete all properties uploaded by this user, including related images and videos.`
+    );
+
+    if (!confirmed) return;
+
+    setActionId(user.id);
+    setMessage("");
+    setMessageType("");
+
+    try {
+      const res = await fetch(`${API}/api/auth/users/${user.id}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.message || "Could not delete user");
+      }
+
+      setUsers((prev) => prev.filter((item) => item.id !== user.id));
+      setMessage(
+        `${user.full_name} deleted successfully. ${Number(
+          data.deletedPropertiesCount || 0
+        )} properties removed.`
+      );
+      setMessageType("success");
+    } catch (error) {
+      console.error(error);
+      setMessage(
+        error instanceof Error ? error.message : "Could not delete user"
+      );
+      setMessageType("error");
+    } finally {
+      setActionId(null);
+    }
+  }
+
   return (
     <main className="mx-auto max-w-7xl px-4 py-6 sm:px-6 sm:py-8 lg:px-8 lg:py-10">
       <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
@@ -120,11 +184,11 @@ export default function AdminUsersPage() {
             Platform Users
           </p>
           <h1 className="mt-2 text-3xl font-bold tracking-tight text-[var(--color-text-main)] sm:text-4xl">
-            All Users and Upload Activity
+            External Users and Upload Activity
           </h1>
           <p className="mt-2 max-w-2xl text-sm leading-6 text-[var(--color-text-muted)]">
-            View every registered user, their access level, verification status,
-            and the number of properties they have uploaded.
+            View external users, their verification status, and delete users
+            together with all properties uploaded by them when necessary.
           </p>
         </div>
 
@@ -187,7 +251,15 @@ export default function AdminUsersPage() {
       )}
 
       {message && (
-        <div className="mt-5 rounded-xl bg-blue-50 px-4 py-3 text-sm text-blue-700">
+        <div
+          className={`mt-5 rounded-xl px-4 py-3 text-sm ${
+            messageType === "success"
+              ? "bg-green-50 text-green-700"
+              : messageType === "error"
+              ? "bg-red-50 text-red-700"
+              : "bg-blue-50 text-blue-700"
+          }`}
+        >
           {message}
         </div>
       )}
@@ -199,7 +271,7 @@ export default function AdminUsersPage() {
           </div>
         ) : users.length === 0 ? (
           <div className="rounded-2xl border border-[var(--color-border)] bg-white p-5 text-sm text-[var(--color-text-muted)] shadow-sm">
-            No users found.
+            No external users found.
           </div>
         ) : (
           users.map((user) => (
@@ -276,13 +348,22 @@ export default function AdminUsersPage() {
                   </div>
                 </div>
 
-                <div className="w-full lg:w-56">
+                <div className="w-full space-y-3 lg:w-56">
                   <button
                     onClick={() => router.push(`/admin/users/${user.id}`)}
                     className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-[var(--color-primary-dark)] px-4 py-3 text-sm font-semibold text-white transition hover:opacity-95"
                   >
                     View User
                     <ArrowRight size={16} />
+                  </button>
+
+                  <button
+                    onClick={() => deleteUser(user)}
+                    disabled={actionId === user.id}
+                    className="inline-flex w-full items-center justify-center gap-2 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700 transition hover:bg-red-100 disabled:cursor-not-allowed disabled:opacity-70"
+                  >
+                    <Trash2 size={16} />
+                    {actionId === user.id ? "Deleting..." : "Delete User"}
                   </button>
                 </div>
               </div>
