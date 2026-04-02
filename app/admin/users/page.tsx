@@ -15,7 +15,7 @@ type AdminUser = {
   id: number;
   full_name: string;
   email: string;
-  role: string;
+  role?: string | null;
   created_at?: string;
   is_verified?: number | boolean;
   property_count: number;
@@ -37,22 +37,40 @@ export default function AdminUsersPage() {
     process.env.NEXT_PUBLIC_API_BASE_URL || "https://api.house-in.online";
 
   const [sessionUser, setSessionUser] = useState<SessionUser | null>(null);
-  const [users, setUsers] = useState<AdminUser[]>([]);
+  const [allUsers, setAllUsers] = useState<AdminUser[]>([]);
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState("");
   const [messageType, setMessageType] = useState<"success" | "error" | "">("");
   const [actionId, setActionId] = useState<number | null>(null);
 
+  const displayedUsers = useMemo(() => {
+    return allUsers.filter((user) => {
+      const role = String(user.role || "").toLowerCase().trim();
+
+      // Exclude only clear admin roles.
+      if (
+        role === "admin" ||
+        role === "superadmin" ||
+        role === "super_admin"
+      ) {
+        return false;
+      }
+
+      return true;
+    });
+  }, [allUsers]);
+
   const totals = useMemo(() => {
     return {
-      users: users.length,
-      properties: users.reduce(
+      users: displayedUsers.length,
+      properties: displayedUsers.reduce(
         (sum, user) => sum + Number(user.property_count || 0),
         0
       ),
-      verified: users.filter((user) => Number(user.is_verified) === 1).length,
+      verified: displayedUsers.filter((user) => Number(user.is_verified) === 1)
+        .length,
     };
-  }, [users]);
+  }, [displayedUsers]);
 
   useEffect(() => {
     async function init() {
@@ -88,11 +106,7 @@ export default function AdminUsersPage() {
         }
 
         setSessionUser(meData.user);
-        setUsers(
-          (usersData.users || []).filter(
-            (user: AdminUser) => String(user.role).toLowerCase() === "user"
-          )
-        );
+        setAllUsers(Array.isArray(usersData.users) ? usersData.users : []);
         setMessage("All external users loaded successfully.");
         setMessageType("success");
       } catch (error) {
@@ -107,12 +121,13 @@ export default function AdminUsersPage() {
     init();
   }, [API, router]);
 
-  function formatRole(role: string) {
+  function formatRole(role?: string | null) {
     const clean = String(role || "").toLowerCase().trim();
 
     if (clean === "superadmin" || clean === "super_admin") return "Super Admin";
     if (clean === "admin") return "Admin";
-    return "User";
+    if (!clean) return "User";
+    return clean.charAt(0).toUpperCase() + clean.slice(1);
   }
 
   function formatDate(value?: string) {
@@ -158,7 +173,8 @@ export default function AdminUsersPage() {
         throw new Error(data.message || "Could not delete user");
       }
 
-      setUsers((prev) => prev.filter((item) => item.id !== user.id));
+      setAllUsers((prev) => prev.filter((item) => item.id !== user.id));
+
       setMessage(
         `${user.full_name} deleted successfully. ${Number(
           data.deletedPropertiesCount || 0
@@ -269,12 +285,12 @@ export default function AdminUsersPage() {
           <div className="rounded-2xl border border-[var(--color-border)] bg-white p-5 text-sm text-[var(--color-text-muted)] shadow-sm">
             Loading users...
           </div>
-        ) : users.length === 0 ? (
+        ) : displayedUsers.length === 0 ? (
           <div className="rounded-2xl border border-[var(--color-border)] bg-white p-5 text-sm text-[var(--color-text-muted)] shadow-sm">
             No external users found.
           </div>
         ) : (
-          users.map((user) => (
+          displayedUsers.map((user) => (
             <div
               key={user.id}
               className="rounded-3xl border border-[var(--color-border)] bg-white p-5 shadow-sm"
