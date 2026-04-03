@@ -13,6 +13,7 @@ import {
   ArrowRight,
   Layers3,
   BadgeCheck,
+  Scale,
 } from "lucide-react";
 
 type User = {
@@ -114,6 +115,20 @@ export default function AdminPage() {
       badge: "Access",
     },
     {
+      title: "Manage Builders",
+      text: "Add, edit, and delete prominent builders displayed on the home page.",
+      href: "/admin/builders",
+      icon: Building2,
+      badge: "Builders",
+    },
+    {
+      title: "Manage Legal Providers",
+      text: "Add, edit, and delete legal service providers displayed on the home page.",
+      href: "/admin/legal-providers",
+      icon: Scale,
+      badge: "Legal",
+    },
+    {
       title: "View Website",
       text: "Open the public website and review the live experience.",
       href: "/",
@@ -202,7 +217,7 @@ export default function AdminPage() {
           </p>
 
           <p className="mt-1 text-sm text-slate-500">
-            Property, user, and admin management access
+            Property, user, admin, and homepage content management access
           </p>
         </div>
 
@@ -244,7 +259,7 @@ export default function AdminPage() {
           </div>
         </div>
 
-        <div className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-5">
+        <div className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
           {quickModules.map((card) => {
             const Icon = card.icon;
 
@@ -297,7 +312,7 @@ export default function AdminPage() {
 
           <div className="mt-4 space-y-3 text-sm leading-6 text-slate-500">
             <p>
-              This dashboard is designed to help admins manage listings, users, and platform access without unnecessary complexity.
+              This dashboard is designed to help admins manage listings, users, admin access, and homepage content without unnecessary complexity.
             </p>
             <p>
               The most important actions are easy to find, the layout is clear, and the navigation stays straightforward.
@@ -347,6 +362,22 @@ export default function AdminPage() {
             </Link>
 
             <Link
+              href="/admin/builders"
+              className="flex items-center justify-between rounded-2xl border border-slate-200 px-4 py-4 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+            >
+              <span>Manage prominent builders</span>
+              <ArrowRight size={16} />
+            </Link>
+
+            <Link
+              href="/admin/legal-providers"
+              className="flex items-center justify-between rounded-2xl border border-slate-200 px-4 py-4 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+            >
+              <span>Manage legal providers</span>
+              <ArrowRight size={16} />
+            </Link>
+
+            <Link
               href="/"
               className="flex items-center justify-between rounded-2xl border border-slate-200 px-4 py-4 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
             >
@@ -366,7 +397,7 @@ export default function AdminPage() {
                   Admin tools ready
                 </p>
                 <p className="mt-1 text-sm leading-6 text-slate-600">
-                  Property management, user oversight, admin control, and core navigation are all available from this dashboard.
+                  Property management, user oversight, admin control, homepage content, and core navigation are all available from this dashboard.
                 </p>
               </div>
             </div>

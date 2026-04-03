@@ -31,6 +31,14 @@ export type Property = {
   listedAtText?: string;
 };
 
+export type PartnerItem = {
+  id: number;
+  name: string;
+  logo_url: string;
+  website?: string | null;
+  created_at?: string;
+};
+
 function normalizeProperty(property: Property): Property {
   const gallery =
     property.gallery_images && property.gallery_images.length > 0
@@ -83,4 +91,32 @@ export async function getApprovedPropertyBySlug(
   }
 
   return data.property ? normalizeProperty(data.property) : null;
+}
+
+export async function getBuilders(): Promise<PartnerItem[]> {
+  const res = await fetch(`${API_BASE_URL}/api/partners/builders`, {
+    cache: "no-store",
+  });
+
+  const data = await res.json();
+
+  if (!res.ok) {
+    throw new Error(data.message || "Failed to fetch builders");
+  }
+
+  return data.builders || [];
+}
+
+export async function getLegalProviders(): Promise<PartnerItem[]> {
+  const res = await fetch(`${API_BASE_URL}/api/partners/legal-providers`, {
+    cache: "no-store",
+  });
+
+  const data = await res.json();
+
+  if (!res.ok) {
+    throw new Error(data.message || "Failed to fetch legal providers");
+  }
+
+  return data.legalProviders || [];
 }
