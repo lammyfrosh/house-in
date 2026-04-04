@@ -1,11 +1,11 @@
 "use client";
 
-import { FormEvent, useMemo, useState } from "react";
+import { Suspense, FormEvent, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { ArrowRight, Eye, EyeOff, Lock, ShieldCheck } from "lucide-react";
 
-export default function ResetPasswordPage() {
+function ResetPasswordContent() {
   const API = "https://api.house-in.online";
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -171,16 +171,10 @@ export default function ResetPasswordPage() {
                   />
                   <button
                     type="button"
-                    onClick={() =>
-                      setShowConfirmPassword((prev) => !prev)
-                    }
+                    onClick={() => setShowConfirmPassword((prev) => !prev)}
                     className="text-gray-500 transition hover:text-gray-700"
                   >
-                    {showConfirmPassword ? (
-                      <EyeOff size={18} />
-                    ) : (
-                      <Eye size={18} />
-                    )}
+                    {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                   </button>
                 </div>
               </div>
@@ -208,5 +202,21 @@ export default function ResetPasswordPage() {
         </section>
       </div>
     </main>
+  );
+}
+
+export default function ResetPasswordPage() {
+  return (
+    <Suspense
+      fallback={
+        <main className="min-h-screen bg-[#f6f8fb] flex items-center justify-center">
+          <div className="rounded-2xl border border-[var(--color-border)] bg-white px-6 py-4 text-sm text-[var(--color-text-muted)] shadow-sm">
+            Loading reset page...
+          </div>
+        </main>
+      }
+    >
+      <ResetPasswordContent />
+    </Suspense>
   );
 }
