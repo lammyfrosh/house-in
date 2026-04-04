@@ -1,61 +1,55 @@
 "use client";
 
-import { FormEvent, useEffect, useState } from "react";
+import { FormEvent, useMemo, useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { Eye, EyeOff, Lock, Mail, ArrowRight, ShieldCheck } from "lucide-react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { ArrowRight, Eye, EyeOff, Lock, ShieldCheck } from "lucide-react";
 
-type LoginUser = {
-  id: number;
-  full_name: string;
-  email: string;
-  role: string;
-};
-
-export default function SignInPage() {
-  const router = useRouter();
+export default function ResetPasswordPage() {
   const API = "https://api.house-in.online";
+  const router = useRouter();
+  const searchParams = useSearchParams();
 
-  const [email, setEmail] = useState("");
+  const token = useMemo(() => searchParams.get("token") || "", [searchParams]);
+
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-
-  useEffect(() => {
-    const token = localStorage.getItem("housein_token");
-    const storedUser = localStorage.getItem("housein_user");
-
-    if (!token || !storedUser) return;
-
-    try {
-      const user: LoginUser = JSON.parse(storedUser);
-      const role = String(user?.role || "").toLowerCase().trim();
-
-      if (role === "admin" || role === "superadmin" || role === "super_admin") {
-        router.replace("/admin");
-      } else {
-        router.replace("/dashboard");
-      }
-    } catch {
-      localStorage.removeItem("housein_token");
-      localStorage.removeItem("housein_user");
-    }
-  }, [router]);
+  const [successMessage, setSuccessMessage] = useState("");
 
   async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    setLoading(true);
     setError("");
+    setSuccessMessage("");
+
+    if (!token) {
+      setError("This reset link is invalid or missing.");
+      return;
+    }
+
+    if (password.length < 6) {
+      setError("Password must be at least 6 characters long.");
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      setError("Passwords do not match.");
+      return;
+    }
+
+    setLoading(true);
 
     try {
-      const res = await fetch(`${API}/api/auth/login`, {
+      const res = await fetch(`${API}/api/auth/reset-password`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          email: email.trim(),
+          token,
           password,
         }),
       });
@@ -63,23 +57,23 @@ export default function SignInPage() {
       const data = await res.json();
 
       if (!res.ok) {
-        throw new Error(data.message || "Login failed");
+        throw new Error(data.message || "Could not reset password");
       }
 
-      localStorage.setItem("housein_token", data.token);
-      localStorage.setItem("housein_user", JSON.stringify(data.user));
-      window.dispatchEvent(new Event("housein-auth-changed"));
+      setSuccessMessage(
+        data.message || "Password reset successful. You can now sign in."
+      );
+      setPassword("");
+      setConfirmPassword("");
 
-      const role = String(data.user?.role || "").toLowerCase().trim();
-
-      if (role === "admin" || role === "superadmin" || role === "super_admin") {
-        router.push("/admin");
-      } else {
-        router.push("/dashboard");
-      }
+      setTimeout(() => {
+        router.push("/signin");
+      }, 1600);
     } catch (err) {
       console.error(err);
-      setError(err instanceof Error ? err.message : "Could not sign in");
+      setError(
+        err instanceof Error ? err.message : "Could not reset password"
+      );
     } finally {
       setLoading(false);
     }
@@ -92,16 +86,16 @@ export default function SignInPage() {
           <div>
             <div className="inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.18em]">
               <ShieldCheck size={14} />
-              House-In Access
+              Password Reset
             </div>
 
             <h1 className="mt-6 text-4xl font-bold leading-tight">
-              Welcome back to your property workspace
+              Set a fresh password for your account
             </h1>
 
             <p className="mt-4 max-w-xl text-sm leading-7 text-white/85">
-              Sign in to manage your listings, track approvals, and keep your
-              property activity moving smoothly from one place.
+              Choose a strong new password to regain secure access to your
+              House-In account.
             </p>
           </div>
         </section>
@@ -110,12 +104,19 @@ export default function SignInPage() {
           <div className="w-full max-w-md rounded-3xl border border-[var(--color-border)] bg-white p-6 shadow-sm sm:p-8">
             <div>
               <p className="text-xs font-extrabold uppercase tracking-[0.22em] text-[var(--color-primary-dark)]">
-                Sign In
+                Reset Password
               </p>
               <h2 className="mt-2 text-3xl font-bold text-[var(--color-text-main)]">
-                Access your account
+                Create a new password
               </h2>
             </div>
+
+            {!token && (
+              <div className="mt-5 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+                This reset link is missing a valid token. Please request a new
+                password reset email.
+              </div>
+            )}
 
             {error && (
               <div className="mt-5 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
@@ -123,38 +124,17 @@ export default function SignInPage() {
               </div>
             )}
 
+            {successMessage && (
+              <div className="mt-5 rounded-2xl border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700">
+                {successMessage}
+              </div>
+            )}
+
             <form onSubmit={handleSubmit} className="mt-6 space-y-5">
               <div>
                 <label className="mb-2 block text-sm font-semibold text-[var(--color-text-main)]">
-                  Email Address
+                  New Password
                 </label>
-                <div className="flex items-center rounded-xl border border-[var(--color-border)] px-3">
-                  <Mail size={18} className="text-gray-400" />
-                  <input
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                    placeholder="you@example.com"
-                    className="h-12 w-full bg-transparent px-3 text-sm outline-none"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <div className="mb-2 flex items-center justify-between gap-4">
-                  <label className="block text-sm font-semibold text-[var(--color-text-main)]">
-                    Password
-                  </label>
-
-                  <Link
-                    href="/forgot-password"
-                    className="text-sm font-semibold text-[var(--color-primary-dark)] hover:underline"
-                  >
-                    Forgot Password?
-                  </Link>
-                </div>
-
                 <div className="flex items-center rounded-xl border border-[var(--color-border)] px-3">
                   <Lock size={18} className="text-gray-400" />
                   <input
@@ -162,7 +142,7 @@ export default function SignInPage() {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     required
-                    placeholder="Enter your password"
+                    placeholder="Enter your new password"
                     className="h-12 w-full bg-transparent px-3 text-sm outline-none"
                   />
                   <button
@@ -175,23 +155,53 @@ export default function SignInPage() {
                 </div>
               </div>
 
+              <div>
+                <label className="mb-2 block text-sm font-semibold text-[var(--color-text-main)]">
+                  Confirm New Password
+                </label>
+                <div className="flex items-center rounded-xl border border-[var(--color-border)] px-3">
+                  <Lock size={18} className="text-gray-400" />
+                  <input
+                    type={showConfirmPassword ? "text" : "password"}
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    required
+                    placeholder="Confirm your new password"
+                    className="h-12 w-full bg-transparent px-3 text-sm outline-none"
+                  />
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setShowConfirmPassword((prev) => !prev)
+                    }
+                    className="text-gray-500 transition hover:text-gray-700"
+                  >
+                    {showConfirmPassword ? (
+                      <EyeOff size={18} />
+                    ) : (
+                      <Eye size={18} />
+                    )}
+                  </button>
+                </div>
+              </div>
+
               <button
                 type="submit"
-                disabled={loading}
+                disabled={loading || !token}
                 className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[var(--color-primary-dark)] px-4 py-3 text-sm font-semibold text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-70"
               >
-                {loading ? "Signing in..." : "Sign In"}
+                {loading ? "Resetting password..." : "Reset Password"}
                 {!loading && <ArrowRight size={16} />}
               </button>
             </form>
 
             <div className="mt-6 text-center text-sm text-[var(--color-text-muted)]">
-              Don&apos;t have an account?{" "}
+              Back to{" "}
               <Link
-                href="/register"
+                href="/signin"
                 className="font-semibold text-[var(--color-primary-dark)] hover:underline"
               >
-                Create one
+                Sign in
               </Link>
             </div>
           </div>
