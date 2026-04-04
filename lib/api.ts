@@ -18,6 +18,7 @@ export type Property = {
   area: string;
   city: string;
   description: string;
+  contact_phone?: string | null;
   image_url?: string;
   video_url?: string;
   featured?: number | boolean;

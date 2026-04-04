@@ -28,6 +28,7 @@ type PropertyForm = {
   area: string;
   city: string;
   description: string;
+  contactPhone: string;
   featured: boolean;
 };
 
@@ -56,6 +57,7 @@ export default function AddPropertyPage() {
     area: "",
     city: "",
     description: "",
+    contactPhone: "",
     featured: false,
   });
 
@@ -211,6 +213,12 @@ export default function AddPropertyPage() {
       return;
     }
 
+    if (!form.contactPhone.trim()) {
+      setMessage("Please enter a contact phone number.");
+      setMessageType("error");
+      return;
+    }
+
     setSaving(true);
     setMessage("");
     setMessageType("");
@@ -232,6 +240,7 @@ export default function AddPropertyPage() {
       formData.append("area", form.area.trim());
       formData.append("city", form.city.trim());
       formData.append("description", form.description.trim());
+      formData.append("contactPhone", form.contactPhone.trim());
       formData.append("featured", String(form.featured));
 
       if (selectedImages[0]) {
@@ -287,6 +296,7 @@ export default function AddPropertyPage() {
         area: "",
         city: "",
         description: "",
+        contactPhone: "",
         featured: false,
       });
 
@@ -435,6 +445,21 @@ export default function AddPropertyPage() {
                   />
                 </div>
 
+                <div>
+                  <label className="mb-2 block text-sm font-medium text-[var(--color-text-main)]">
+                    Contact Phone Number
+                  </label>
+                  <input
+                    type="tel"
+                    name="contactPhone"
+                    value={form.contactPhone}
+                    onChange={handleChange}
+                    required
+                    className="h-12 w-full rounded-xl border border-[var(--color-border)] px-4 outline-none transition focus:border-[var(--color-primary-dark)] focus:ring-2 focus:ring-[var(--color-primary)]/20"
+                    placeholder="e.g. 08031234567"
+                  />
+                </div>
+
                 <div className="md:col-span-2">
                   <label className="flex items-center gap-3 rounded-2xl border border-[var(--color-border)] bg-[#f8fafc] px-4 py-3 text-sm text-[var(--color-text-main)]">
                     <input
@@ -442,23 +467,9 @@ export default function AddPropertyPage() {
                       name="priceOnRequest"
                       checked={form.priceOnRequest}
                       onChange={handleChange}
-                      className="h-4 w-4"
                     />
-                    Hide public price and show “Call for Price” instead
+                    Use Call for Price instead of showing a fixed amount
                   </label>
-                </div>
-
-                <div>
-                  <label className="mb-2 block text-sm font-medium text-[var(--color-text-main)]">
-                    Size
-                  </label>
-                  <input
-                    name="size"
-                    value={form.size}
-                    onChange={handleChange}
-                    className="h-12 w-full rounded-xl border border-[var(--color-border)] px-4 outline-none transition focus:border-[var(--color-primary-dark)] focus:ring-2 focus:ring-[var(--color-primary)]/20"
-                    placeholder="e.g. 600 sqm"
-                  />
                 </div>
 
                 <div>
@@ -471,7 +482,7 @@ export default function AddPropertyPage() {
                     value={form.bedrooms}
                     onChange={handleChange}
                     className="h-12 w-full rounded-xl border border-[var(--color-border)] px-4 outline-none transition focus:border-[var(--color-primary-dark)] focus:ring-2 focus:ring-[var(--color-primary)]/20"
-                    placeholder="0"
+                    placeholder="e.g. 4"
                   />
                 </div>
 
@@ -485,7 +496,7 @@ export default function AddPropertyPage() {
                     value={form.bathrooms}
                     onChange={handleChange}
                     className="h-12 w-full rounded-xl border border-[var(--color-border)] px-4 outline-none transition focus:border-[var(--color-primary-dark)] focus:ring-2 focus:ring-[var(--color-primary)]/20"
-                    placeholder="0"
+                    placeholder="e.g. 5"
                   />
                 </div>
 
@@ -499,7 +510,7 @@ export default function AddPropertyPage() {
                     value={form.toilets}
                     onChange={handleChange}
                     className="h-12 w-full rounded-xl border border-[var(--color-border)] px-4 outline-none transition focus:border-[var(--color-primary-dark)] focus:ring-2 focus:ring-[var(--color-primary)]/20"
-                    placeholder="0"
+                    placeholder="e.g. 5"
                   />
                 </div>
 
@@ -513,18 +524,23 @@ export default function AddPropertyPage() {
                     value={form.parkingSpaces}
                     onChange={handleChange}
                     className="h-12 w-full rounded-xl border border-[var(--color-border)] px-4 outline-none transition focus:border-[var(--color-primary-dark)] focus:ring-2 focus:ring-[var(--color-primary)]/20"
-                    placeholder="0"
+                    placeholder="e.g. 3"
                   />
                 </div>
-              </div>
-            </section>
 
-            <section className="rounded-3xl border border-[var(--color-border)] bg-white p-5 shadow-sm sm:p-6">
-              <h2 className="text-lg font-semibold text-[var(--color-text-main)]">
-                Location
-              </h2>
+                <div>
+                  <label className="mb-2 block text-sm font-medium text-[var(--color-text-main)]">
+                    Size
+                  </label>
+                  <input
+                    name="size"
+                    value={form.size}
+                    onChange={handleChange}
+                    className="h-12 w-full rounded-xl border border-[var(--color-border)] px-4 outline-none transition focus:border-[var(--color-primary-dark)] focus:ring-2 focus:ring-[var(--color-primary)]/20"
+                    placeholder="e.g. 650 sqm"
+                  />
+                </div>
 
-              <div className="mt-5 grid gap-4 md:grid-cols-3">
                 <div>
                   <label className="mb-2 block text-sm font-medium text-[var(--color-text-main)]">
                     State
@@ -541,7 +557,7 @@ export default function AddPropertyPage() {
 
                 <div>
                   <label className="mb-2 block text-sm font-medium text-[var(--color-text-main)]">
-                    Area / LGA
+                    Area
                   </label>
                   <input
                     name="area"
@@ -566,143 +582,139 @@ export default function AddPropertyPage() {
                     placeholder="e.g. Lagos"
                   />
                 </div>
-              </div>
-            </section>
 
-            <section className="rounded-3xl border border-[var(--color-border)] bg-white p-5 shadow-sm sm:p-6">
-              <h2 className="text-lg font-semibold text-[var(--color-text-main)]">
-                Description
-              </h2>
-
-              <div className="mt-5">
-                <label className="mb-2 block text-sm font-medium text-[var(--color-text-main)]">
-                  Property Description
-                </label>
-                <textarea
-                  name="description"
-                  value={form.description}
-                  onChange={handleChange}
-                  rows={7}
-                  className="w-full rounded-2xl border border-[var(--color-border)] px-4 py-3 outline-none transition focus:border-[var(--color-primary-dark)] focus:ring-2 focus:ring-[var(--color-primary)]/20"
-                  placeholder="Write a strong and clear property description..."
-                />
-              </div>
-
-              {isAdmin && (
-                <label className="mt-5 flex items-center gap-3 rounded-2xl border border-[var(--color-border)] bg-[#f8fafc] px-4 py-3 text-sm text-[var(--color-text-main)]">
-                  <input
-                    type="checkbox"
-                    name="featured"
-                    checked={form.featured}
+                <div className="md:col-span-2">
+                  <label className="mb-2 block text-sm font-medium text-[var(--color-text-main)]">
+                    Description
+                  </label>
+                  <textarea
+                    name="description"
+                    value={form.description}
                     onChange={handleChange}
-                    className="h-4 w-4"
+                    rows={6}
+                    className="w-full rounded-xl border border-[var(--color-border)] px-4 py-3 outline-none transition focus:border-[var(--color-primary-dark)] focus:ring-2 focus:ring-[var(--color-primary)]/20"
+                    placeholder="Write a compelling property description..."
                   />
-                  Mark as featured
-                </label>
-              )}
-            </section>
-          </div>
-
-          <div className="space-y-8">
-            <section className="rounded-3xl border border-[var(--color-border)] bg-white p-5 shadow-sm sm:p-6">
-              <h2 className="text-lg font-semibold text-[var(--color-text-main)]">
-                Images
-              </h2>
-
-              <div className="mt-5">
-                <label className="mb-2 block text-sm font-medium text-[var(--color-text-main)]">
-                  Upload Images
-                </label>
-                <input
-                  type="file"
-                  accept="image/*"
-                  multiple
-                  onChange={handleImagesChange}
-                  className="block w-full rounded-xl border border-[var(--color-border)] px-4 py-3 text-sm"
-                />
-                <p className="mt-2 text-xs text-[var(--color-text-muted)]">
-                  Upload one or multiple images. The first image becomes the main image.
-                </p>
-              </div>
-
-              {imagePreviews.length > 0 && (
-                <div className="mt-5 grid grid-cols-2 gap-4 sm:grid-cols-3">
-                  {imagePreviews.map((src, index) => (
-                    <div
-                      key={`${src}-${index}`}
-                      className="relative overflow-hidden rounded-2xl border border-[var(--color-border)] bg-[#f8fafc]"
-                    >
-                      <img
-                        src={src}
-                        alt={`Preview ${index + 1}`}
-                        className="h-36 w-full object-cover"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => removeImage(index)}
-                        className="absolute right-2 top-2 rounded-full bg-black/70 p-1 text-white"
-                      >
-                        <X size={14} />
-                      </button>
-                    </div>
-                  ))}
                 </div>
-              )}
+
+                <div className="md:col-span-2">
+                  <label className="flex items-center gap-3 rounded-2xl border border-[var(--color-border)] bg-[#f8fafc] px-4 py-3 text-sm text-[var(--color-text-main)]">
+                    <input
+                      type="checkbox"
+                      name="featured"
+                      checked={form.featured}
+                      onChange={handleChange}
+                    />
+                    Mark this property as featured
+                  </label>
+                </div>
+              </div>
             </section>
 
             <section className="rounded-3xl border border-[var(--color-border)] bg-white p-5 shadow-sm sm:p-6">
               <h2 className="text-lg font-semibold text-[var(--color-text-main)]">
-                Video
+                Media Uploads
               </h2>
 
-              <div className="mt-5">
-                <label className="mb-2 block text-sm font-medium text-[var(--color-text-main)]">
-                  Upload Video
-                </label>
-                <input
-                  type="file"
-                  accept="video/*"
-                  onChange={handleVideoChange}
-                  className="block w-full rounded-xl border border-[var(--color-border)] px-4 py-3 text-sm"
-                />
-                <p className="mt-2 text-xs text-[var(--color-text-muted)]">
-                  Optional. Add a property walkthrough video if available.
-                </p>
-              </div>
+              <div className="mt-5 space-y-6">
+                <div>
+                  <label className="mb-2 block text-sm font-medium text-[var(--color-text-main)]">
+                    Property Images
+                  </label>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    multiple
+                    onChange={handleImagesChange}
+                    className="block w-full text-sm text-[var(--color-text-main)]"
+                  />
+                  <p className="mt-2 text-xs text-[var(--color-text-muted)]">
+                    Upload one main image and as many gallery images as you want.
+                  </p>
+                </div>
 
-              {videoPreview && (
-                <div className="mt-5 overflow-hidden rounded-2xl border border-[var(--color-border)] bg-black">
-                  <video controls className="w-full">
+                {imagePreviews.length > 0 && (
+                  <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                    {imagePreviews.map((preview, index) => (
+                      <div
+                        key={preview}
+                        className="relative overflow-hidden rounded-2xl border border-[var(--color-border)] bg-[#f8fafc]"
+                      >
+                        <img
+                          src={preview}
+                          alt={`Preview ${index + 1}`}
+                          className="h-44 w-full object-cover"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => removeImage(index)}
+                          className="absolute right-3 top-3 inline-flex h-8 w-8 items-center justify-center rounded-full bg-black/70 text-white transition hover:bg-black"
+                        >
+                          <X size={16} />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                <div>
+                  <label className="mb-2 block text-sm font-medium text-[var(--color-text-main)]">
+                    Property Video
+                  </label>
+                  <input
+                    type="file"
+                    accept="video/*"
+                    onChange={handleVideoChange}
+                    className="block w-full text-sm text-[var(--color-text-main)]"
+                  />
+                  <p className="mt-2 text-xs text-[var(--color-text-muted)]">
+                    Optional video upload for a richer listing presentation.
+                  </p>
+                </div>
+
+                {videoPreview && (
+                  <video
+                    controls
+                    className="w-full rounded-2xl border border-[var(--color-border)] bg-black"
+                  >
                     <source src={videoPreview} />
                     Your browser does not support the video tag.
                   </video>
-                </div>
-              )}
-            </section>
-
-            <section className="rounded-3xl border border-[var(--color-border)] bg-white p-5 shadow-sm sm:p-6">
-              <h2 className="text-lg font-semibold text-[var(--color-text-main)]">
-                Submit
-              </h2>
-
-              <div className="mt-4 space-y-3 text-sm text-[var(--color-text-muted)]">
-                <p>
-                  Once submitted, this property will go live immediately for public viewing.
-                </p>
-                <p>
-                  Admins will still be able to reject or delete the listing later if needed.
-                </p>
+                )}
               </div>
-
-              <button
-                type="submit"
-                disabled={saving}
-                className="mt-6 inline-flex w-full items-center justify-center rounded-2xl bg-[var(--color-primary-dark)] px-5 py-3 text-sm font-semibold text-white transition hover:opacity-95 disabled:cursor-not-allowed disabled:opacity-70"
-              >
-                {saving ? "Publishing Property..." : "Publish Property"}
-              </button>
             </section>
           </div>
+
+          <aside className="h-fit rounded-3xl border border-[var(--color-border)] bg-white p-5 shadow-sm sm:p-6">
+            <h2 className="text-lg font-semibold text-[var(--color-text-main)]">
+              Submission Guide
+            </h2>
+
+            <div className="mt-5 space-y-4 text-sm leading-6 text-[var(--color-text-muted)]">
+              <p>
+                Make sure your title is clear, your location is accurate, and your
+                description highlights the strongest selling points of the property.
+              </p>
+
+              <p>
+                The contact phone number you enter will be used for direct calls
+                and WhatsApp enquiries from interested buyers or tenants.
+              </p>
+
+              <p>
+                Strong images and a short video can dramatically improve how
+                premium your listing feels.
+              </p>
+            </div>
+
+            <button
+              type="submit"
+              disabled={saving}
+              className="mt-8 inline-flex w-full items-center justify-center rounded-2xl bg-[var(--color-primary-dark)] px-5 py-3 text-sm font-semibold text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {saving ? "Submitting Property..." : "Submit Property"}
+            </button>
+          </aside>
         </form>
       </div>
     </main>

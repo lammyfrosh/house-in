@@ -5,11 +5,11 @@ import {
   Bath,
   MapPin,
   BadgeDollarSign,
-  Mail,
   Car,
   Ruler,
   Toilet,
   MessageCircle,
+  Phone,
 } from "lucide-react";
 import {
   getApprovedProperties,
@@ -35,8 +35,39 @@ function isPriceOnRequest(property: { price_on_request?: number | boolean }) {
   );
 }
 
-const ADMIN_WHATSAPP_NUMBER = "2348075990912";
-const CONTACT_EMAIL = "contact@house-in.online";
+function sanitizeWhatsAppNumber(phone?: string | null) {
+  if (!phone) return null;
+
+  const cleaned = String(phone).replace(/[^\d+]/g, "").trim();
+  if (!cleaned) return null;
+
+  if (cleaned.startsWith("+")) {
+    return cleaned.slice(1);
+  }
+
+  if (cleaned.startsWith("0")) {
+    return `234${cleaned.slice(1)}`;
+  }
+
+  return cleaned;
+}
+
+function sanitizeTelNumber(phone?: string | null) {
+  if (!phone) return null;
+
+  const cleaned = String(phone).replace(/[^\d+]/g, "").trim();
+  if (!cleaned) return null;
+
+  if (cleaned.startsWith("+")) {
+    return cleaned;
+  }
+
+  if (cleaned.startsWith("0")) {
+    return `+234${cleaned.slice(1)}`;
+  }
+
+  return `+${cleaned}`;
+}
 
 export default async function PropertyPage({
   params,
@@ -71,42 +102,18 @@ export default async function PropertyPage({
       ? property.gallery_images
       : [property.image_url || "/placeholder-property.jpg"];
 
+  const whatsappNumber = sanitizeWhatsAppNumber(property.contact_phone);
+  const telNumber = sanitizeTelNumber(property.contact_phone);
+
   const whatsappMessage = showCallForPrice
     ? `Hello, I am interested in this property: ${property.title} in ${property.area}, ${property.city}, ${property.state}. Please share the price and more details.`
     : `Hello, I am interested in this property: ${property.title} in ${property.area}, ${property.city}, ${property.state}. Please share more details.`;
 
-  const whatsappHref = `https://wa.me/${ADMIN_WHATSAPP_NUMBER}?text=${encodeURIComponent(
-    whatsappMessage
-  )}`;
-
-  const emailSubject = `Inquiry about ${property.title}`;
-  const emailBody = showCallForPrice
-    ? `Hello,
-
-I am interested in this property:
-
-Title: ${property.title}
-Location: ${property.area}, ${property.city}, ${property.state}
-Price: Call for Price
-
-Please share the price and more details.
-
-Thank you.`
-    : `Hello,
-
-I am interested in this property:
-
-Title: ${property.title}
-Location: ${property.area}, ${property.city}, ${property.state}
-Price: ₦${Number(property.price || 0).toLocaleString()}
-
-Please share more details.
-
-Thank you.`;
-
-  const mailHref = `mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent(
-    emailSubject
-  )}&body=${encodeURIComponent(emailBody)}`;
+  const whatsappHref = whatsappNumber
+    ? `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(
+        whatsappMessage
+      )}`
+    : null;
 
   return (
     <main className="bg-[#f7f9fc]">
@@ -221,27 +228,41 @@ Thank you.`;
           </h2>
 
           <p className="mt-2 text-sm text-[var(--color-text-muted)]">
-            Interested in this property? Reach out directly through WhatsApp or email.
+            Interested in this property? Reach out directly to the person who posted it.
           </p>
 
-          <div className="mt-6 space-y-3">
-            <a
-              href={whatsappHref}
-              target="_blank"
-              rel="noreferrer"
-              className="flex w-full items-center justify-center gap-2 rounded-xl bg-green-600 px-4 py-3 text-sm font-semibold text-white transition hover:bg-green-700"
-            >
-              <MessageCircle size={16} />
-              Contact via WhatsApp
-            </a>
+          {property.contact_phone ? (
+            <div className="mt-4 rounded-2xl bg-gray-50 px-4 py-3 text-sm text-[var(--color-text-main)]">
+              <span className="font-semibold">Phone:</span> {property.contact_phone}
+            </div>
+          ) : (
+            <div className="mt-4 rounded-2xl bg-amber-50 px-4 py-3 text-sm text-amber-800">
+              This property does not have a contact phone number yet.
+            </div>
+          )}
 
-            <a
-              href={mailHref}
-              className="flex w-full items-center justify-center gap-2 rounded-xl border border-[var(--color-border)] px-4 py-3 text-sm font-semibold text-[var(--color-text-main)] transition hover:bg-gray-50"
-            >
-              <Mail size={16} />
-              Send Email
-            </a>
+          <div className="mt-6 space-y-3">
+            {whatsappHref && (
+              <a
+                href={whatsappHref}
+                target="_blank"
+                rel="noreferrer"
+                className="flex w-full items-center justify-center gap-2 rounded-xl bg-green-600 px-4 py-3 text-sm font-semibold text-white transition hover:bg-green-700"
+              >
+                <MessageCircle size={16} />
+                Contact via WhatsApp
+              </a>
+            )}
+
+            {telNumber && (
+              <a
+                href={`tel:${telNumber}`}
+                className="flex w-full items-center justify-center gap-2 rounded-xl border border-[var(--color-border)] px-4 py-3 text-sm font-semibold text-[var(--color-text-main)] transition hover:bg-gray-50"
+              >
+                <Phone size={16} />
+                {showCallForPrice ? "Call for Price" : "Call Agent"}
+              </a>
+            )}
           </div>
 
           <div className="mt-6 rounded-xl bg-gray-50 p-4 text-xs text-gray-600">
