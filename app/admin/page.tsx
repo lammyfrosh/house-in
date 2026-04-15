@@ -14,6 +14,7 @@ import {
   Layers3,
   BadgeCheck,
   Scale,
+  MessageSquareText,
 } from "lucide-react";
 
 type User = {
@@ -101,6 +102,13 @@ export default function AdminPage() {
       badge: "Manage",
     },
     {
+      title: "Property Requests",
+      text: "Review incoming property demand and manage request status updates.",
+      href: "/admin/requests",
+      icon: MessageSquareText,
+      badge: "Requests",
+    },
+    {
       title: "Manage Users",
       text: "View all registered users and see every property uploaded by each user.",
       href: "/admin/users",
@@ -156,7 +164,8 @@ export default function AdminPage() {
                 </h2>
 
                 <p className="mt-3 max-w-2xl text-sm leading-6 text-white/85 sm:text-base">
-                  Manage listings, users, admin access, and key platform operations from one central dashboard.
+                  Manage listings, requests, users, admin access, and key
+                  platform operations from one central dashboard.
                 </p>
               </div>
 
@@ -170,10 +179,10 @@ export default function AdminPage() {
                 </Link>
 
                 <Link
-                  href="/admin/users"
+                  href="/admin/requests"
                   className="inline-flex items-center justify-center gap-2 rounded-2xl border border-white/20 bg-white/10 px-5 py-3 text-sm font-semibold text-white backdrop-blur transition hover:bg-white/15"
                 >
-                  Open Users
+                  Open Requests
                   <ArrowRight size={16} />
                 </Link>
               </div>
@@ -217,7 +226,7 @@ export default function AdminPage() {
           </p>
 
           <p className="mt-1 text-sm text-slate-500">
-            Property, user, admin, and homepage content management access
+            Property, request, user, admin, and homepage content management access
           </p>
         </div>
 
@@ -312,13 +321,17 @@ export default function AdminPage() {
 
           <div className="mt-4 space-y-3 text-sm leading-6 text-slate-500">
             <p>
-              This dashboard is designed to help admins manage listings, users, admin access, and homepage content without unnecessary complexity.
+              This dashboard is designed to help admins manage listings,
+              requests, users, admin access, and homepage content without
+              unnecessary complexity.
             </p>
             <p>
-              The most important actions are easy to find, the layout is clear, and the navigation stays straightforward.
+              The most important actions are easy to find, the layout is clear,
+              and the navigation stays straightforward.
             </p>
             <p>
-              That makes it easier to move quickly and keep the platform properly managed.
+              That makes it easier to move quickly and keep the platform
+              properly managed.
             </p>
           </div>
         </div>
@@ -334,6 +347,14 @@ export default function AdminPage() {
               className="flex items-center justify-between rounded-2xl border border-slate-200 px-4 py-4 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
             >
               <span>Add a new property listing</span>
+              <ArrowRight size={16} />
+            </Link>
+
+            <Link
+              href="/admin/requests"
+              className="flex items-center justify-between rounded-2xl border border-slate-200 px-4 py-4 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+            >
+              <span>Open property requests</span>
               <ArrowRight size={16} />
             </Link>
 
@@ -397,7 +418,8 @@ export default function AdminPage() {
                   Admin tools ready
                 </p>
                 <p className="mt-1 text-sm leading-6 text-slate-600">
-                  Property management, user oversight, admin control, homepage content, and core navigation are all available from this dashboard.
+                  Property management, request oversight, user control, homepage
+                  content, and core navigation are all available from this dashboard.
                 </p>
               </div>
             </div>
