@@ -1,3 +1,6 @@
+"use client";
+
+import { useState } from "react";
 import Link from "next/link";
 import {
   Facebook,
@@ -5,14 +8,34 @@ import {
   Linkedin,
   Twitter,
   MessageCircle,
+  Phone,
+  ChevronDown,
 } from "lucide-react";
 
-const ADMIN_WHATSAPP_NUMBER = "+23408075990912";
+const ADMIN_CONTACTS = [
+  {
+    label: "Admin 1",
+    whatsapp: "2348075990912",
+    phone: "+23408075990912",
+    email: "contact@house-in.online",
+  },
+  {
+    label: "Admin 2",
+    whatsapp: "2348033103109",
+    phone: "+23408033103109",
+    email: "support@house-in.online",
+  },
+];
 
 export default function Footer() {
-  const whatsappHref = `https://wa.me/${ADMIN_WHATSAPP_NUMBER}?text=${encodeURIComponent(
-    "Hello, I would like to make an enquiry on House-In."
-  )}`;
+  const [showWhatsappOptions, setShowWhatsappOptions] = useState(false);
+  const [showContactOptions, setShowContactOptions] = useState(false);
+
+  function buildWhatsappLink(number: string) {
+    return `https://wa.me/${number}?text=${encodeURIComponent(
+      "Hello, I would like to make an enquiry on House-In."
+    )}`;
+  }
 
   return (
     <footer className="mt-14 bg-[#0a0a0a] text-white">
@@ -172,17 +195,80 @@ export default function Footer() {
                 <span style={{ color: "#000000" }}>Add Property</span>
               </Link>
 
-              <a
-                href={whatsappHref}
-                target="_blank"
-                rel="noreferrer"
-                className="inline-flex items-center justify-center gap-2 rounded-xl border border-gray-700 px-4 py-2 text-xs font-extrabold uppercase tracking-widest text-white transition hover:bg-[#151515]"
-              >
-                <MessageCircle size={14} />
-                WhatsApp
-              </a>
+              <div className="relative">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowWhatsappOptions((prev) => !prev);
+                    setShowContactOptions(false);
+                  }}
+                  className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-gray-700 px-4 py-2 text-xs font-extrabold uppercase tracking-widest text-white transition hover:bg-[#151515]"
+                >
+                  <MessageCircle size={14} />
+                  WhatsApp
+                  <ChevronDown size={14} />
+                </button>
+
+                {showWhatsappOptions && (
+                  <div className="mt-2 rounded-2xl border border-gray-800 bg-[#121212] p-2 shadow-xl">
+                    {ADMIN_CONTACTS.map((admin) => (
+                      <a
+                        key={admin.label}
+                        href={buildWhatsappLink(admin.whatsapp)}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="flex items-center justify-between rounded-xl px-3 py-3 text-sm text-gray-300 transition hover:bg-[#1b1b1b] hover:text-white"
+                      >
+                        <span>{admin.label}</span>
+                        <MessageCircle size={14} />
+                      </a>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              <div className="relative">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowContactOptions((prev) => !prev);
+                    setShowWhatsappOptions(false);
+                  }}
+                  className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-gray-700 px-4 py-2 text-xs font-extrabold uppercase tracking-widest text-white transition hover:bg-[#151515]"
+                >
+                  <Phone size={14} />
+                  Contact
+                  <ChevronDown size={14} />
+                </button>
+
+                {showContactOptions && (
+                  <div className="mt-2 rounded-2xl border border-gray-800 bg-[#121212] p-2 shadow-xl">
+                    {ADMIN_CONTACTS.map((admin) => (
+                      <a
+                        key={admin.label}
+                        href={`tel:${admin.phone}`}
+                        className="flex items-center justify-between rounded-xl px-3 py-3 text-sm text-gray-300 transition hover:bg-[#1b1b1b] hover:text-white"
+                      >
+                        <span>{admin.label}</span>
+                        <Phone size={14} />
+                      </a>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
           </div>
+        </div>
+
+        <div className="mt-10 rounded-2xl border border-gray-800 bg-[#111111] p-4">
+          <p className="text-xs leading-6 text-gray-400">
+            <span className="font-semibold text-white">Disclaimer:</span> House-In
+            is a property discovery and advertising platform. While we strive to
+            maintain quality and accurate listings, users are strongly advised to
+            independently verify property details, ownership, documentation,
+            pricing, and transaction terms before making any payment, commitment,
+            or legal decision.
+          </p>
         </div>
 
         <div className="mt-12 border-t border-gray-800 pt-6 text-sm text-gray-500 sm:flex sm:items-center sm:justify-between">

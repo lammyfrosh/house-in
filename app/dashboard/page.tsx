@@ -3,17 +3,28 @@
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
+  Bell,
   CheckCircle2,
   Clock3,
+  Info,
+  MessageCircle,
   PlusCircle,
   XCircle,
-  MessageCircle,
 } from "lucide-react";
 
 type Property = {
   id: number;
   title: string;
   status: "pending" | "approved" | "rejected" | string;
+};
+
+type NotificationItem = {
+  id: number;
+  title: string;
+  message: string;
+  type: string;
+  is_read: number | boolean;
+  created_at?: string;
 };
 
 type StoredUser = {
@@ -23,7 +34,7 @@ type StoredUser = {
   role: string;
 };
 
-const ADMIN_WHATSAPP_NUMBER = "+23408075990912";
+const ADMIN_WHATSAPP_NUMBER = "2348075990912";
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -31,6 +42,7 @@ export default function DashboardPage() {
     process.env.NEXT_PUBLIC_API_BASE_URL || "https://api.house-in.online";
 
   const [properties, setProperties] = useState<Property[]>([]);
+  const [notifications, setNotifications] = useState<NotificationItem[]>([]);
   const [user, setUser] = useState<StoredUser | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -78,6 +90,7 @@ export default function DashboardPage() {
         }
 
         setProperties(data.properties || []);
+        setNotifications(data.notifications || []);
       } catch (error) {
         console.error(error);
         setError(
@@ -97,10 +110,12 @@ export default function DashboardPage() {
     const total = properties.length;
     const approved = properties.filter((p) => p.status === "approved").length;
     const pending = properties.filter((p) => p.status === "pending").length;
-    const rejected = properties.filter((p) => p.status === "rejected").length;
+    const rejectedNotifications = notifications.filter((n) =>
+      String(n.title || "").toLowerCase().includes("rejected")
+    ).length;
 
-    return { total, approved, pending, rejected };
-  }, [properties]);
+    return { total, approved, pending, rejectedNotifications };
+  }, [properties, notifications]);
 
   function badgeClass(status: string) {
     if (status === "approved") {
@@ -110,6 +125,39 @@ export default function DashboardPage() {
       return "bg-red-100 text-red-700";
     }
     return "bg-yellow-100 text-yellow-700";
+  }
+
+  function notificationTone(type: string) {
+    if (type === "warning") {
+      return "border-red-200 bg-red-50";
+    }
+    if (type === "success") {
+      return "border-green-200 bg-green-50";
+    }
+    return "border-slate-200 bg-slate-50";
+  }
+
+  function notificationIcon(type: string) {
+    if (type === "warning") {
+      return <XCircle size={18} className="text-red-600" />;
+    }
+    if (type === "success") {
+      return <CheckCircle2 size={18} className="text-green-600" />;
+    }
+    return <Info size={18} className="text-slate-600" />;
+  }
+
+  function formatDate(value?: string) {
+    if (!value) return "Recently";
+
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return "Recently";
+
+    return date.toLocaleDateString(undefined, {
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+    });
   }
 
   function handleWhatsAppAdmin() {
@@ -148,7 +196,7 @@ export default function DashboardPage() {
               </h1>
               <p className="mt-2 max-w-2xl text-sm text-white/80">
                 Manage your submitted properties, track approval status, and
-                reach the admin team quickly when you need support.
+                stay informed through notifications from the admin team.
               </p>
             </div>
 
@@ -181,7 +229,7 @@ export default function DashboardPage() {
         <div className="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
           <div className="rounded-2xl border border-[var(--color-border)] bg-white p-5 shadow-sm">
             <p className="text-sm text-[var(--color-text-muted)]">
-              Total Listings
+              Total Active Listings
             </p>
             <p className="mt-2 text-3xl font-bold text-[var(--color-text-main)]">
               {stats.total}
@@ -210,81 +258,142 @@ export default function DashboardPage() {
 
           <div className="rounded-2xl border border-[var(--color-border)] bg-white p-5 shadow-sm">
             <div className="flex items-center gap-2">
-              <XCircle size={18} className="text-red-600" />
-              <p className="text-sm text-[var(--color-text-muted)]">Rejected</p>
+              <Bell size={18} className="text-red-600" />
+              <p className="text-sm text-[var(--color-text-muted)]">
+                Rejection Notifications
+              </p>
             </div>
             <p className="mt-2 text-3xl font-bold text-[var(--color-text-main)]">
-              {stats.rejected}
+              {stats.rejectedNotifications}
             </p>
           </div>
         </div>
 
-        <div className="mt-6 rounded-3xl border border-[var(--color-border)] bg-white p-6 shadow-sm">
-          <div className="flex items-center justify-between">
-            <div>
-              <h2 className="text-xl font-semibold text-[var(--color-text-main)]">
-                My Properties
-              </h2>
-              <p className="mt-1 text-sm text-[var(--color-text-muted)]">
-                Keep an eye on every listing you have submitted.
-              </p>
+        <div className="mt-6 grid gap-6 lg:grid-cols-[1.15fr_0.85fr]">
+          <div className="rounded-3xl border border-[var(--color-border)] bg-white p-6 shadow-sm">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-xl font-semibold text-[var(--color-text-main)]">
+                  My Properties
+                </h2>
+                <p className="mt-1 text-sm text-[var(--color-text-muted)]">
+                  Keep an eye on every active listing you have submitted.
+                </p>
+              </div>
+            </div>
+
+            <div className="mt-6 grid gap-4">
+              {properties.length > 0 ? (
+                properties.map((property) => (
+                  <div
+                    key={property.id}
+                    className="rounded-2xl border border-[var(--color-border)] bg-[#fcfcfd] p-5"
+                  >
+                    <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                      <div>
+                        <h3 className="text-lg font-semibold text-[var(--color-text-main)]">
+                          {property.title}
+                        </h3>
+                        <p className="mt-1 text-sm text-[var(--color-text-muted)]">
+                          Listing ID: #{property.id}
+                        </p>
+                      </div>
+
+                      <span
+                        className={`inline-flex w-fit rounded-full px-3 py-1 text-xs font-semibold capitalize ${badgeClass(
+                          property.status
+                        )}`}
+                      >
+                        {property.status}
+                      </span>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div className="rounded-2xl border border-dashed border-[var(--color-border)] bg-white p-10 text-center">
+                  <h3 className="text-lg font-semibold text-[var(--color-text-main)]">
+                    No active properties right now
+                  </h3>
+                  <p className="mt-2 text-sm text-[var(--color-text-muted)]">
+                    Start by submitting your first property listing or check your
+                    notifications for recent admin updates.
+                  </p>
+                  <div className="mt-5 flex flex-col items-center justify-center gap-3 sm:flex-row">
+                    <button
+                      onClick={() => router.push("/add-property")}
+                      className="inline-flex items-center gap-2 rounded-xl bg-[var(--color-primary-dark)] px-5 py-3 text-sm font-semibold text-white transition hover:opacity-90"
+                    >
+                      <PlusCircle size={16} />
+                      Submit Property
+                    </button>
+
+                    <button
+                      onClick={handleWhatsAppAdmin}
+                      className="inline-flex items-center gap-2 rounded-xl border border-[var(--color-border)] px-5 py-3 text-sm font-semibold text-[var(--color-text-main)] transition hover:bg-gray-50"
+                    >
+                      <MessageCircle size={16} />
+                      Chat Admin on WhatsApp
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
 
-          <div className="mt-6 grid gap-4">
-            {properties.length > 0 ? (
-              properties.map((property) => (
-                <div
-                  key={property.id}
-                  className="rounded-2xl border border-[var(--color-border)] bg-[#fcfcfd] p-5"
-                >
-                  <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                    <div>
-                      <h3 className="text-lg font-semibold text-[var(--color-text-main)]">
-                        {property.title}
-                      </h3>
-                      <p className="mt-1 text-sm text-[var(--color-text-muted)]">
-                        Listing ID: #{property.id}
-                      </p>
-                    </div>
-
-                    <span
-                      className={`inline-flex w-fit rounded-full px-3 py-1 text-xs font-semibold capitalize ${badgeClass(
-                        property.status
-                      )}`}
-                    >
-                      {property.status}
-                    </span>
-                  </div>
-                </div>
-              ))
-            ) : (
-              <div className="rounded-2xl border border-dashed border-[var(--color-border)] bg-white p-10 text-center">
-                <h3 className="text-lg font-semibold text-[var(--color-text-main)]">
-                  No properties yet
-                </h3>
-                <p className="mt-2 text-sm text-[var(--color-text-muted)]">
-                  Start by submitting your first property listing.
-                </p>
-                <div className="mt-5 flex flex-col items-center justify-center gap-3 sm:flex-row">
-                  <button
-                    onClick={() => router.push("/add-property")}
-                    className="inline-flex items-center gap-2 rounded-xl bg-[var(--color-primary-dark)] px-5 py-3 text-sm font-semibold text-white transition hover:opacity-90"
-                  >
-                    <PlusCircle size={16} />
-                    Submit Your First Property
-                  </button>
-
-                  <button
-                    onClick={handleWhatsAppAdmin}
-                    className="inline-flex items-center gap-2 rounded-xl border border-[var(--color-border)] px-5 py-3 text-sm font-semibold text-[var(--color-text-main)] transition hover:bg-gray-50"
-                  >
-                    <MessageCircle size={16} />
-                    Chat Admin on WhatsApp
-                  </button>
-                </div>
+          <div className="rounded-3xl border border-[var(--color-border)] bg-white p-6 shadow-sm">
+            <div className="flex items-center gap-3">
+              <div className="rounded-2xl bg-[var(--color-primary)]/10 p-3 text-[var(--color-primary-dark)]">
+                <Bell size={20} />
               </div>
-            )}
+              <div>
+                <h2 className="text-xl font-semibold text-[var(--color-text-main)]">
+                  Notifications
+                </h2>
+                <p className="mt-1 text-sm text-[var(--color-text-muted)]">
+                  Important updates from the platform and admin team.
+                </p>
+              </div>
+            </div>
+
+            <div className="mt-6 grid gap-4">
+              {notifications.length > 0 ? (
+                notifications.map((notification) => (
+                  <div
+                    key={notification.id}
+                    className={`rounded-2xl border p-4 ${notificationTone(
+                      notification.type
+                    )}`}
+                  >
+                    <div className="flex items-start gap-3">
+                      <div className="mt-0.5">
+                        {notificationIcon(notification.type)}
+                      </div>
+
+                      <div className="min-w-0 flex-1">
+                        <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+                          <h3 className="text-sm font-semibold text-[var(--color-text-main)]">
+                            {notification.title}
+                          </h3>
+                          <span className="text-xs text-[var(--color-text-muted)]">
+                            {formatDate(notification.created_at)}
+                          </span>
+                        </div>
+
+                        <p className="mt-2 text-sm leading-6 text-[var(--color-text-muted)]">
+                          {notification.message}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div className="rounded-2xl border border-dashed border-[var(--color-border)] bg-[#fcfcfd] p-6 text-center">
+                  <p className="text-sm text-[var(--color-text-muted)]">
+                    No notifications yet.
+                  </p>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>

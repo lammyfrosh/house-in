@@ -9,6 +9,7 @@ import {
   BadgeCheck,
   ArrowRight,
   Scale,
+  Download,
 } from "lucide-react";
 import {
   getApprovedProperties,
@@ -163,7 +164,6 @@ export default async function Home() {
 
   return (
     <main>
-      {/* HERO */}
       <section className="relative min-h-[920px] overflow-hidden md:min-h-[980px]">
         <Image
           src="/hero-v2.jpg"
@@ -178,13 +178,16 @@ export default async function Home() {
 
         <div className="relative z-10 mx-auto flex min-h-[920px] max-w-6xl flex-col px-4 pt-24 md:min-h-[980px] md:pt-28">
           <div className="max-w-3xl">
-            <p className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-4 py-2 text-xs font-medium tracking-wide text-white backdrop-blur-md">
-              <ShieldCheck size={14} />
-              SEARCH BY STATE & AREA • RENT • SALE • SHORTLET
-            </p>
+            <Link
+              href="/contact"
+              className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-4 py-2 text-xs font-medium tracking-wide text-white backdrop-blur-md transition hover:bg-white/15"
+            >
+              <Download size={14} />
+              CLICK HERE TO DOWNLOAD HOUSE-IN APP
+            </Link>
 
             <h1 className="mt-6 max-w-[900px] text-4xl font-semibold leading-tight text-white drop-shadow-sm md:text-7xl md:leading-[1.04]">
-              Find Property the Smarter Way in Nigeria
+              Find Property the Smart Way in Nigeria
             </h1>
 
             <p className="mt-5 max-w-2xl text-base leading-8 text-white/90 drop-shadow md:text-xl">
@@ -244,7 +247,6 @@ export default async function Home() {
         </div>
       </section>
 
-      {/* SEARCH SECTION */}
       <section className="bg-[#eef2f5] py-10 md:py-12">
         <div className="mx-auto max-w-6xl px-4">
           <div className="rounded-3xl border border-[var(--color-border)] bg-[#f7f8fa] p-4 shadow-sm md:p-6">
@@ -386,7 +388,6 @@ export default async function Home() {
         </div>
       </section>
 
-      {/* FEATURED PROPERTIES */}
       <section className="mx-auto max-w-6xl px-4 py-14">
         <div className="mb-5 flex items-center justify-between">
           <div>
@@ -426,7 +427,6 @@ export default async function Home() {
         )}
       </section>
 
-      {/* BROWSE BY STATE */}
       <section className="bg-white">
         <div className="mx-auto max-w-6xl px-4 py-14">
           <div className="mb-6">
@@ -468,7 +468,6 @@ export default async function Home() {
         </div>
       </section>
 
-      {/* ABOUT */}
       <section className="bg-[var(--color-primary)]/20">
         <div className="mx-auto max-w-6xl px-4 py-14">
           <div className="grid gap-10 lg:grid-cols-[1.1fr_0.9fr]">
@@ -555,7 +554,6 @@ export default async function Home() {
         </div>
       </section>
 
-      {/* WHY PEOPLE WILL LOVE IT */}
       <section>
         <div className="mx-auto max-w-6xl px-4 py-14">
           <div className="mb-6">
@@ -592,7 +590,6 @@ export default async function Home() {
         </div>
       </section>
 
-      {/* PARTNERS JUST BEFORE FOOTER */}
       <PartnerGrid
         items={builders}
         title="Prominent Builders"

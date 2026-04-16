@@ -140,6 +140,14 @@ export default function AdminPropertiesPage() {
         return;
       }
 
+      if (status === "rejected") {
+        setProperties((prev) => prev.filter((p) => p.id !== id));
+        setUnreviewedCount((prev) => Math.max(0, prev - 1));
+        setMessage("Property rejected successfully and removed from the admin list.");
+        setMessageType("success");
+        return;
+      }
+
       if (data.property) {
         setProperties((prev) =>
           prev.map((p) => (p.id === id ? { ...p, ...data.property } : p))
@@ -188,16 +196,34 @@ export default function AdminPropertiesPage() {
     }).format(price || 0);
   }
 
-  function statusClasses(status: PropertyStatus) {
-    if (status === "approved") {
-      return "bg-green-100 text-green-700";
+  function badgeClasses(property: Property) {
+    const isPendingReview = Number(property.admin_reviewed) === 0;
+
+    if (isPendingReview) {
+      return {
+        text: "Pending Review",
+        className: "bg-amber-100 text-amber-800",
+      };
     }
 
-    if (status === "rejected") {
-      return "bg-red-100 text-red-700";
+    if (property.status === "approved") {
+      return {
+        text: "Approved",
+        className: "bg-green-100 text-green-700",
+      };
     }
 
-    return "bg-yellow-100 text-yellow-700";
+    if (property.status === "rejected") {
+      return {
+        text: "Rejected",
+        className: "bg-red-100 text-red-700",
+      };
+    }
+
+    return {
+      text: "Pending",
+      className: "bg-yellow-100 text-yellow-700",
+    };
   }
 
   return (
@@ -213,8 +239,8 @@ export default function AdminPropertiesPage() {
           </h1>
 
           <p className="mt-2 max-w-2xl text-sm leading-6 text-[var(--color-text-muted)]">
-            Review all listings and manage approval status. Click the property
-            image or title to open the property editor.
+            Review all listings and manage approval status. Newly uploaded listings
+            remain clearly marked until they have been reviewed.
           </p>
         </div>
 
@@ -242,11 +268,11 @@ export default function AdminPropertiesPage() {
           </p>
         </div>
 
-        <div className="rounded-2xl border border-[var(--color-primary)]/20 bg-[var(--color-primary)]/10 p-4">
-          <p className="text-xs font-bold uppercase tracking-widest text-[var(--color-primary-dark)]">
-            Unreviewed
+        <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4">
+          <p className="text-xs font-bold uppercase tracking-widest text-amber-700">
+            Pending Review
           </p>
-          <p className="mt-2 text-2xl font-bold text-[var(--color-primary-dark)]">
+          <p className="mt-2 text-2xl font-bold text-amber-800">
             {unreviewedCount}
           </p>
         </div>
@@ -285,13 +311,14 @@ export default function AdminPropertiesPage() {
         ) : (
           properties.map((property) => {
             const isUnreviewed = Number(property.admin_reviewed) === 0;
+            const badge = badgeClasses(property);
 
             return (
               <div
                 key={property.id}
                 className={`overflow-hidden rounded-2xl border ${
                   isUnreviewed
-                    ? "border-[var(--color-primary)]/25 bg-[var(--color-primary)]/10"
+                    ? "border-amber-200 bg-amber-50/40"
                     : "border-[var(--color-border)] bg-white"
                 }`}
               >
@@ -300,7 +327,7 @@ export default function AdminPropertiesPage() {
                     onClick={() => openEdit(property)}
                     className={`cursor-pointer border-b lg:border-b-0 lg:border-r ${
                       isUnreviewed
-                        ? "border-[var(--color-primary)]/15 bg-[var(--color-primary)]/5"
+                        ? "border-amber-200 bg-amber-50/30"
                         : "border-[var(--color-border)] bg-gray-50"
                     }`}
                     title="Open property editor"
@@ -331,22 +358,14 @@ export default function AdminPropertiesPage() {
                           </button>
 
                           <span
-                            className={`rounded-full px-3 py-1 text-xs font-bold uppercase ${statusClasses(
-                              property.status
-                            )}`}
+                            className={`rounded-full px-3 py-1 text-xs font-bold uppercase ${badge.className}`}
                           >
-                            {property.status}
+                            {badge.text}
                           </span>
 
                           {Boolean(property.featured) && (
                             <span className="rounded-full bg-[var(--color-primary-dark)]/10 px-3 py-1 text-xs font-bold uppercase text-[var(--color-primary-dark)]">
                               Featured
-                            </span>
-                          )}
-
-                          {isUnreviewed && (
-                            <span className="rounded-full bg-[var(--color-primary-dark)] px-3 py-1 text-xs font-bold uppercase text-white">
-                              New / Unreviewed
                             </span>
                           )}
                         </div>
@@ -366,9 +385,7 @@ export default function AdminPropertiesPage() {
                           <span>Bathrooms: {property.bathrooms ?? 0}</span>
                           <span>Toilets: {property.toilets ?? 0}</span>
                           <span>Parking: {property.parking_spaces ?? 0}</span>
-                          {property.size ? (
-                            <span>Size: {property.size}</span>
-                          ) : null}
+                          {property.size ? <span>Size: {property.size}</span> : null}
                         </div>
 
                         {property.created_by_name && (
@@ -406,9 +423,7 @@ export default function AdminPropertiesPage() {
                             disabled={actionId === property.id}
                             className="rounded-lg bg-green-600 px-4 py-2 text-sm font-semibold text-white hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-70"
                           >
-                            {actionId === property.id
-                              ? "Processing..."
-                              : "Approve"}
+                            {actionId === property.id ? "Processing..." : "Approve"}
                           </button>
                         )}
 
@@ -418,9 +433,7 @@ export default function AdminPropertiesPage() {
                             disabled={actionId === property.id}
                             className="rounded-lg bg-red-600 px-4 py-2 text-sm font-semibold text-white hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-70"
                           >
-                            {actionId === property.id
-                              ? "Processing..."
-                              : "Reject"}
+                            {actionId === property.id ? "Processing..." : "Reject"}
                           </button>
                         )}
 

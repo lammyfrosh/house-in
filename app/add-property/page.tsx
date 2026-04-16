@@ -32,6 +32,9 @@ type PropertyForm = {
   featured: boolean;
 };
 
+const MAX_TOTAL_IMAGES = 10;
+const MAX_VIDEO_DURATION_SECONDS = 45;
+
 export default function AddPropertyPage() {
   const router = useRouter();
 
@@ -178,13 +181,59 @@ export default function AddPropertyPage() {
     const files = Array.from(e.target.files || []);
     if (files.length === 0) return;
 
+    const nextTotal = selectedImages.length + files.length;
+
+    if (nextTotal > MAX_TOTAL_IMAGES) {
+      setMessage(`You can upload a maximum of ${MAX_TOTAL_IMAGES} images in total.`);
+      setMessageType("error");
+      e.target.value = "";
+      return;
+    }
+
     setSelectedImages((prev) => [...prev, ...files]);
+    setMessage("");
+    setMessageType("");
     e.target.value = "";
   }
 
-  function handleVideoChange(e: ChangeEvent<HTMLInputElement>) {
+  async function handleVideoChange(e: ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0] || null;
+
+    if (!file) {
+      setSelectedVideo(null);
+      return;
+    }
+
+    const objectUrl = URL.createObjectURL(file);
+
+    const isWithinDuration = await new Promise<boolean>((resolve) => {
+      const video = document.createElement("video");
+      video.preload = "metadata";
+      video.src = objectUrl;
+
+      video.onloadedmetadata = () => {
+        const duration = video.duration;
+        resolve(duration <= MAX_VIDEO_DURATION_SECONDS);
+      };
+
+      video.onerror = () => resolve(false);
+    });
+
+    URL.revokeObjectURL(objectUrl);
+
+    if (!isWithinDuration) {
+      setSelectedVideo(null);
+      setMessage(
+        `Only videos of ${MAX_VIDEO_DURATION_SECONDS} seconds or less are allowed.`
+      );
+      setMessageType("error");
+      e.target.value = "";
+      return;
+    }
+
     setSelectedVideo(file);
+    setMessage("");
+    setMessageType("");
   }
 
   function removeImage(index: number) {
@@ -203,6 +252,12 @@ export default function AddPropertyPage() {
 
     if (selectedImages.length === 0) {
       setMessage("Please upload at least one property image.");
+      setMessageType("error");
+      return;
+    }
+
+    if (selectedImages.length > MAX_TOTAL_IMAGES) {
+      setMessage(`You can upload a maximum of ${MAX_TOTAL_IMAGES} images in total.`);
       setMessageType("error");
       return;
     }
@@ -343,8 +398,8 @@ export default function AddPropertyPage() {
               Add New Property
             </h1>
             <p className="mt-2 max-w-2xl text-sm leading-6 text-[var(--color-text-muted)]">
-              Create a new property listing with multiple images, optional video,
-              and all the details needed for a strong presentation.
+              Create a new property listing with up to 10 images and one optional
+              video of not more than 45 seconds.
             </p>
           </div>
 
@@ -374,7 +429,10 @@ export default function AddPropertyPage() {
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="mt-8 grid gap-8 xl:grid-cols-[1.1fr_0.9fr]">
+        <form
+          onSubmit={handleSubmit}
+          className="mt-8 grid gap-8 xl:grid-cols-[1.1fr_0.9fr]"
+        >
           <div className="space-y-8">
             <section className="rounded-3xl border border-[var(--color-border)] bg-white p-5 shadow-sm sm:p-6">
               <h2 className="text-lg font-semibold text-[var(--color-text-main)]">
@@ -629,7 +687,7 @@ export default function AddPropertyPage() {
                     className="block w-full text-sm text-[var(--color-text-main)]"
                   />
                   <p className="mt-2 text-xs text-[var(--color-text-muted)]">
-                    Upload one main image and as many gallery images as you want.
+                    Upload up to {MAX_TOTAL_IMAGES} images in total, including the main image.
                   </p>
                 </div>
 
@@ -668,7 +726,8 @@ export default function AddPropertyPage() {
                     className="block w-full text-sm text-[var(--color-text-main)]"
                   />
                   <p className="mt-2 text-xs text-[var(--color-text-muted)]">
-                    Optional video upload for a richer listing presentation.
+                    Optional video upload. Only the first 45 seconds is allowed,
+                    so please upload a clip that is 45 seconds or less.
                   </p>
                 </div>
 
@@ -702,8 +761,8 @@ export default function AddPropertyPage() {
               </p>
 
               <p>
-                Strong images and a short video can dramatically improve how
-                premium your listing feels.
+                You can upload up to {MAX_TOTAL_IMAGES} images and one optional
+                video of not more than {MAX_VIDEO_DURATION_SECONDS} seconds.
               </p>
             </div>
 
