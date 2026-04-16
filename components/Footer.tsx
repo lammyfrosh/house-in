@@ -21,8 +21,8 @@ const ADMIN_CONTACTS = [
   },
   {
     label: "Admin 2",
-    whatsapp: "2348033103109",
-    phone: "+23408033103109",
+    whatsapp: "2348088769717",
+    phone: "+23408088769717",
     email: "support@house-in.online",
   },
 ];
