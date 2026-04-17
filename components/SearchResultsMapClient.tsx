@@ -362,7 +362,8 @@ export default function SearchResultsMapClient({
               </div>
             </div>
 
-            <div className="space-y-5 px-4 py-6 sm:px-6">
+            {/* PROPERTY LIST WITH EXTRA BOTTOM SPACE ON MOBILE */}
+            <div className="space-y-5 px-4 py-6 pb-[250px] sm:px-6 sm:pb-[290px] xl:pb-6">
               {filteredResults.length === 0 ? (
                 <div className="rounded-3xl border border-[var(--color-border)] bg-white p-8 text-center shadow-sm">
                   <h2 className="text-xl font-bold text-[var(--color-text-main)]">
@@ -450,35 +451,33 @@ export default function SearchResultsMapClient({
         </div>
       </section>
 
-      {/* MOBILE MAP - COMPLETELY BELOW PAGE CONTENT */}
-      <section className="border-t border-[var(--color-border)] bg-[#f7f9fc] px-4 pb-8 pt-2 sm:px-6 xl:hidden">
+      {/* MOBILE FIXED BOTTOM MAP */}
+      <section className="fixed bottom-0 left-0 right-0 z-40 border-t border-[var(--color-border)] bg-[#f7f9fc] px-4 pb-4 pt-2 shadow-[0_-10px_30px_rgba(15,23,42,0.08)] xl:hidden">
         <div className="mx-auto max-w-7xl">
           <div className="overflow-hidden rounded-3xl border border-[var(--color-border)] bg-white shadow-sm">
-            <div className="border-b border-[var(--color-border)] px-5 py-4">
-              <h2 className="text-lg font-bold text-[var(--color-text-main)]">
+            <div className="border-b border-[var(--color-border)] px-5 py-3">
+              <h2 className="text-base font-bold text-[var(--color-text-main)]">
                 Map View
               </h2>
-              <p className="mt-1 text-sm text-[var(--color-text-muted)]">
-                The map stays here at the bottom. Tap any property above to update
-                the location focus.
+              <p className="mt-1 text-xs text-[var(--color-text-muted)]">
+                Tap any property above to update the location focus.
               </p>
             </div>
 
-           <div className="relative h-[280px] w-full sm:h-[340px]">
-  <iframe
-    key={`mobile-${selectedProperty?.id || "default-map"}`}
-    title="Property search map"
-    src={mapSrc}
-    className="h-full w-full border-0"
-    loading="lazy"
-    referrerPolicy="no-referrer-when-downgrade"
-  />
-
-  <div
-    className="absolute inset-0 z-10 bg-transparent"
-    aria-hidden="true"
-  />
-</div>
+            <div className="relative h-[170px] w-full sm:h-[210px]">
+              <iframe
+                key={`mobile-${selectedProperty?.id || "default-map"}`}
+                title="Property search map"
+                src={mapSrc}
+                className="h-full w-full border-0"
+                loading="lazy"
+                referrerPolicy="no-referrer-when-downgrade"
+              />
+              <div
+                className="absolute inset-0 z-10 bg-transparent"
+                aria-hidden="true"
+              />
+            </div>
           </div>
         </div>
       </section>
