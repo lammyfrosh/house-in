@@ -9,6 +9,7 @@ import {
   Twitter,
   MessageCircle,
   Phone,
+  Mail,
   ChevronDown,
 } from "lucide-react";
 
@@ -29,11 +30,18 @@ const ADMIN_CONTACTS = [
 
 export default function Footer() {
   const [showWhatsappOptions, setShowWhatsappOptions] = useState(false);
-  const [showContactOptions, setShowContactOptions] = useState(false);
+  const [showCallOptions, setShowCallOptions] = useState(false);
+  const [showEmailOptions, setShowEmailOptions] = useState(false);
 
   function buildWhatsappLink(number: string) {
     return `https://wa.me/${number}?text=${encodeURIComponent(
       "Hello, I would like to make an enquiry on House-In."
+    )}`;
+  }
+
+  function buildMailtoLink(email: string) {
+    return `mailto:${email}?subject=${encodeURIComponent(
+      "House-In Enquiry"
     )}`;
   }
 
@@ -177,8 +185,31 @@ export default function Footer() {
             </p>
 
             <ul className="mt-4 space-y-3 text-sm text-gray-400">
-              <li>Email: contact@house-in.online</li>
-              <li>Phone: +23408075990912</li>
+              <li>
+                Email:{" "}
+                <a
+                  href={buildMailtoLink("contact@house-in.online")}
+                  className="transition hover:text-white hover:underline"
+                >
+                  contact@house-in.online
+                </a>
+              </li>
+              <li className="leading-6">
+                Phone:{" "}
+                <a
+                  href="tel:+23408075990912"
+                  className="transition hover:text-white hover:underline"
+                >
+                  +23408075990912
+                </a>
+                <span className="mx-2 text-gray-600">•</span>
+                <a
+                  href="tel:+23408088769717"
+                  className="transition hover:text-white hover:underline"
+                >
+                  +23408088769717
+                </a>
+              </li>
               <li>Hours: Mon–Sat, 9am–6pm</li>
             </ul>
 
@@ -200,7 +231,8 @@ export default function Footer() {
                   type="button"
                   onClick={() => {
                     setShowWhatsappOptions((prev) => !prev);
-                    setShowContactOptions(false);
+                    setShowCallOptions(false);
+                    setShowEmailOptions(false);
                   }}
                   className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-gray-700 px-4 py-2 text-xs font-extrabold uppercase tracking-widest text-white transition hover:bg-[#151515]"
                 >
@@ -231,17 +263,18 @@ export default function Footer() {
                 <button
                   type="button"
                   onClick={() => {
-                    setShowContactOptions((prev) => !prev);
+                    setShowCallOptions((prev) => !prev);
                     setShowWhatsappOptions(false);
+                    setShowEmailOptions(false);
                   }}
                   className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-gray-700 px-4 py-2 text-xs font-extrabold uppercase tracking-widest text-white transition hover:bg-[#151515]"
                 >
                   <Phone size={14} />
-                  Contact
+                  Call
                   <ChevronDown size={14} />
                 </button>
 
-                {showContactOptions && (
+                {showCallOptions && (
                   <div className="mt-2 rounded-2xl border border-gray-800 bg-[#121212] p-2 shadow-xl">
                     {ADMIN_CONTACTS.map((admin) => (
                       <a
@@ -251,6 +284,37 @@ export default function Footer() {
                       >
                         <span>{admin.label}</span>
                         <Phone size={14} />
+                      </a>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              <div className="relative">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowEmailOptions((prev) => !prev);
+                    setShowWhatsappOptions(false);
+                    setShowCallOptions(false);
+                  }}
+                  className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-gray-700 px-4 py-2 text-xs font-extrabold uppercase tracking-widest text-white transition hover:bg-[#151515]"
+                >
+                  <Mail size={14} />
+                  Email
+                  <ChevronDown size={14} />
+                </button>
+
+                {showEmailOptions && (
+                  <div className="mt-2 rounded-2xl border border-gray-800 bg-[#121212] p-2 shadow-xl">
+                    {ADMIN_CONTACTS.map((admin) => (
+                      <a
+                        key={admin.label}
+                        href={buildMailtoLink(admin.email)}
+                        className="flex items-center justify-between rounded-xl px-3 py-3 text-sm text-gray-300 transition hover:bg-[#1b1b1b] hover:text-white"
+                      >
+                        <span>{admin.label}</span>
+                        <Mail size={14} />
                       </a>
                     ))}
                   </div>

@@ -183,16 +183,19 @@ export default function Header() {
   return (
     <header className="sticky top-0 z-50 border-b border-white/10 bg-[var(--color-primary-dark)] text-white shadow-sm">
       <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-4 sm:px-6 lg:px-8">
-        <Link href="/" className="shrink-0" aria-label="House-In Home">
-          <div className="relative h-14 w-[220px] sm:h-16 sm:w-[300px] lg:w-[340px]">
-            <Image
-              src="/logo-light.png"
-              alt="House-In"
-              fill
-              className="object-contain object-left"
-              priority
-            />
-          </div>
+        <Link
+          href="/"
+          className="flex shrink-0 items-center"
+          aria-label="House-In Home"
+        >
+          <Image
+            src="/logo-light.png"
+            alt="House-In"
+            width={190}
+            height={56}
+            className="h-auto w-[150px] object-contain sm:w-[170px] lg:w-[190px]"
+            priority
+          />
         </Link>
 
         <nav className="hidden items-center gap-7 md:flex">
@@ -238,7 +241,10 @@ export default function Header() {
                 title={user.full_name || user.email || "My Account"}
               >
                 <UserCircle2 size={17} className="text-white/80" />
-                <span className="max-w-[120px] truncate" style={{ color: "#ffffff" }}>
+                <span
+                  className="max-w-[120px] truncate"
+                  style={{ color: "#ffffff" }}
+                >
                   {shortName}
                 </span>
               </Link>
@@ -288,14 +294,14 @@ export default function Header() {
         <div className="border-t border-white/10 bg-[var(--color-primary-dark)] md:hidden">
           <div className="mx-auto max-w-7xl px-4 py-4 sm:px-6">
             <div className="mb-4">
-              <div className="relative h-12 w-[220px]">
-                <Image
-                  src="/logo-light.png"
-                  alt="House-In"
-                  fill
-                  className="object-contain object-left"
-                />
-              </div>
+              <Image
+                src="/logo-light.png"
+                alt="House-In"
+                width={170}
+                height={50}
+                className="h-auto w-[150px] object-contain"
+                priority
+              />
             </div>
 
             <div className="space-y-2">

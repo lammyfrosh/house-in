@@ -19,6 +19,7 @@ import {
   PartnerItem,
 } from "@/lib/api";
 import PropertyCard from "@/components/PropertyCard";
+import ExpandablePartnerCards from "@/components/ExpandablePartnerCards";
 
 const STATES = [
   "Lagos",
@@ -61,74 +62,6 @@ const trustItems = [
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
-
-function PartnerGrid({
-  items,
-  title,
-  subtitle,
-  icon: Icon,
-}: {
-  items: PartnerItem[];
-  title: string;
-  subtitle: string;
-  icon: React.ComponentType<{ size?: number; className?: string }>;
-}) {
-  if (!items.length) return null;
-
-  return (
-    <section className="bg-white">
-      <div className="mx-auto max-w-6xl px-4 py-14">
-        <div className="mb-6 flex items-start gap-3">
-          <div className="rounded-2xl bg-[var(--color-primary)]/20 p-3 text-[var(--color-primary-dark)]">
-            <Icon size={20} />
-          </div>
-
-          <div>
-            <h2 className="text-2xl font-semibold text-[var(--color-text-main)]">
-              {title}
-            </h2>
-            <p className="mt-1 text-sm text-[var(--color-text-muted)]">
-              {subtitle}
-            </p>
-          </div>
-        </div>
-
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {items.map((item) => {
-            const card = (
-              <div className="group flex h-full flex-col items-center justify-center rounded-2xl border border-[var(--color-border)] bg-white p-5 text-center shadow-sm transition hover:-translate-y-1 hover:border-[var(--color-primary)] hover:shadow-md">
-                <div className="flex h-24 w-full items-center justify-center rounded-2xl bg-[#f8fafc] p-4">
-                  <img
-                    src={item.logo_url}
-                    alt={item.name}
-                    className="max-h-full max-w-full object-contain"
-                  />
-                </div>
-
-                <p className="mt-4 text-sm font-semibold text-[var(--color-text-main)]">
-                  {item.name}
-                </p>
-              </div>
-            );
-
-            return item.website ? (
-              <a
-                key={item.id}
-                href={item.website}
-                target="_blank"
-                rel="noreferrer"
-              >
-                {card}
-              </a>
-            ) : (
-              <div key={item.id}>{card}</div>
-            );
-          })}
-        </div>
-      </div>
-    </section>
-  );
-}
 
 export default async function Home() {
   let properties: Property[] = [];
@@ -590,18 +523,9 @@ export default async function Home() {
         </div>
       </section>
 
-      <PartnerGrid
-        items={builders}
-        title="Prominent Builders"
-        subtitle="A selection of trusted builder brands featured on House-In."
-        icon={Building2}
-      />
-
-      <PartnerGrid
-        items={legalProviders}
-        title="Legal Service Providers"
-        subtitle="Recognised legal service providers available within the House-In ecosystem."
-        icon={Scale}
+      <ExpandablePartnerCards
+        builders={builders}
+        legalProviders={legalProviders}
       />
     </main>
   );
