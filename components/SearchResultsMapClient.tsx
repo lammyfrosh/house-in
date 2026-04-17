@@ -464,16 +464,21 @@ export default function SearchResultsMapClient({
               </p>
             </div>
 
-            <div className="h-[280px] w-full sm:h-[340px]">
-              <iframe
-                key={`mobile-${selectedProperty?.id || "default-map"}`}
-                title="Property search map"
-                src={mapSrc}
-                className="h-full w-full border-0"
-                loading="lazy"
-                referrerPolicy="no-referrer-when-downgrade"
-              />
-            </div>
+           <div className="relative h-[280px] w-full sm:h-[340px]">
+  <iframe
+    key={`mobile-${selectedProperty?.id || "default-map"}`}
+    title="Property search map"
+    src={mapSrc}
+    className="h-full w-full border-0"
+    loading="lazy"
+    referrerPolicy="no-referrer-when-downgrade"
+  />
+
+  <div
+    className="absolute inset-0 z-10 bg-transparent"
+    aria-hidden="true"
+  />
+</div>
           </div>
         </div>
       </section>
