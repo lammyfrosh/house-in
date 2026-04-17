@@ -174,6 +174,7 @@ export default function SearchResultsMapClient({
 
   const selectedLat = selectedProperty?.lat ?? defaultCenter.lat;
   const selectedLng = selectedProperty?.lng ?? defaultCenter.lng;
+  const mapSrc = buildMapUrl(selectedLat, selectedLng);
 
   function updateFilter<K extends keyof Filters>(key: K, value: Filters[K]) {
     setFilters((prev) => ({ ...prev, [key]: value }));
@@ -200,8 +201,9 @@ export default function SearchResultsMapClient({
           <aside className="hidden xl:block xl:h-full xl:border-r xl:border-[var(--color-border)] xl:bg-white">
             <div className="sticky top-[88px] h-[calc(100vh-88px)]">
               <iframe
+                key={selectedProperty?.id || "default-map"}
                 title="Property search map"
-                src={buildMapUrl(selectedLat, selectedLng)}
+                src={mapSrc}
                 className="h-full w-full border-0"
                 loading="lazy"
                 referrerPolicy="no-referrer-when-downgrade"
@@ -211,30 +213,6 @@ export default function SearchResultsMapClient({
 
           {/* RIGHT PANEL */}
           <div className="xl:h-[calc(100vh-88px)] xl:overflow-y-auto">
-            {/* MOBILE STICKY MAP */}
-            <section className="sticky top-[88px] z-30 border-b border-[var(--color-border)] bg-[#f7f9fc] px-4 py-4 xl:hidden">
-              <div className="overflow-hidden rounded-3xl border border-[var(--color-border)] bg-white shadow-sm">
-                <div className="border-b border-[var(--color-border)] px-5 py-4">
-                  <h2 className="text-lg font-bold text-[var(--color-text-main)]">
-                    Search Map
-                  </h2>
-                  <p className="mt-1 text-sm text-[var(--color-text-muted)]">
-                    Tap any property below to update the map focus.
-                  </p>
-                </div>
-
-                <div className="h-[280px] w-full sm:h-[320px]">
-                  <iframe
-                    title="Property search map"
-                    src={buildMapUrl(selectedLat, selectedLng)}
-                    className="h-full w-full border-0"
-                    loading="lazy"
-                    referrerPolicy="no-referrer-when-downgrade"
-                  />
-                </div>
-              </div>
-            </section>
-
             <div className="border-b border-[var(--color-border)] bg-white px-4 py-6 sm:px-6">
               <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
                 <div className="max-w-3xl">
@@ -248,6 +226,8 @@ export default function SearchResultsMapClient({
 
                   <p className="mt-3 text-sm leading-7 text-[var(--color-text-muted)]">
                     Filter listings and browse matching properties beside the map.
+                    Hover on desktop or tap on mobile to update the map to the
+                    selected property area.
                   </p>
                 </div>
 
@@ -271,7 +251,10 @@ export default function SearchResultsMapClient({
 
               <div className="mt-6 rounded-3xl border border-[var(--color-border)] bg-[#f8fafc] p-4 shadow-sm">
                 <div className="mb-4 flex items-center gap-2">
-                  <SlidersHorizontal size={18} className="text-[var(--color-primary-dark)]" />
+                  <SlidersHorizontal
+                    size={18}
+                    className="text-[var(--color-primary-dark)]"
+                  />
                   <h2 className="text-base font-bold text-[var(--color-text-main)]">
                     Filter Properties
                   </h2>
@@ -390,63 +373,106 @@ export default function SearchResultsMapClient({
                   </p>
                 </div>
               ) : (
-                filteredResults.map((property) => (
-                  <Link
-                    key={property.id}
-                    href={`/property/${property.slug}`}
-                    onMouseEnter={() => setSelectedProperty(property)}
-                    onClick={() => setSelectedProperty(property)}
-                    className="overflow-hidden rounded-3xl border border-[var(--color-border)] bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-md"
-                  >
-                    <div className="grid gap-0 md:grid-cols-[300px_1fr]">
-                      <div className="bg-slate-100">
-                        <img
-                          src={property.imageUrl}
-                          alt={property.title}
-                          className="h-64 w-full object-cover md:h-full"
-                        />
-                      </div>
+                filteredResults.map((property) => {
+                  const isSelected = selectedProperty?.id === property.id;
 
-                      <div className="p-5">
-                        <div className="flex flex-wrap items-center gap-3">
-                          <span className="rounded-full bg-[var(--color-primary-dark)]/10 px-3 py-1 text-xs font-bold uppercase text-[var(--color-primary-dark)]">
-                            {purposeLabel(property.purpose)}
-                          </span>
-
-                          <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-bold uppercase text-slate-600">
-                            {property.propertyType}
-                          </span>
+                  return (
+                    <Link
+                      key={property.id}
+                      href={`/property/${property.slug}`}
+                      onMouseEnter={() => setSelectedProperty(property)}
+                      onFocus={() => setSelectedProperty(property)}
+                      onClick={() => setSelectedProperty(property)}
+                      className={`overflow-hidden rounded-3xl border bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-md ${
+                        isSelected
+                          ? "border-[var(--color-primary-dark)] ring-2 ring-[var(--color-primary)]/20"
+                          : "border-[var(--color-border)]"
+                      }`}
+                    >
+                      <div className="grid gap-0 md:grid-cols-[300px_1fr]">
+                        <div className="bg-slate-100">
+                          <img
+                            src={property.imageUrl}
+                            alt={property.title}
+                            className="h-64 w-full object-cover md:h-full"
+                          />
                         </div>
 
-                        <h2 className="mt-3 text-2xl font-semibold text-[var(--color-text-main)]">
-                          {property.title}
-                        </h2>
+                        <div className="p-5">
+                          <div className="flex flex-wrap items-center gap-3">
+                            <span className="rounded-full bg-[var(--color-primary-dark)]/10 px-3 py-1 text-xs font-bold uppercase text-[var(--color-primary-dark)]">
+                              {purposeLabel(property.purpose)}
+                            </span>
 
-                        <p className="mt-2 flex items-center gap-2 text-sm text-[var(--color-text-muted)]">
-                          <MapPin size={16} />
-                          {property.area}, {property.city}, {property.state}
-                        </p>
+                            <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-bold uppercase text-slate-600">
+                              {property.propertyType}
+                            </span>
 
-                        <p className="mt-4 text-2xl font-bold text-[var(--color-text-main)]">
-                          {money(property.price)}
-                        </p>
+                            {isSelected && (
+                              <span className="rounded-full bg-emerald-50 px-3 py-1 text-xs font-bold uppercase text-emerald-700">
+                                Map Focus
+                              </span>
+                            )}
+                          </div>
 
-                        <div className="mt-4 flex flex-wrap gap-4 text-sm text-[var(--color-text-muted)]">
-                          <span className="inline-flex items-center gap-2">
-                            <BedDouble size={16} />
-                            {property.bedrooms} Beds
-                          </span>
+                          <h2 className="mt-3 text-2xl font-semibold text-[var(--color-text-main)]">
+                            {property.title}
+                          </h2>
 
-                          <span className="inline-flex items-center gap-2">
-                            <Bath size={16} />
-                            {property.bathrooms} Baths
-                          </span>
+                          <p className="mt-2 flex items-center gap-2 text-sm text-[var(--color-text-muted)]">
+                            <MapPin size={16} />
+                            {property.area}, {property.city}, {property.state}
+                          </p>
+
+                          <p className="mt-4 text-2xl font-bold text-[var(--color-text-main)]">
+                            {money(property.price)}
+                          </p>
+
+                          <div className="mt-4 flex flex-wrap gap-4 text-sm text-[var(--color-text-muted)]">
+                            <span className="inline-flex items-center gap-2">
+                              <BedDouble size={16} />
+                              {property.bedrooms} Beds
+                            </span>
+
+                            <span className="inline-flex items-center gap-2">
+                              <Bath size={16} />
+                              {property.bathrooms} Baths
+                            </span>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  </Link>
-                ))
+                    </Link>
+                  );
+                })
               )}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* MOBILE MAP - COMPLETELY BELOW PAGE CONTENT */}
+      <section className="border-t border-[var(--color-border)] bg-[#f7f9fc] px-4 pb-8 pt-2 sm:px-6 xl:hidden">
+        <div className="mx-auto max-w-7xl">
+          <div className="overflow-hidden rounded-3xl border border-[var(--color-border)] bg-white shadow-sm">
+            <div className="border-b border-[var(--color-border)] px-5 py-4">
+              <h2 className="text-lg font-bold text-[var(--color-text-main)]">
+                Map View
+              </h2>
+              <p className="mt-1 text-sm text-[var(--color-text-muted)]">
+                The map stays here at the bottom. Tap any property above to update
+                the location focus.
+              </p>
+            </div>
+
+            <div className="h-[280px] w-full sm:h-[340px]">
+              <iframe
+                key={`mobile-${selectedProperty?.id || "default-map"}`}
+                title="Property search map"
+                src={mapSrc}
+                className="h-full w-full border-0"
+                loading="lazy"
+                referrerPolicy="no-referrer-when-downgrade"
+              />
             </div>
           </div>
         </div>
