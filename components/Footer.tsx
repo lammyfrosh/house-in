@@ -7,11 +7,11 @@ import {
   Instagram,
   Linkedin,
   Twitter,
-  MessageCircle,
   Phone,
   Mail,
   ChevronDown,
 } from "lucide-react";
+import { FaWhatsapp } from "react-icons/fa";
 
 const ADMIN_CONTACTS = [
   {
@@ -227,20 +227,19 @@ export default function Footer() {
               </Link>
 
               <div className="relative">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setShowWhatsappOptions((prev) => !prev);
-                    setShowCallOptions(false);
-                    setShowEmailOptions(false);
-                  }}
-                  className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-gray-700 px-4 py-2 text-xs font-extrabold uppercase tracking-widest text-white transition hover:bg-[#151515]"
-                >
-                  <MessageCircle size={14} />
-                  WhatsApp
-                  <ChevronDown size={14} />
-                </button>
-
+             <button
+  type="button"
+  onClick={() => {
+    setShowWhatsappOptions((prev) => !prev);
+    setShowCallOptions(false);
+    setShowEmailOptions(false);
+  }}
+  className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-gray-700 px-4 py-2 text-[10px] font-semibold uppercase tracking-wide text-white transition hover:bg-[#151515]"
+>
+  <FaWhatsapp size={13} />
+  WhatsApp
+  <ChevronDown size={13} />
+</button>
                 {showWhatsappOptions && (
                   <div className="mt-2 rounded-2xl border border-gray-800 bg-[#121212] p-2 shadow-xl">
                     {ADMIN_CONTACTS.map((admin) => (
@@ -252,7 +251,7 @@ export default function Footer() {
                         className="flex items-center justify-between rounded-xl px-3 py-3 text-sm text-gray-300 transition hover:bg-[#1b1b1b] hover:text-white"
                       >
                         <span>{admin.label}</span>
-                        <MessageCircle size={14} />
+                        <FaWhatsapp size={14} />
                       </a>
                     ))}
                   </div>
@@ -260,19 +259,19 @@ export default function Footer() {
               </div>
 
               <div className="relative">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setShowCallOptions((prev) => !prev);
-                    setShowWhatsappOptions(false);
-                    setShowEmailOptions(false);
-                  }}
-                  className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-gray-700 px-4 py-2 text-xs font-extrabold uppercase tracking-widest text-white transition hover:bg-[#151515]"
-                >
-                  <Phone size={14} />
-                  Call
-                  <ChevronDown size={14} />
-                </button>
+               <button
+  type="button"
+  onClick={() => {
+    setShowCallOptions((prev) => !prev);
+    setShowWhatsappOptions(false);
+    setShowEmailOptions(false);
+  }}
+  className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-gray-700 px-4 py-2 text-[10px] font-semibold uppercase tracking-wide text-white transition hover:bg-[#151515]"
+>
+  <Phone size={13} />
+  Call
+  <ChevronDown size={13} />
+</button>
 
                 {showCallOptions && (
                   <div className="mt-2 rounded-2xl border border-gray-800 bg-[#121212] p-2 shadow-xl">
@@ -291,20 +290,19 @@ export default function Footer() {
               </div>
 
               <div className="relative">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setShowEmailOptions((prev) => !prev);
-                    setShowWhatsappOptions(false);
-                    setShowCallOptions(false);
-                  }}
-                  className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-gray-700 px-4 py-2 text-xs font-extrabold uppercase tracking-widest text-white transition hover:bg-[#151515]"
-                >
-                  <Mail size={14} />
-                  Email
-                  <ChevronDown size={14} />
-                </button>
-
+             <button
+  type="button"
+  onClick={() => {
+    setShowEmailOptions((prev) => !prev);
+    setShowWhatsappOptions(false);
+    setShowCallOptions(false);
+  }}
+  className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-gray-700 px-4 py-2 text-[10px] font-semibold uppercase tracking-wide text-white transition hover:bg-[#151515]"
+>
+  <Mail size={13} />
+  Email
+  <ChevronDown size={13} />
+</button>
                 {showEmailOptions && (
                   <div className="mt-2 rounded-2xl border border-gray-800 bg-[#121212] p-2 shadow-xl">
                     {ADMIN_CONTACTS.map((admin) => (

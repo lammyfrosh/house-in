@@ -149,8 +149,8 @@ export default async function PropertyPage({
         </div>
       </section>
 
-      <section className="mx-auto grid max-w-7xl gap-6 px-4 py-8 xl:grid-cols-[1.75fr_0.95fr_1.05fr]">
-        <div>
+      <section className="mx-auto grid max-w-7xl items-start gap-6 px-4 py-8 xl:grid-cols-[1.45fr_0.9fr_0.95fr]">
+        <div className="min-w-0">
           <PropertyGallery title={property.title} images={galleryImages} />
         </div>
 
@@ -222,7 +222,7 @@ export default async function PropertyPage({
           )}
         </div>
 
-        <aside className="h-fit rounded-3xl border border-[var(--color-border)] bg-white p-6 shadow-sm">
+        <aside className="h-fit rounded-3xl border border-[var(--color-border)] bg-white p-6 shadow-sm xl:sticky xl:top-24">
           <h2 className="text-lg font-bold text-[var(--color-text-main)]">
             Contact Agent
           </h2>
@@ -297,7 +297,7 @@ export default async function PropertyPage({
                   href={`/property/${p.slug}`}
                   className="overflow-hidden rounded-3xl border border-[var(--color-border)] bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-md"
                 >
-                  <div className="relative h-56 w-full">
+                  <div className="relative h-56 w-full overflow-hidden">
                     <img
                       src={p.image_url || "/placeholder-property.jpg"}
                       alt={p.title}

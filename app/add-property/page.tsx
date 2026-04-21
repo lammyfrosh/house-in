@@ -274,6 +274,12 @@ export default function AddPropertyPage() {
       return;
     }
 
+    if (!form.state.trim()) {
+      setMessage("Please enter the state where the property is located.");
+      setMessageType("error");
+      return;
+    }
+
     setSaving(true);
     setMessage("");
     setMessageType("");
@@ -398,8 +404,9 @@ export default function AddPropertyPage() {
               Add New Property
             </h1>
             <p className="mt-2 max-w-2xl text-sm leading-6 text-[var(--color-text-muted)]">
-              Create a new property listing with up to 10 images and one optional
-              video of not more than 45 seconds.
+              Create a new property listing with up to 10 images, one optional
+              video of not more than 45 seconds, and flexible location details
+              for any state in Nigeria.
             </p>
           </div>
 
@@ -539,6 +546,7 @@ export default function AddPropertyPage() {
                     name="bedrooms"
                     value={form.bedrooms}
                     onChange={handleChange}
+                    min="0"
                     className="h-12 w-full rounded-xl border border-[var(--color-border)] px-4 outline-none transition focus:border-[var(--color-primary-dark)] focus:ring-2 focus:ring-[var(--color-primary)]/20"
                     placeholder="e.g. 4"
                   />
@@ -553,6 +561,7 @@ export default function AddPropertyPage() {
                     name="bathrooms"
                     value={form.bathrooms}
                     onChange={handleChange}
+                    min="0"
                     className="h-12 w-full rounded-xl border border-[var(--color-border)] px-4 outline-none transition focus:border-[var(--color-primary-dark)] focus:ring-2 focus:ring-[var(--color-primary)]/20"
                     placeholder="e.g. 5"
                   />
@@ -567,6 +576,7 @@ export default function AddPropertyPage() {
                     name="toilets"
                     value={form.toilets}
                     onChange={handleChange}
+                    min="0"
                     className="h-12 w-full rounded-xl border border-[var(--color-border)] px-4 outline-none transition focus:border-[var(--color-primary-dark)] focus:ring-2 focus:ring-[var(--color-primary)]/20"
                     placeholder="e.g. 5"
                   />
@@ -581,6 +591,7 @@ export default function AddPropertyPage() {
                     name="parkingSpaces"
                     value={form.parkingSpaces}
                     onChange={handleChange}
+                    min="0"
                     className="h-12 w-full rounded-xl border border-[var(--color-border)] px-4 outline-none transition focus:border-[var(--color-primary-dark)] focus:ring-2 focus:ring-[var(--color-primary)]/20"
                     placeholder="e.g. 3"
                   />
@@ -609,8 +620,11 @@ export default function AddPropertyPage() {
                     onChange={handleChange}
                     required
                     className="h-12 w-full rounded-xl border border-[var(--color-border)] px-4 outline-none transition focus:border-[var(--color-primary-dark)] focus:ring-2 focus:ring-[var(--color-primary)]/20"
-                    placeholder="e.g. Lagos"
+                    placeholder="e.g. Lagos, Ogun, Kano, Kaduna"
                   />
+                  <p className="mt-2 text-xs text-[var(--color-text-muted)]">
+                    Enter any Nigerian state where the property is located.
+                  </p>
                 </div>
 
                 <div>
@@ -623,7 +637,7 @@ export default function AddPropertyPage() {
                     onChange={handleChange}
                     required
                     className="h-12 w-full rounded-xl border border-[var(--color-border)] px-4 outline-none transition focus:border-[var(--color-primary-dark)] focus:ring-2 focus:ring-[var(--color-primary)]/20"
-                    placeholder="e.g. Lekki"
+                    placeholder="e.g. Lekki, Ajah, Wuse, GRA"
                   />
                 </div>
 
@@ -637,7 +651,7 @@ export default function AddPropertyPage() {
                     onChange={handleChange}
                     required
                     className="h-12 w-full rounded-xl border border-[var(--color-border)] px-4 outline-none transition focus:border-[var(--color-primary-dark)] focus:ring-2 focus:ring-[var(--color-primary)]/20"
-                    placeholder="e.g. Lagos"
+                    placeholder="e.g. Lagos, Abuja, Port Harcourt"
                   />
                 </div>
 
@@ -758,6 +772,11 @@ export default function AddPropertyPage() {
               <p>
                 The contact phone number you enter will be used for direct calls
                 and WhatsApp enquiries from interested buyers or tenants.
+              </p>
+
+              <p>
+                State and bedroom details are flexible, so you can enter the
+                actual location and room count for the property you are listing.
               </p>
 
               <p>

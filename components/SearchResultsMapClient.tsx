@@ -24,10 +24,12 @@ export type MapProperty = {
 
 export type SearchSummary = {
   state?: string;
+  otherState?: string;
   area?: string;
   purpose?: string;
   propertyType?: string;
   beds?: string;
+  otherBeds?: string;
   baths?: string;
   minPrice?: number;
   maxPrice?: number;
@@ -35,10 +37,12 @@ export type SearchSummary = {
 
 type Filters = {
   state: string;
+  otherState: string;
   area: string;
   purpose: string;
   propertyType: string;
   beds: string;
+  otherBeds: string;
   baths: string;
   minPrice: string;
   maxPrice: string;
@@ -66,6 +70,18 @@ function buildMapUrl(lat: number, lng: number) {
   return `https://www.google.com/maps?q=${lat},${lng}&z=14&output=embed`;
 }
 
+const FEATURED_STATES = [
+  "Lagos",
+  "Abuja",
+  "Rivers",
+  "Edo",
+  "Delta",
+  "Anambra",
+  "Enugu",
+  "Imo",
+  "Abia",
+];
+
 const PRICE_OPTIONS = [
   { label: "Any", value: "" },
   { label: "₦500k", value: "500000" },
@@ -78,6 +94,8 @@ const PRICE_OPTIONS = [
   { label: "₦500m", value: "500000000" },
 ];
 
+const BED_OPTIONS = ["1", "2", "3", "4", "5", "6", "7", "8"];
+
 export default function SearchResultsMapClient({
   results,
   defaultCenter,
@@ -89,10 +107,12 @@ export default function SearchResultsMapClient({
 }) {
   const [filters, setFilters] = useState<Filters>({
     state: searchSummary.state || "",
+    otherState: searchSummary.otherState || "",
     area: searchSummary.area || "",
     purpose: searchSummary.purpose || "",
     propertyType: searchSummary.propertyType || "",
     beds: searchSummary.beds || "",
+    otherBeds: searchSummary.otherBeds || "",
     baths: searchSummary.baths || "",
     minPrice: searchSummary.minPrice ? String(searchSummary.minPrice) : "",
     maxPrice: searchSummary.maxPrice ? String(searchSummary.maxPrice) : "",
@@ -102,9 +122,21 @@ export default function SearchResultsMapClient({
     results.length > 0 ? results[0] : null
   );
 
-  const states = useMemo(() => {
-    return Array.from(new Set(results.map((r) => r.state).filter(Boolean))).sort();
+  const allStates = useMemo(() => {
+    return Array.from(
+      new Set(
+        results
+          .map((r) => String(r.state || "").trim())
+          .filter(Boolean)
+      )
+    ).sort((a, b) => a.localeCompare(b));
   }, [results]);
+
+  const otherStates = useMemo(() => {
+    return allStates.filter(
+      (state) => !FEATURED_STATES.some((featured) => norm(featured) === norm(state))
+    );
+  }, [allStates]);
 
   const propertyTypes = useMemo(() => {
     return Array.from(
@@ -114,8 +146,16 @@ export default function SearchResultsMapClient({
 
   const filteredResults = useMemo(() => {
     return results.filter((property) => {
-      if (filters.state && norm(property.state) !== norm(filters.state)) {
-        return false;
+      const propertyState = String(property.state || "").trim();
+      const propertyBedrooms = Number(property.bedrooms || 0);
+
+      if (filters.state) {
+        if (filters.state === "other") {
+          if (!filters.otherState) return false;
+          if (norm(propertyState) !== norm(filters.otherState)) return false;
+        } else {
+          if (norm(propertyState) !== norm(filters.state)) return false;
+        }
       }
 
       if (
@@ -140,8 +180,22 @@ export default function SearchResultsMapClient({
         return false;
       }
 
-      if (filters.beds && Number(property.bedrooms) < Number(filters.beds)) {
-        return false;
+      if (filters.beds) {
+        if (filters.beds === "other") {
+          if (filters.otherBeds) {
+            if (propertyBedrooms !== Number(filters.otherBeds)) {
+              return false;
+            }
+          } else {
+            if (propertyBedrooms <= 8) {
+              return false;
+            }
+          }
+        } else {
+          if (propertyBedrooms !== Number(filters.beds)) {
+            return false;
+          }
+        }
       }
 
       if (filters.baths && Number(property.bathrooms) < Number(filters.baths)) {
@@ -177,16 +231,30 @@ export default function SearchResultsMapClient({
   const mapSrc = buildMapUrl(selectedLat, selectedLng);
 
   function updateFilter<K extends keyof Filters>(key: K, value: Filters[K]) {
-    setFilters((prev) => ({ ...prev, [key]: value }));
+    setFilters((prev) => {
+      const next = { ...prev, [key]: value };
+
+      if (key === "state" && value !== "other") {
+        next.otherState = "";
+      }
+
+      if (key === "beds" && value !== "other") {
+        next.otherBeds = "";
+      }
+
+      return next;
+    });
   }
 
   function resetFilters() {
     setFilters({
       state: "",
+      otherState: "",
       area: "",
       purpose: "",
       propertyType: "",
       beds: "",
+      otherBeds: "",
       baths: "",
       minPrice: "",
       maxPrice: "",
@@ -196,8 +264,7 @@ export default function SearchResultsMapClient({
   return (
     <main className="bg-[#f7f9fc]">
       <section className="xl:h-[calc(100vh-88px)] xl:overflow-hidden">
-        <div className="grid xl:h-full xl:grid-cols-[1.05fr_0.95fr]">
-          {/* LEFT MAP DESKTOP */}
+        <div className="grid xl:h-full xl:grid-cols-[0.9fr_1.1fr]">
           <aside className="hidden xl:block xl:h-full xl:border-r xl:border-[var(--color-border)] xl:bg-white">
             <div className="sticky top-[88px] h-[calc(100vh-88px)]">
               <iframe
@@ -211,7 +278,6 @@ export default function SearchResultsMapClient({
             </div>
           </aside>
 
-          {/* RIGHT PANEL */}
           <div className="xl:h-[calc(100vh-88px)] xl:overflow-y-auto">
             <div className="border-b border-[var(--color-border)] bg-white px-4 py-6 sm:px-6">
               <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
@@ -266,20 +332,45 @@ export default function SearchResultsMapClient({
                     onChange={(e) => updateFilter("state", e.target.value)}
                     className="h-12 rounded-xl border border-[var(--color-border)] bg-white px-4 text-sm outline-none focus:border-[var(--color-primary-dark)]"
                   >
-                    <option value="">All States</option>
-                    {states.map((state) => (
+                    <option value="">All Featured States</option>
+                    {FEATURED_STATES.map((state) => (
                       <option key={state} value={state}>
                         {state}
                       </option>
                     ))}
+                    <option value="other">Other</option>
                   </select>
 
-                  <input
-                    value={filters.area}
-                    onChange={(e) => updateFilter("area", e.target.value)}
-                    placeholder="Location / Area"
-                    className="h-12 rounded-xl border border-[var(--color-border)] bg-white px-4 text-sm outline-none focus:border-[var(--color-primary-dark)]"
-                  />
+                  {filters.state === "other" ? (
+                    <select
+                      value={filters.otherState}
+                      onChange={(e) => updateFilter("otherState", e.target.value)}
+                      className="h-12 rounded-xl border border-[var(--color-border)] bg-white px-4 text-sm outline-none focus:border-[var(--color-primary-dark)]"
+                    >
+                      <option value="">Select Other State</option>
+                      {otherStates.map((state) => (
+                        <option key={state} value={state}>
+                          {state}
+                        </option>
+                      ))}
+                    </select>
+                  ) : (
+                    <input
+                      value={filters.area}
+                      onChange={(e) => updateFilter("area", e.target.value)}
+                      placeholder="Location / Area"
+                      className="h-12 rounded-xl border border-[var(--color-border)] bg-white px-4 text-sm outline-none focus:border-[var(--color-primary-dark)]"
+                    />
+                  )}
+
+                  {filters.state === "other" && (
+                    <input
+                      value={filters.area}
+                      onChange={(e) => updateFilter("area", e.target.value)}
+                      placeholder="Location / Area"
+                      className="h-12 rounded-xl border border-[var(--color-border)] bg-white px-4 text-sm outline-none focus:border-[var(--color-primary-dark)]"
+                    />
+                  )}
 
                   <select
                     value={filters.purpose}
@@ -310,25 +401,51 @@ export default function SearchResultsMapClient({
                     onChange={(e) => updateFilter("beds", e.target.value)}
                     className="h-12 rounded-xl border border-[var(--color-border)] bg-white px-4 text-sm outline-none focus:border-[var(--color-primary-dark)]"
                   >
-                    <option value="">Any Beds</option>
-                    <option value="1">1+</option>
-                    <option value="2">2+</option>
-                    <option value="3">3+</option>
-                    <option value="4">4+</option>
-                    <option value="5">5+</option>
+                    <option value="">Any Bedrooms</option>
+                    {BED_OPTIONS.map((bed) => (
+                      <option key={bed} value={bed}>
+                        {bed}
+                      </option>
+                    ))}
+                    <option value="other">Other</option>
                   </select>
 
-                  <select
-                    value={filters.baths}
-                    onChange={(e) => updateFilter("baths", e.target.value)}
-                    className="h-12 rounded-xl border border-[var(--color-border)] bg-white px-4 text-sm outline-none focus:border-[var(--color-primary-dark)]"
-                  >
-                    <option value="">Any Baths</option>
-                    <option value="1">1+</option>
-                    <option value="2">2+</option>
-                    <option value="3">3+</option>
-                    <option value="4">4+</option>
-                  </select>
+                  {filters.beds === "other" ? (
+                    <input
+                      type="number"
+                      min="9"
+                      value={filters.otherBeds}
+                      onChange={(e) => updateFilter("otherBeds", e.target.value)}
+                      placeholder="Enter 9 or above"
+                      className="h-12 rounded-xl border border-[var(--color-border)] bg-white px-4 text-sm outline-none focus:border-[var(--color-primary-dark)]"
+                    />
+                  ) : (
+                    <select
+                      value={filters.baths}
+                      onChange={(e) => updateFilter("baths", e.target.value)}
+                      className="h-12 rounded-xl border border-[var(--color-border)] bg-white px-4 text-sm outline-none focus:border-[var(--color-primary-dark)]"
+                    >
+                      <option value="">Any Baths</option>
+                      <option value="1">1+</option>
+                      <option value="2">2+</option>
+                      <option value="3">3+</option>
+                      <option value="4">4+</option>
+                    </select>
+                  )}
+
+                  {filters.beds === "other" && (
+                    <select
+                      value={filters.baths}
+                      onChange={(e) => updateFilter("baths", e.target.value)}
+                      className="h-12 rounded-xl border border-[var(--color-border)] bg-white px-4 text-sm outline-none focus:border-[var(--color-primary-dark)]"
+                    >
+                      <option value="">Any Baths</option>
+                      <option value="1">1+</option>
+                      <option value="2">2+</option>
+                      <option value="3">3+</option>
+                      <option value="4">4+</option>
+                    </select>
+                  )}
 
                   <select
                     value={filters.minPrice}
@@ -362,7 +479,6 @@ export default function SearchResultsMapClient({
               </div>
             </div>
 
-            {/* PROPERTY LIST WITH EXTRA BOTTOM SPACE ON MOBILE */}
             <div className="space-y-5 px-4 py-6 pb-[250px] sm:px-6 sm:pb-[290px] xl:pb-6">
               {filteredResults.length === 0 ? (
                 <div className="rounded-3xl border border-[var(--color-border)] bg-white p-8 text-center shadow-sm">
@@ -451,7 +567,6 @@ export default function SearchResultsMapClient({
         </div>
       </section>
 
-      {/* MOBILE FIXED BOTTOM MAP */}
       <section className="fixed bottom-0 left-0 right-0 z-40 border-t border-[var(--color-border)] bg-[#f7f9fc] px-4 pb-4 pt-2 shadow-[0_-10px_30px_rgba(15,23,42,0.08)] xl:hidden">
         <div className="mx-auto max-w-7xl">
           <div className="overflow-hidden rounded-3xl border border-[var(--color-border)] bg-white shadow-sm">

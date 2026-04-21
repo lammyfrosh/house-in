@@ -8,8 +8,8 @@ import {
   House,
   BadgeCheck,
   ArrowRight,
-  Scale,
   Download,
+  Globe2,
 } from "lucide-react";
 import {
   getApprovedProperties,
@@ -33,13 +33,14 @@ const STATES = [
   "Abia",
 ];
 
-const stateLinks = [
+const FEATURED_STATE_LINKS = [
   { name: "Lagos", href: "/search?state=Lagos", icon: MapPin },
   { name: "Abuja", href: "/search?state=Abuja", icon: Building2 },
   { name: "Rivers", href: "/search?state=Rivers", icon: House },
   { name: "Edo", href: "/search?state=Edo", icon: MapPin },
   { name: "Delta", href: "/search?state=Delta", icon: Building2 },
   { name: "Enugu", href: "/search?state=Enugu", icon: House },
+  { name: "Others", href: "/search?state=other", icon: Globe2 },
 ];
 
 const trustItems = [
@@ -97,7 +98,7 @@ export default async function Home() {
 
   return (
     <main>
-      <section className="relative min-h-[920px] overflow-hidden md:min-h-[980px]">
+      <section className="relative min-h-[700px] overflow-hidden md:min-h-[980px]">
         <Image
           src="/hero-v2.jpg"
           alt="Organised residential estate view"
@@ -109,21 +110,21 @@ export default async function Home() {
         <div className="absolute inset-0 bg-gradient-to-r from-black/75 via-black/55 to-black/30" />
         <div className="absolute inset-0 bg-[var(--color-primary-dark)]/28" />
 
-        <div className="relative z-10 mx-auto flex min-h-[920px] max-w-6xl flex-col px-4 pt-24 md:min-h-[980px] md:pt-28">
+        <div className="relative z-10 mx-auto flex min-h-[700px] max-w-6xl flex-col px-4 pt-14 md:min-h-[980px] md:pt-28">
           <div className="max-w-3xl">
             <Link
               href="/contact"
-              className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-4 py-2 text-xs font-medium tracking-wide text-white backdrop-blur-md transition hover:bg-white/15"
+              className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-4 py-2 text-[11px] font-medium tracking-wide text-white backdrop-blur-md transition hover:bg-white/15 md:text-xs"
             >
               <Download size={14} />
               CLICK HERE TO DOWNLOAD HOUSE-IN APP
             </Link>
 
-            <h1 className="mt-6 max-w-[900px] text-4xl font-semibold leading-tight text-white drop-shadow-sm md:text-7xl md:leading-[1.04]">
+            <h1 className="mt-4 max-w-[900px] text-3xl font-semibold leading-tight text-white drop-shadow-sm sm:text-4xl md:mt-6 md:text-7xl md:leading-[1.04]">
               Find Property the Smart Way in Nigeria
             </h1>
 
-            <p className="mt-5 max-w-2xl text-base leading-8 text-white/90 drop-shadow md:text-xl">
+            <p className="mt-4 max-w-2xl text-sm leading-7 text-white/90 drop-shadow sm:text-base md:mt-5 md:text-xl md:leading-8">
               Discover houses, apartments, land, and shortlet listings across
               selected states in Nigeria — with a platform designed to make your
               search easier, faster, and more reliable.
@@ -131,32 +132,38 @@ export default async function Home() {
           </div>
         </div>
 
-        <div className="absolute inset-x-0 bottom-12 z-20 md:bottom-14">
+        <div className="absolute inset-x-0 bottom-5 z-20 md:bottom-14">
           <div className="mx-auto max-w-6xl px-4">
-            <div className="rounded-[30px] border border-white/30 bg-white/95 p-4 shadow-2xl backdrop-blur-md md:p-5">
-              <div className="grid gap-4 md:grid-cols-3">
+            <div className="rounded-[26px] border border-white/30 bg-white/95 p-3 shadow-2xl backdrop-blur-md md:rounded-[30px] md:p-5">
+              <div className="grid gap-3 md:grid-cols-3 md:gap-4">
                 <Link
                   href="/search?purpose=sale"
-                  className="group cursor-pointer rounded-3xl bg-[var(--color-primary-dark)] px-6 py-8 text-white transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
+                  className="group cursor-pointer rounded-3xl bg-[var(--color-primary-dark)] px-5 py-5 text-white transition-all duration-300 hover:-translate-y-1 hover:shadow-xl md:px-6 md:py-8"
                 >
-                  <div className="mb-5 inline-flex rounded-2xl bg-white/15 p-3 text-white">
-                    <Building2 size={22} />
+                  <div className="mb-4 inline-flex rounded-2xl bg-white/15 p-3 text-white md:mb-5">
+                    <Building2 size={20} className="md:hidden" />
+                    <Building2 size={22} className="hidden md:block" />
                   </div>
-                  <p className="text-2xl font-bold text-white">For Sale</p>
-                  <p className="mt-3 text-sm leading-6 text-white/85">
+                  <p className="text-xl font-bold text-white md:text-2xl">
+                    For Sale
+                  </p>
+                  <p className="mt-2 text-xs leading-5 text-white/85 md:mt-3 md:text-sm md:leading-6">
                     Explore curated sale listings across prime locations.
                   </p>
                 </Link>
 
                 <Link
                   href="/search?purpose=rent"
-                  className="group cursor-pointer rounded-3xl bg-[var(--color-primary-dark)] px-6 py-8 text-white transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
+                  className="group cursor-pointer rounded-3xl bg-[var(--color-primary-dark)] px-5 py-5 text-white transition-all duration-300 hover:-translate-y-1 hover:shadow-xl md:px-6 md:py-8"
                 >
-                  <div className="mb-5 inline-flex rounded-2xl bg-white/15 p-3 text-white">
-                    <House size={22} />
+                  <div className="mb-4 inline-flex rounded-2xl bg-white/15 p-3 text-white md:mb-5">
+                    <House size={20} className="md:hidden" />
+                    <House size={22} className="hidden md:block" />
                   </div>
-                  <p className="text-2xl font-bold text-white">For Rent</p>
-                  <p className="mt-3 text-sm leading-6 text-white/85">
+                  <p className="text-xl font-bold text-white md:text-2xl">
+                    For Rent
+                  </p>
+                  <p className="mt-2 text-xs leading-5 text-white/85 md:mt-3 md:text-sm md:leading-6">
                     Discover rental properties with better clarity and faster
                     access.
                   </p>
@@ -164,13 +171,16 @@ export default async function Home() {
 
                 <Link
                   href="/search?purpose=shortlet"
-                  className="group cursor-pointer rounded-3xl bg-[var(--color-primary-dark)] px-6 py-8 text-white transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
+                  className="group cursor-pointer rounded-3xl bg-[var(--color-primary-dark)] px-5 py-5 text-white transition-all duration-300 hover:-translate-y-1 hover:shadow-xl md:px-6 md:py-8"
                 >
-                  <div className="mb-5 inline-flex rounded-2xl bg-white/15 p-3 text-white">
-                    <BadgeCheck size={22} />
+                  <div className="mb-4 inline-flex rounded-2xl bg-white/15 p-3 text-white md:mb-5">
+                    <BadgeCheck size={20} className="md:hidden" />
+                    <BadgeCheck size={22} className="hidden md:block" />
                   </div>
-                  <p className="text-2xl font-bold text-white">Shortlet</p>
-                  <p className="mt-3 text-sm leading-6 text-white/85">
+                  <p className="text-xl font-bold text-white md:text-2xl">
+                    Shortlet
+                  </p>
+                  <p className="mt-2 text-xs leading-5 text-white/85 md:mt-3 md:text-sm md:leading-6">
                     Find flexible short-stay options for comfort and convenience.
                   </p>
                 </Link>
@@ -195,6 +205,7 @@ export default async function Home() {
                     {s}
                   </option>
                 ))}
+                <option value="other">Other</option>
               </select>
 
               <input
@@ -241,11 +252,15 @@ export default async function Home() {
                   defaultValue=""
                 >
                   <option value="">Beds</option>
-                  <option value="1">1+</option>
-                  <option value="2">2+</option>
-                  <option value="3">3+</option>
-                  <option value="4">4+</option>
-                  <option value="5">5+</option>
+                  <option value="1">1</option>
+                  <option value="2">2</option>
+                  <option value="3">3</option>
+                  <option value="4">4</option>
+                  <option value="5">5</option>
+                  <option value="6">6</option>
+                  <option value="7">7</option>
+                  <option value="8">8</option>
+                  <option value="other">Other</option>
                 </select>
 
                 <select
@@ -373,13 +388,17 @@ export default async function Home() {
           </div>
 
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {stateLinks.map((state) => {
+            {FEATURED_STATE_LINKS.map((state) => {
               const Icon = state.icon;
+              const isOthers = state.name === "Others";
+
               return (
                 <Link
                   key={state.name}
                   href={state.href}
-                  className="group rounded-2xl border border-[var(--color-border)] bg-white p-5 transition-all duration-300 hover:border-[var(--color-primary)] hover:shadow-sm"
+                  className={`group rounded-2xl border border-[var(--color-border)] bg-white p-5 transition-all duration-300 hover:border-[var(--color-primary)] hover:shadow-sm ${
+                    isOthers ? "lg:col-start-2" : ""
+                  }`}
                 >
                   <div className="flex items-start justify-between">
                     <div>
@@ -387,9 +406,12 @@ export default async function Home() {
                         {state.name}
                       </p>
                       <p className="mt-1 text-sm text-[var(--color-text-muted)]">
-                        View listings in {state.name}
+                        {isOthers
+                          ? "View listings in other states"
+                          : `View listings in ${state.name}`}
                       </p>
                     </div>
+
                     <div className="rounded-xl bg-[var(--color-primary)]/30 p-2 text-[var(--color-primary-dark)]">
                       <Icon size={18} />
                     </div>
