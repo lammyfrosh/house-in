@@ -10,6 +10,7 @@ import {
   ArrowRight,
   Download,
   Globe2,
+  ChevronDown,
 } from "lucide-react";
 import {
   getApprovedProperties,
@@ -21,7 +22,7 @@ import {
 import PropertyCard from "@/components/PropertyCard";
 import ExpandablePartnerCards from "@/components/ExpandablePartnerCards";
 
-const STATES = [
+const FEATURED_STATES = [
   "Lagos",
   "Abuja",
   "Rivers",
@@ -33,6 +34,50 @@ const STATES = [
   "Abia",
 ];
 
+const ALL_NIGERIA_STATES = [
+  "Abia",
+  "Adamawa",
+  "Akwa Ibom",
+  "Anambra",
+  "Bauchi",
+  "Bayelsa",
+  "Benue",
+  "Borno",
+  "Cross River",
+  "Delta",
+  "Ebonyi",
+  "Edo",
+  "Ekiti",
+  "Enugu",
+  "FCT",
+  "Gombe",
+  "Imo",
+  "Jigawa",
+  "Kaduna",
+  "Kano",
+  "Katsina",
+  "Kebbi",
+  "Kogi",
+  "Kwara",
+  "Lagos",
+  "Nasarawa",
+  "Niger",
+  "Ogun",
+  "Ondo",
+  "Osun",
+  "Oyo",
+  "Plateau",
+  "Rivers",
+  "Sokoto",
+  "Taraba",
+  "Yobe",
+  "Zamfara",
+];
+
+const OTHER_STATES = ALL_NIGERIA_STATES.filter(
+  (state) => !FEATURED_STATES.includes(state)
+);
+
 const FEATURED_STATE_LINKS = [
   { name: "Lagos", href: "/search?state=Lagos", icon: MapPin },
   { name: "Abuja", href: "/search?state=Abuja", icon: Building2 },
@@ -40,7 +85,6 @@ const FEATURED_STATE_LINKS = [
   { name: "Edo", href: "/search?state=Edo", icon: MapPin },
   { name: "Delta", href: "/search?state=Delta", icon: Building2 },
   { name: "Enugu", href: "/search?state=Enugu", icon: House },
-  { name: "Others", href: "/search?state=other", icon: Globe2 },
 ];
 
 const trustItems = [
@@ -98,7 +142,7 @@ export default async function Home() {
 
   return (
     <main>
-      <section className="relative min-h-[700px] overflow-hidden md:min-h-[980px]">
+      <section className="relative min-h-[560px] overflow-hidden md:min-h-[980px]">
         <Image
           src="/hero-v2.jpg"
           alt="Organised residential estate view"
@@ -110,21 +154,21 @@ export default async function Home() {
         <div className="absolute inset-0 bg-gradient-to-r from-black/75 via-black/55 to-black/30" />
         <div className="absolute inset-0 bg-[var(--color-primary-dark)]/28" />
 
-        <div className="relative z-10 mx-auto flex min-h-[700px] max-w-6xl flex-col px-4 pt-14 md:min-h-[980px] md:pt-28">
+        <div className="relative z-10 mx-auto flex min-h-[560px] max-w-6xl flex-col px-4 pt-5 md:min-h-[980px] md:pt-28">
           <div className="max-w-3xl">
             <Link
               href="/contact"
-              className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-4 py-2 text-[11px] font-medium tracking-wide text-white backdrop-blur-md transition hover:bg-white/15 md:text-xs"
+              className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-4 py-2 text-[10px] font-medium tracking-wide text-white backdrop-blur-md transition hover:bg-white/15 md:text-xs"
             >
               <Download size={14} />
               CLICK HERE TO DOWNLOAD HOUSE-IN APP
             </Link>
 
-            <h1 className="mt-4 max-w-[900px] text-3xl font-semibold leading-tight text-white drop-shadow-sm sm:text-4xl md:mt-6 md:text-7xl md:leading-[1.04]">
+            <h1 className="hidden sm:block mt-3 max-w-[900px] text-[28px] font-semibold leading-tight text-white drop-shadow-sm sm:text-4xl md:mt-6 md:text-7xl md:leading-[1.04]">
               Find Property the Smart Way in Nigeria
             </h1>
 
-            <p className="mt-4 max-w-2xl text-sm leading-7 text-white/90 drop-shadow sm:text-base md:mt-5 md:text-xl md:leading-8">
+            <p className="mt-3 hidden max-w-2xl text-sm leading-6 text-white/90 drop-shadow sm:block sm:text-base md:mt-5 md:text-xl md:leading-8">
               Discover houses, apartments, land, and shortlet listings across
               selected states in Nigeria — with a platform designed to make your
               search easier, faster, and more reliable.
@@ -132,38 +176,38 @@ export default async function Home() {
           </div>
         </div>
 
-        <div className="absolute inset-x-0 bottom-5 z-20 md:bottom-14">
+        <div className="absolute inset-x-0 bottom-2 z-20 md:bottom-14">
           <div className="mx-auto max-w-6xl px-4">
-            <div className="rounded-[26px] border border-white/30 bg-white/95 p-3 shadow-2xl backdrop-blur-md md:rounded-[30px] md:p-5">
+            <div className="rounded-[24px] border border-white/30 bg-white/95 p-3 shadow-2xl backdrop-blur-md md:rounded-[30px] md:p-5">
               <div className="grid gap-3 md:grid-cols-3 md:gap-4">
                 <Link
                   href="/search?purpose=sale"
-                  className="group cursor-pointer rounded-3xl bg-[var(--color-primary-dark)] px-5 py-5 text-white transition-all duration-300 hover:-translate-y-1 hover:shadow-xl md:px-6 md:py-8"
+                  className="group cursor-pointer rounded-3xl bg-[var(--color-primary-dark)] px-4 py-4 text-white transition-all duration-300 hover:-translate-y-1 hover:shadow-xl md:px-6 md:py-8"
                 >
-                  <div className="mb-4 inline-flex rounded-2xl bg-white/15 p-3 text-white md:mb-5">
-                    <Building2 size={20} className="md:hidden" />
+                  <div className="mb-3 inline-flex rounded-2xl bg-white/15 p-3 text-white md:mb-5">
+                    <Building2 size={18} className="md:hidden" />
                     <Building2 size={22} className="hidden md:block" />
                   </div>
-                  <p className="text-xl font-bold text-white md:text-2xl">
+                  <p className="text-lg font-bold text-white md:text-2xl">
                     For Sale
                   </p>
-                  <p className="mt-2 text-xs leading-5 text-white/85 md:mt-3 md:text-sm md:leading-6">
+                  <p className="mt-2 text-[11px] leading-5 text-white/85 md:mt-3 md:text-sm md:leading-6">
                     Explore curated sale listings across prime locations.
                   </p>
                 </Link>
 
                 <Link
                   href="/search?purpose=rent"
-                  className="group cursor-pointer rounded-3xl bg-[var(--color-primary-dark)] px-5 py-5 text-white transition-all duration-300 hover:-translate-y-1 hover:shadow-xl md:px-6 md:py-8"
+                  className="group cursor-pointer rounded-3xl bg-[var(--color-primary-dark)] px-4 py-4 text-white transition-all duration-300 hover:-translate-y-1 hover:shadow-xl md:px-6 md:py-8"
                 >
-                  <div className="mb-4 inline-flex rounded-2xl bg-white/15 p-3 text-white md:mb-5">
-                    <House size={20} className="md:hidden" />
+                  <div className="mb-3 inline-flex rounded-2xl bg-white/15 p-3 text-white md:mb-5">
+                    <House size={18} className="md:hidden" />
                     <House size={22} className="hidden md:block" />
                   </div>
-                  <p className="text-xl font-bold text-white md:text-2xl">
+                  <p className="text-lg font-bold text-white md:text-2xl">
                     For Rent
                   </p>
-                  <p className="mt-2 text-xs leading-5 text-white/85 md:mt-3 md:text-sm md:leading-6">
+                  <p className="mt-2 text-[11px] leading-5 text-white/85 md:mt-3 md:text-sm md:leading-6">
                     Discover rental properties with better clarity and faster
                     access.
                   </p>
@@ -171,16 +215,16 @@ export default async function Home() {
 
                 <Link
                   href="/search?purpose=shortlet"
-                  className="group cursor-pointer rounded-3xl bg-[var(--color-primary-dark)] px-5 py-5 text-white transition-all duration-300 hover:-translate-y-1 hover:shadow-xl md:px-6 md:py-8"
+                  className="group cursor-pointer rounded-3xl bg-[var(--color-primary-dark)] px-4 py-4 text-white transition-all duration-300 hover:-translate-y-1 hover:shadow-xl md:px-6 md:py-8"
                 >
-                  <div className="mb-4 inline-flex rounded-2xl bg-white/15 p-3 text-white md:mb-5">
-                    <BadgeCheck size={20} className="md:hidden" />
+                  <div className="mb-3 inline-flex rounded-2xl bg-white/15 p-3 text-white md:mb-5">
+                    <BadgeCheck size={18} className="md:hidden" />
                     <BadgeCheck size={22} className="hidden md:block" />
                   </div>
-                  <p className="text-xl font-bold text-white md:text-2xl">
+                  <p className="text-lg font-bold text-white md:text-2xl">
                     Shortlet
                   </p>
-                  <p className="mt-2 text-xs leading-5 text-white/85 md:mt-3 md:text-sm md:leading-6">
+                  <p className="mt-2 text-[11px] leading-5 text-white/85 md:mt-3 md:text-sm md:leading-6">
                     Find flexible short-stay options for comfort and convenience.
                   </p>
                 </Link>
@@ -199,8 +243,8 @@ export default async function Home() {
                 className="h-12 rounded-xl border border-[var(--color-border)] bg-white px-3 transition outline-none focus:border-[var(--color-primary-dark)] focus:ring-2 focus:ring-[var(--color-primary)]/20 md:col-span-3"
                 defaultValue=""
               >
-                <option value="">Select State</option>
-                {STATES.map((s) => (
+                <option value="">Featured States</option>
+                {FEATURED_STATES.map((s) => (
                   <option key={s} value={s}>
                     {s}
                   </option>
@@ -208,10 +252,23 @@ export default async function Home() {
                 <option value="other">Other</option>
               </select>
 
+              <select
+                name="otherState"
+                className="h-12 rounded-xl border border-[var(--color-border)] bg-white px-3 transition outline-none focus:border-[var(--color-primary-dark)] focus:ring-2 focus:ring-[var(--color-primary)]/20 md:col-span-3"
+                defaultValue=""
+              >
+                <option value="">Other States</option>
+                {OTHER_STATES.map((s) => (
+                  <option key={s} value={s}>
+                    {s}
+                  </option>
+                ))}
+              </select>
+
               <input
                 name="area"
-                className="h-12 rounded-xl border border-[var(--color-border)] bg-white px-3 transition outline-none focus:border-[var(--color-primary-dark)] focus:ring-2 focus:ring-[var(--color-primary)]/20 md:col-span-4"
-                placeholder="Area / LGA (e.g. Lekki, Ikeja, Wuse)"
+                className="h-12 rounded-xl border border-[var(--color-border)] bg-white px-3 transition outline-none focus:border-[var(--color-primary-dark)] focus:ring-2 focus:ring-[var(--color-primary)]/20 md:col-span-3"
+                placeholder="Area / LGA"
               />
 
               <select
@@ -225,19 +282,6 @@ export default async function Home() {
                 <option value="shortlet">Shortlet</option>
               </select>
 
-              <select
-                name="propertyType"
-                className="h-12 rounded-xl border border-[var(--color-border)] bg-white px-3 transition outline-none focus:border-[var(--color-primary-dark)] focus:ring-2 focus:ring-[var(--color-primary)]/20 md:col-span-2"
-                defaultValue=""
-              >
-                <option value="">Property Type</option>
-                <option value="Apartment">Flat / Apartment</option>
-                <option value="Duplex">Duplex</option>
-                <option value="Terrace">Terrace</option>
-                <option value="Bungalow">Bungalow</option>
-                <option value="Land">Land</option>
-              </select>
-
               <button
                 type="submit"
                 className="h-12 rounded-xl bg-[var(--color-primary-dark)] font-semibold text-white transition-all duration-300 hover:-translate-y-0.5 hover:opacity-95 hover:shadow-md md:col-span-1"
@@ -246,6 +290,19 @@ export default async function Home() {
               </button>
 
               <div className="grid gap-3 md:col-span-12 md:grid-cols-12">
+                <select
+                  name="propertyType"
+                  className="h-12 rounded-xl border border-[var(--color-border)] bg-white px-3 transition outline-none focus:border-[var(--color-primary-dark)] focus:ring-2 focus:ring-[var(--color-primary)]/20 md:col-span-3"
+                  defaultValue=""
+                >
+                  <option value="">Property Type</option>
+                  <option value="Apartment">Flat / Apartment</option>
+                  <option value="Duplex">Duplex</option>
+                  <option value="Terrace">Terrace</option>
+                  <option value="Bungalow">Bungalow</option>
+                  <option value="Land">Land</option>
+                </select>
+
                 <select
                   name="beds"
                   className="h-12 rounded-xl border border-[var(--color-border)] bg-white px-3 transition outline-none focus:border-[var(--color-primary-dark)] focus:ring-2 focus:ring-[var(--color-primary)]/20 md:col-span-2"
@@ -277,7 +334,7 @@ export default async function Home() {
 
                 <select
                   name="minPrice"
-                  className="h-12 rounded-xl border border-[var(--color-border)] bg-white px-3 transition outline-none focus:border-[var(--color-primary-dark)] focus:ring-2 focus:ring-[var(--color-primary)]/20 md:col-span-4"
+                  className="h-12 rounded-xl border border-[var(--color-border)] bg-white px-3 transition outline-none focus:border-[var(--color-primary-dark)] focus:ring-2 focus:ring-[var(--color-primary)]/20 md:col-span-2"
                   defaultValue=""
                 >
                   <option value="">Min Price</option>
@@ -292,7 +349,7 @@ export default async function Home() {
 
                 <select
                   name="maxPrice"
-                  className="h-12 rounded-xl border border-[var(--color-border)] bg-white px-3 transition outline-none focus:border-[var(--color-primary-dark)] focus:ring-2 focus:ring-[var(--color-primary)]/20 md:col-span-4"
+                  className="h-12 rounded-xl border border-[var(--color-border)] bg-white px-3 transition outline-none focus:border-[var(--color-primary-dark)] focus:ring-2 focus:ring-[var(--color-primary)]/20 md:col-span-3"
                   defaultValue=""
                 >
                   <option value="">Max Price</option>
@@ -390,15 +447,12 @@ export default async function Home() {
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {FEATURED_STATE_LINKS.map((state) => {
               const Icon = state.icon;
-              const isOthers = state.name === "Others";
 
               return (
                 <Link
                   key={state.name}
                   href={state.href}
-                  className={`group rounded-2xl border border-[var(--color-border)] bg-white p-5 transition-all duration-300 hover:border-[var(--color-primary)] hover:shadow-sm ${
-                    isOthers ? "lg:col-start-2" : ""
-                  }`}
+                  className="group rounded-2xl border border-[var(--color-border)] bg-white p-5 transition-all duration-300 hover:border-[var(--color-primary)] hover:shadow-sm"
                 >
                   <div className="flex items-start justify-between">
                     <div>
@@ -406,9 +460,7 @@ export default async function Home() {
                         {state.name}
                       </p>
                       <p className="mt-1 text-sm text-[var(--color-text-muted)]">
-                        {isOthers
-                          ? "View listings in other states"
-                          : `View listings in ${state.name}`}
+                        View listings in {state.name}
                       </p>
                     </div>
 
@@ -419,6 +471,38 @@ export default async function Home() {
                 </Link>
               );
             })}
+
+            <details className="group rounded-2xl border border-[var(--color-border)] bg-white p-5 transition-all duration-300 hover:border-[var(--color-primary)] hover:shadow-sm lg:col-start-2">
+              <summary className="flex cursor-pointer list-none items-start justify-between">
+                <div>
+                  <p className="text-lg font-semibold text-[var(--color-text-main)]">
+                    Others
+                  </p>
+                  <p className="mt-1 text-sm text-[var(--color-text-muted)]">
+                    View listings in other states
+                  </p>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <div className="rounded-xl bg-[var(--color-primary)]/30 p-2 text-[var(--color-primary-dark)]">
+                    <Globe2 size={18} />
+                  </div>
+                  <ChevronDown className="mt-1 text-[var(--color-text-muted)] transition group-open:rotate-180" size={18} />
+                </div>
+              </summary>
+
+              <div className="mt-4 grid max-h-64 grid-cols-2 gap-2 overflow-y-auto rounded-2xl border border-[var(--color-border)] bg-[#f8fafc] p-3">
+                {OTHER_STATES.map((state) => (
+                  <Link
+                    key={state}
+                    href={`/search?state=other&otherState=${encodeURIComponent(state)}`}
+                    className="rounded-xl bg-white px-3 py-2 text-sm text-[var(--color-text-main)] transition hover:bg-[var(--color-primary)]/10 hover:text-[var(--color-primary-dark)]"
+                  >
+                    {state}
+                  </Link>
+                ))}
+              </div>
+            </details>
           </div>
         </div>
       </section>

@@ -82,6 +82,50 @@ const FEATURED_STATES = [
   "Abia",
 ];
 
+const ALL_NIGERIA_STATES = [
+  "Abia",
+  "Adamawa",
+  "Akwa Ibom",
+  "Anambra",
+  "Bauchi",
+  "Bayelsa",
+  "Benue",
+  "Borno",
+  "Cross River",
+  "Delta",
+  "Ebonyi",
+  "Edo",
+  "Ekiti",
+  "Enugu",
+  "FCT",
+  "Gombe",
+  "Imo",
+  "Jigawa",
+  "Kaduna",
+  "Kano",
+  "Katsina",
+  "Kebbi",
+  "Kogi",
+  "Kwara",
+  "Lagos",
+  "Nasarawa",
+  "Niger",
+  "Ogun",
+  "Ondo",
+  "Osun",
+  "Oyo",
+  "Plateau",
+  "Rivers",
+  "Sokoto",
+  "Taraba",
+  "Yobe",
+  "Zamfara",
+];
+
+const OTHER_STATES = ALL_NIGERIA_STATES.filter(
+  (state) => !FEATURED_STATES.includes(state)
+);
+
 const PRICE_OPTIONS = [
   { label: "Any", value: "" },
   { label: "₦500k", value: "500000" },
@@ -121,22 +165,6 @@ export default function SearchResultsMapClient({
   const [selectedProperty, setSelectedProperty] = useState<MapProperty | null>(
     results.length > 0 ? results[0] : null
   );
-
-  const allStates = useMemo(() => {
-    return Array.from(
-      new Set(
-        results
-          .map((r) => String(r.state || "").trim())
-          .filter(Boolean)
-      )
-    ).sort((a, b) => a.localeCompare(b));
-  }, [results]);
-
-  const otherStates = useMemo(() => {
-    return allStates.filter(
-      (state) => !FEATURED_STATES.some((featured) => norm(featured) === norm(state))
-    );
-  }, [allStates]);
 
   const propertyTypes = useMemo(() => {
     return Array.from(
@@ -186,15 +214,11 @@ export default function SearchResultsMapClient({
             if (propertyBedrooms !== Number(filters.otherBeds)) {
               return false;
             }
-          } else {
-            if (propertyBedrooms <= 8) {
-              return false;
-            }
-          }
-        } else {
-          if (propertyBedrooms !== Number(filters.beds)) {
+          } else if (propertyBedrooms <= 8) {
             return false;
           }
+        } else if (propertyBedrooms !== Number(filters.beds)) {
+          return false;
         }
       }
 
@@ -220,7 +244,9 @@ export default function SearchResultsMapClient({
       return;
     }
 
-    const stillExists = filteredResults.find((p) => p.id === selectedProperty?.id);
+    const stillExists = filteredResults.find(
+      (p) => p.id === selectedProperty?.id
+    );
     if (!stillExists) {
       setSelectedProperty(filteredResults[0]);
     }
@@ -332,7 +358,7 @@ export default function SearchResultsMapClient({
                     onChange={(e) => updateFilter("state", e.target.value)}
                     className="h-12 rounded-xl border border-[var(--color-border)] bg-white px-4 text-sm outline-none focus:border-[var(--color-primary-dark)]"
                   >
-                    <option value="">All Featured States</option>
+                    <option value="">Featured States</option>
                     {FEATURED_STATES.map((state) => (
                       <option key={state} value={state}>
                         {state}
@@ -341,36 +367,30 @@ export default function SearchResultsMapClient({
                     <option value="other">Other</option>
                   </select>
 
-                  {filters.state === "other" ? (
-                    <select
-                      value={filters.otherState}
-                      onChange={(e) => updateFilter("otherState", e.target.value)}
-                      className="h-12 rounded-xl border border-[var(--color-border)] bg-white px-4 text-sm outline-none focus:border-[var(--color-primary-dark)]"
-                    >
-                      <option value="">Select Other State</option>
-                      {otherStates.map((state) => (
-                        <option key={state} value={state}>
-                          {state}
-                        </option>
-                      ))}
-                    </select>
-                  ) : (
-                    <input
-                      value={filters.area}
-                      onChange={(e) => updateFilter("area", e.target.value)}
-                      placeholder="Location / Area"
-                      className="h-12 rounded-xl border border-[var(--color-border)] bg-white px-4 text-sm outline-none focus:border-[var(--color-primary-dark)]"
-                    />
-                  )}
+                  <select
+                    value={filters.otherState}
+                    onChange={(e) => updateFilter("otherState", e.target.value)}
+                    disabled={filters.state !== "other"}
+                    className={`h-12 rounded-xl border px-4 text-sm outline-none ${
+                      filters.state === "other"
+                        ? "border-[var(--color-border)] bg-white focus:border-[var(--color-primary-dark)]"
+                        : "cursor-not-allowed border-gray-200 bg-gray-100 text-gray-400"
+                    }`}
+                  >
+                    <option value="">Other States</option>
+                    {OTHER_STATES.map((state) => (
+                      <option key={state} value={state}>
+                        {state}
+                      </option>
+                    ))}
+                  </select>
 
-                  {filters.state === "other" && (
-                    <input
-                      value={filters.area}
-                      onChange={(e) => updateFilter("area", e.target.value)}
-                      placeholder="Location / Area"
-                      className="h-12 rounded-xl border border-[var(--color-border)] bg-white px-4 text-sm outline-none focus:border-[var(--color-primary-dark)]"
-                    />
-                  )}
+                  <input
+                    value={filters.area}
+                    onChange={(e) => updateFilter("area", e.target.value)}
+                    placeholder="Location / Area"
+                    className="h-12 rounded-xl border border-[var(--color-border)] bg-white px-4 text-sm outline-none focus:border-[var(--color-primary-dark)]"
+                  />
 
                   <select
                     value={filters.purpose}
@@ -410,42 +430,31 @@ export default function SearchResultsMapClient({
                     <option value="other">Other</option>
                   </select>
 
-                  {filters.beds === "other" ? (
-                    <input
-                      type="number"
-                      min="9"
-                      value={filters.otherBeds}
-                      onChange={(e) => updateFilter("otherBeds", e.target.value)}
-                      placeholder="Enter 9 or above"
-                      className="h-12 rounded-xl border border-[var(--color-border)] bg-white px-4 text-sm outline-none focus:border-[var(--color-primary-dark)]"
-                    />
-                  ) : (
-                    <select
-                      value={filters.baths}
-                      onChange={(e) => updateFilter("baths", e.target.value)}
-                      className="h-12 rounded-xl border border-[var(--color-border)] bg-white px-4 text-sm outline-none focus:border-[var(--color-primary-dark)]"
-                    >
-                      <option value="">Any Baths</option>
-                      <option value="1">1+</option>
-                      <option value="2">2+</option>
-                      <option value="3">3+</option>
-                      <option value="4">4+</option>
-                    </select>
-                  )}
+                  <input
+                    type="number"
+                    min="9"
+                    value={filters.otherBeds}
+                    onChange={(e) => updateFilter("otherBeds", e.target.value)}
+                    placeholder="Beds (9+)"
+                    disabled={filters.beds !== "other"}
+                    className={`h-12 rounded-xl border px-4 text-sm outline-none ${
+                      filters.beds === "other"
+                        ? "border-[var(--color-border)] bg-white focus:border-[var(--color-primary-dark)]"
+                        : "cursor-not-allowed border-gray-200 bg-gray-100 text-gray-400"
+                    }`}
+                  />
 
-                  {filters.beds === "other" && (
-                    <select
-                      value={filters.baths}
-                      onChange={(e) => updateFilter("baths", e.target.value)}
-                      className="h-12 rounded-xl border border-[var(--color-border)] bg-white px-4 text-sm outline-none focus:border-[var(--color-primary-dark)]"
-                    >
-                      <option value="">Any Baths</option>
-                      <option value="1">1+</option>
-                      <option value="2">2+</option>
-                      <option value="3">3+</option>
-                      <option value="4">4+</option>
-                    </select>
-                  )}
+                  <select
+                    value={filters.baths}
+                    onChange={(e) => updateFilter("baths", e.target.value)}
+                    className="h-12 rounded-xl border border-[var(--color-border)] bg-white px-4 text-sm outline-none focus:border-[var(--color-primary-dark)]"
+                  >
+                    <option value="">Any Baths</option>
+                    <option value="1">1+</option>
+                    <option value="2">2+</option>
+                    <option value="3">3+</option>
+                    <option value="4">4+</option>
+                  </select>
 
                   <select
                     value={filters.minPrice}
@@ -454,7 +463,7 @@ export default function SearchResultsMapClient({
                   >
                     {PRICE_OPTIONS.map((option) => (
                       <option key={`min-${option.value}`} value={option.value}>
-                        Min Price {option.label !== "Any" ? `- ${option.label}` : ""}
+                        Min {option.label}
                       </option>
                     ))}
                   </select>
@@ -466,7 +475,7 @@ export default function SearchResultsMapClient({
                   >
                     {PRICE_OPTIONS.map((option) => (
                       <option key={`max-${option.value}`} value={option.value}>
-                        Max Price {option.label !== "Any" ? `- ${option.label}` : ""}
+                        Max {option.label}
                       </option>
                     ))}
                   </select>

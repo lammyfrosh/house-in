@@ -25,6 +25,7 @@ type PropertyForm = {
   parkingSpaces: string;
   size: string;
   state: string;
+  otherState: string;
   area: string;
   city: string;
   description: string;
@@ -34,6 +35,62 @@ type PropertyForm = {
 
 const MAX_TOTAL_IMAGES = 10;
 const MAX_VIDEO_DURATION_SECONDS = 45;
+
+const FEATURED_STATES = [
+  "Lagos",
+  "Abuja",
+  "Rivers",
+  "Edo",
+  "Delta",
+  "Anambra",
+  "Enugu",
+  "Imo",
+  "Abia",
+];
+
+const ALL_NIGERIA_STATES = [
+  "Abia",
+  "Adamawa",
+  "Akwa Ibom",
+  "Anambra",
+  "Bauchi",
+  "Bayelsa",
+  "Benue",
+  "Borno",
+  "Cross River",
+  "Delta",
+  "Ebonyi",
+  "Edo",
+  "Ekiti",
+  "Enugu",
+  "FCT",
+  "Gombe",
+  "Imo",
+  "Jigawa",
+  "Kaduna",
+  "Kano",
+  "Katsina",
+  "Kebbi",
+  "Kogi",
+  "Kwara",
+  "Lagos",
+  "Nasarawa",
+  "Niger",
+  "Ogun",
+  "Ondo",
+  "Osun",
+  "Oyo",
+  "Plateau",
+  "Rivers",
+  "Sokoto",
+  "Taraba",
+  "Yobe",
+  "Zamfara",
+];
+
+const OTHER_STATES = ALL_NIGERIA_STATES.filter(
+  (state) => !FEATURED_STATES.includes(state)
+);
 
 export default function AddPropertyPage() {
   const router = useRouter();
@@ -57,6 +114,7 @@ export default function AddPropertyPage() {
     parkingSpaces: "",
     size: "",
     state: "",
+    otherState: "",
     area: "",
     city: "",
     description: "",
@@ -171,10 +229,18 @@ export default function AddPropertyPage() {
       return;
     }
 
-    setForm((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
+    setForm((prev) => {
+      const next = {
+        ...prev,
+        [name]: value,
+      };
+
+      if (name === "state" && value !== "other") {
+        next.otherState = "";
+      }
+
+      return next;
+    });
   }
 
   function handleImagesChange(e: ChangeEvent<HTMLInputElement>) {
@@ -274,8 +340,11 @@ export default function AddPropertyPage() {
       return;
     }
 
-    if (!form.state.trim()) {
-      setMessage("Please enter the state where the property is located.");
+    const resolvedState =
+      form.state === "other" ? form.otherState.trim() : form.state.trim();
+
+    if (!resolvedState) {
+      setMessage("Please select the state where the property is located.");
       setMessageType("error");
       return;
     }
@@ -297,7 +366,7 @@ export default function AddPropertyPage() {
       formData.append("toilets", form.toilets || "0");
       formData.append("parkingSpaces", form.parkingSpaces || "0");
       formData.append("size", form.size.trim());
-      formData.append("state", form.state.trim());
+      formData.append("state", resolvedState);
       formData.append("area", form.area.trim());
       formData.append("city", form.city.trim());
       formData.append("description", form.description.trim());
@@ -354,6 +423,7 @@ export default function AddPropertyPage() {
         parkingSpaces: "",
         size: "",
         state: "",
+        otherState: "",
         area: "",
         city: "",
         description: "",
@@ -405,8 +475,8 @@ export default function AddPropertyPage() {
             </h1>
             <p className="mt-2 max-w-2xl text-sm leading-6 text-[var(--color-text-muted)]">
               Create a new property listing with up to 10 images, one optional
-              video of not more than 45 seconds, and flexible location details
-              for any state in Nigeria.
+              video of not more than 45 seconds, and structured location details
+              for properties across Nigeria.
             </p>
           </div>
 
@@ -614,16 +684,47 @@ export default function AddPropertyPage() {
                   <label className="mb-2 block text-sm font-medium text-[var(--color-text-main)]">
                     State
                   </label>
-                  <input
+                  <select
                     name="state"
                     value={form.state}
                     onChange={handleChange}
                     required
                     className="h-12 w-full rounded-xl border border-[var(--color-border)] px-4 outline-none transition focus:border-[var(--color-primary-dark)] focus:ring-2 focus:ring-[var(--color-primary)]/20"
-                    placeholder="e.g. Lagos, Ogun, Kano, Kaduna"
-                  />
+                  >
+                    <option value="">Select State</option>
+                    {FEATURED_STATES.map((state) => (
+                      <option key={state} value={state}>
+                        {state}
+                      </option>
+                    ))}
+                    <option value="other">Other</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="mb-2 block text-sm font-medium text-[var(--color-text-main)]">
+                    Other States
+                  </label>
+                  <select
+                    name="otherState"
+                    value={form.otherState}
+                    onChange={handleChange}
+                    disabled={form.state !== "other"}
+                    className={`h-12 w-full rounded-xl border px-4 outline-none transition ${
+                      form.state === "other"
+                        ? "border-[var(--color-border)] bg-white focus:border-[var(--color-primary-dark)] focus:ring-2 focus:ring-[var(--color-primary)]/20"
+                        : "cursor-not-allowed border-gray-200 bg-gray-100 text-gray-400"
+                    }`}
+                  >
+                    <option value="">Select Other State</option>
+                    {OTHER_STATES.map((state) => (
+                      <option key={state} value={state}>
+                        {state}
+                      </option>
+                    ))}
+                  </select>
                   <p className="mt-2 text-xs text-[var(--color-text-muted)]">
-                    Enter any Nigerian state where the property is located.
+                    Choose from featured states or select Other to open the full list.
                   </p>
                 </div>
 
@@ -775,8 +876,8 @@ export default function AddPropertyPage() {
               </p>
 
               <p>
-                State and bedroom details are flexible, so you can enter the
-                actual location and room count for the property you are listing.
+                State selection is now structured to keep your listings clean,
+                consistent, and easier to search across the platform.
               </p>
 
               <p>
