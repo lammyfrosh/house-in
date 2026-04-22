@@ -6,7 +6,8 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { ArrowRight, Eye, EyeOff, Lock, ShieldCheck } from "lucide-react";
 
 function ResetPasswordContent() {
-  const API = "https://api.house-in.online";
+  const API =
+  process.env.NEXT_PUBLIC_API_BASE_URL || "https://api.house-in.online";
   const router = useRouter();
   const searchParams = useSearchParams();
 

@@ -5,7 +5,8 @@ import Link from "next/link";
 import { ArrowRight, Mail, ShieldCheck } from "lucide-react";
 
 export default function ForgotPasswordPage() {
-  const API = "https://api.house-in.online";
+  const API =
+  process.env.NEXT_PUBLIC_API_BASE_URL || "https://api.house-in.online";
 
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
