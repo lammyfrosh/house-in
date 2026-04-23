@@ -15,18 +15,18 @@ const geistMono = Geist_Mono({
 });
 
 const siteUrl = "https://house-in.online";
-const siteName = "House-In";
-const siteTitle = "House-In | Property Search Platform";
+const siteName = "House-In Property Hub";
+const siteTitle = "House-In Property Hub | Property Search Platform";
 const siteDescription =
   "House-In helps you find houses, apartments, land, and shortlet properties across Nigeria with a simple and reliable property search experience.";
 
-const gaId = process.env.NEXT_PUBLIC_GA_ID;
+const gaId = process.env.NEXT_PUBLIC_GA_ID?.trim();
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
     default: siteTitle,
-    template: "%s | House-In",
+    template: "%s | House-In Property Hub",
   },
   description: siteDescription,
   keywords: [
@@ -99,7 +99,7 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        {gaId ? (
+        {gaId && (
           <>
             <Script
               src={`https://www.googletagmanager.com/gtag/js?id=${gaId}`}
@@ -110,13 +110,11 @@ export default function RootLayout({
                 window.dataLayer = window.dataLayer || [];
                 function gtag(){dataLayer.push(arguments);}
                 gtag('js', new Date());
-                gtag('config', '${gaId}', {
-                  page_path: window.location.pathname,
-                });
+                gtag('config', '${gaId}');
               `}
             </Script>
           </>
-        ) : null}
+        )}
 
         <LayoutShell>{children}</LayoutShell>
       </body>
