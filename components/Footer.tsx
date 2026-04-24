@@ -5,13 +5,19 @@ import Link from "next/link";
 import {
   Facebook,
   Instagram,
-  Linkedin,
   Twitter,
   Phone,
   Mail,
   ChevronDown,
 } from "lucide-react";
-import { FaWhatsapp } from "react-icons/fa";
+import { FaWhatsapp, FaTiktok } from "react-icons/fa";
+
+const SOCIAL_LINKS = {
+  facebook: "#",
+  instagram: "#",
+  twitter: "#",
+  tiktok: "#", // Paste TikTok page link here later
+};
 
 const ADMIN_CONTACTS = [
   {
@@ -40,9 +46,7 @@ export default function Footer() {
   }
 
   function buildMailtoLink(email: string) {
-    return `mailto:${email}?subject=${encodeURIComponent(
-      "House-In Enquiry"
-    )}`;
+    return `mailto:${email}?subject=${encodeURIComponent("House-In Enquiry")}`;
   }
 
   return (
@@ -62,39 +66,50 @@ export default function Footer() {
             <div className="mt-5 rounded-2xl bg-[#151515] p-4">
               <p className="text-sm leading-6 text-gray-300">
                 <span className="font-semibold text-white">Safety Tip:</span>{" "}
-                Always inspect properties physically and verify documents
-                before payment.
+                Always inspect properties physically and verify documents before
+                payment.
               </p>
             </div>
 
             <div className="mt-5 flex items-center gap-3">
               <a
-                href="#"
+                href={SOCIAL_LINKS.facebook}
                 className="rounded-xl bg-[#151515] p-2 text-gray-300 transition hover:text-white"
                 aria-label="Facebook"
+                target="_blank"
+                rel="noreferrer"
               >
                 <Facebook size={18} />
               </a>
+
               <a
-                href="#"
+                href={SOCIAL_LINKS.instagram}
                 className="rounded-xl bg-[#151515] p-2 text-gray-300 transition hover:text-white"
                 aria-label="Instagram"
+                target="_blank"
+                rel="noreferrer"
               >
                 <Instagram size={18} />
               </a>
+
               <a
-                href="#"
+                href={SOCIAL_LINKS.twitter}
                 className="rounded-xl bg-[#151515] p-2 text-gray-300 transition hover:text-white"
                 aria-label="Twitter"
+                target="_blank"
+                rel="noreferrer"
               >
                 <Twitter size={18} />
               </a>
+
               <a
-                href="#"
+                href={SOCIAL_LINKS.tiktok}
                 className="rounded-xl bg-[#151515] p-2 text-gray-300 transition hover:text-white"
-                aria-label="LinkedIn"
+                aria-label="TikTok"
+                target="_blank"
+                rel="noreferrer"
               >
-                <Linkedin size={18} />
+                <FaTiktok size={18} />
               </a>
             </div>
           </div>
@@ -105,34 +120,22 @@ export default function Footer() {
             </p>
             <ul className="mt-4 space-y-3 text-sm">
               <li>
-                <Link
-                  href="/for-sale"
-                  className="text-gray-400 transition hover:text-white"
-                >
+                <Link href="/for-sale" className="text-gray-400 transition hover:text-white">
                   For Sale
                 </Link>
               </li>
               <li>
-                <Link
-                  href="/for-rent"
-                  className="text-gray-400 transition hover:text-white"
-                >
+                <Link href="/for-rent" className="text-gray-400 transition hover:text-white">
                   For Rent
                 </Link>
               </li>
               <li>
-                <Link
-                  href="/shortlet"
-                  className="text-gray-400 transition hover:text-white"
-                >
+                <Link href="/shortlet" className="text-gray-400 transition hover:text-white">
                   Shortlet
                 </Link>
               </li>
               <li>
-                <Link
-                  href="/requests"
-                  className="text-gray-400 transition hover:text-white"
-                >
+                <Link href="/requests" className="text-gray-400 transition hover:text-white">
                   Requests
                 </Link>
               </li>
@@ -145,34 +148,22 @@ export default function Footer() {
             </p>
             <ul className="mt-4 space-y-3 text-sm">
               <li>
-                <Link
-                  href="/contact"
-                  className="text-gray-400 transition hover:text-white"
-                >
+                <Link href="/contact" className="text-gray-400 transition hover:text-white">
                   Contact
                 </Link>
               </li>
               <li>
-                <Link
-                  href="/safety"
-                  className="text-gray-400 transition hover:text-white"
-                >
+                <Link href="/safety" className="text-gray-400 transition hover:text-white">
                   Safety Tips
                 </Link>
               </li>
               <li>
-                <Link
-                  href="/terms"
-                  className="text-gray-400 transition hover:text-white"
-                >
+                <Link href="/terms" className="text-gray-400 transition hover:text-white">
                   Terms
                 </Link>
               </li>
               <li>
-                <Link
-                  href="/privacy"
-                  className="text-gray-400 transition hover:text-white"
-                >
+                <Link href="/privacy" className="text-gray-400 transition hover:text-white">
                   Privacy
                 </Link>
               </li>
@@ -194,6 +185,7 @@ export default function Footer() {
                   contact@house-in.online
                 </a>
               </li>
+
               <li className="leading-6">
                 Phone:{" "}
                 <a
@@ -210,6 +202,7 @@ export default function Footer() {
                   +23408088769717
                 </a>
               </li>
+
               <li>Hours: Mon–Sat, 9am–6pm</li>
             </ul>
 
@@ -227,19 +220,20 @@ export default function Footer() {
               </Link>
 
               <div className="relative">
-             <button
-  type="button"
-  onClick={() => {
-    setShowWhatsappOptions((prev) => !prev);
-    setShowCallOptions(false);
-    setShowEmailOptions(false);
-  }}
-  className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-gray-700 px-4 py-2 text-[10px] font-semibold uppercase tracking-wide text-white transition hover:bg-[#151515]"
->
-  <FaWhatsapp size={13} />
-  WhatsApp
-  <ChevronDown size={13} />
-</button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowWhatsappOptions((prev) => !prev);
+                    setShowCallOptions(false);
+                    setShowEmailOptions(false);
+                  }}
+                  className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-gray-700 px-4 py-2 text-[10px] font-semibold uppercase tracking-wide text-white transition hover:bg-[#151515]"
+                >
+                  <FaWhatsapp size={13} />
+                  WhatsApp
+                  <ChevronDown size={13} />
+                </button>
+
                 {showWhatsappOptions && (
                   <div className="mt-2 rounded-2xl border border-gray-800 bg-[#121212] p-2 shadow-xl">
                     {ADMIN_CONTACTS.map((admin) => (
@@ -259,19 +253,19 @@ export default function Footer() {
               </div>
 
               <div className="relative">
-               <button
-  type="button"
-  onClick={() => {
-    setShowCallOptions((prev) => !prev);
-    setShowWhatsappOptions(false);
-    setShowEmailOptions(false);
-  }}
-  className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-gray-700 px-4 py-2 text-[10px] font-semibold uppercase tracking-wide text-white transition hover:bg-[#151515]"
->
-  <Phone size={13} />
-  Call
-  <ChevronDown size={13} />
-</button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowCallOptions((prev) => !prev);
+                    setShowWhatsappOptions(false);
+                    setShowEmailOptions(false);
+                  }}
+                  className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-gray-700 px-4 py-2 text-[10px] font-semibold uppercase tracking-wide text-white transition hover:bg-[#151515]"
+                >
+                  <Phone size={13} />
+                  Call
+                  <ChevronDown size={13} />
+                </button>
 
                 {showCallOptions && (
                   <div className="mt-2 rounded-2xl border border-gray-800 bg-[#121212] p-2 shadow-xl">
@@ -290,19 +284,20 @@ export default function Footer() {
               </div>
 
               <div className="relative">
-             <button
-  type="button"
-  onClick={() => {
-    setShowEmailOptions((prev) => !prev);
-    setShowWhatsappOptions(false);
-    setShowCallOptions(false);
-  }}
-  className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-gray-700 px-4 py-2 text-[10px] font-semibold uppercase tracking-wide text-white transition hover:bg-[#151515]"
->
-  <Mail size={13} />
-  Email
-  <ChevronDown size={13} />
-</button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowEmailOptions((prev) => !prev);
+                    setShowWhatsappOptions(false);
+                    setShowCallOptions(false);
+                  }}
+                  className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-gray-700 px-4 py-2 text-[10px] font-semibold uppercase tracking-wide text-white transition hover:bg-[#151515]"
+                >
+                  <Mail size={13} />
+                  Email
+                  <ChevronDown size={13} />
+                </button>
+
                 {showEmailOptions && (
                   <div className="mt-2 rounded-2xl border border-gray-800 bg-[#121212] p-2 shadow-xl">
                     {ADMIN_CONTACTS.map((admin) => (
@@ -324,12 +319,12 @@ export default function Footer() {
 
         <div className="mt-10 rounded-2xl border border-gray-800 bg-[#111111] p-4">
           <p className="text-xs leading-6 text-gray-400">
-            <span className="font-semibold text-white">Disclaimer:</span> House-In
-            is a property discovery and advertising platform. While we strive to
-            maintain quality and accurate listings, users are strongly advised to
-            independently verify property details, ownership, documentation,
-            pricing, and transaction terms before making any payment, commitment,
-            or legal decision.
+            <span className="font-semibold text-white">Disclaimer:</span>{" "}
+            House-In is a property discovery and advertising platform. While we
+            strive to maintain quality and accurate listings, users are strongly
+            advised to independently verify property details, ownership,
+            documentation, pricing, and transaction terms before making any
+            payment, commitment, or legal decision.
           </p>
         </div>
 

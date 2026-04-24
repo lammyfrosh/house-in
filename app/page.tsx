@@ -156,13 +156,14 @@ export default async function Home() {
 
         <div className="relative z-10 mx-auto flex min-h-[560px] max-w-6xl flex-col px-4 pt-5 md:min-h-[980px] md:pt-28">
           <div className="max-w-3xl">
-            <Link
-              href="/contact"
-              className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-4 py-2 text-[10px] font-medium tracking-wide text-white backdrop-blur-md transition hover:bg-white/15 md:text-xs"
-            >
-              <Download size={14} />
-              CLICK HERE TO DOWNLOAD HOUSE-IN APP
-            </Link>
+          <a
+  href="/house-in-app.apk"
+  download="House-In-App.apk"
+  className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-4 py-2 text-[10px] font-medium tracking-wide text-white backdrop-blur-md transition hover:bg-white/15 md:text-xs"
+>
+  <Download size={14} />
+  CLICK HERE TO DOWNLOAD HOUSE-IN APP
+</a>
 
             <h1 className="hidden sm:block mt-3 max-w-[900px] text-[28px] font-semibold leading-tight text-white drop-shadow-sm sm:text-4xl md:mt-6 md:text-7xl md:leading-[1.04]">
               Find Property the Smart Way in Nigeria

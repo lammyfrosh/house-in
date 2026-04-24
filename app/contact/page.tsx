@@ -21,7 +21,7 @@ export default function ContactPage() {
               Email
             </p>
             <p className="mt-2 text-lg font-semibold text-[var(--color-text-main)]">
-              support@house-in.online
+              contact@house-in.online
             </p>
           </div>
 
