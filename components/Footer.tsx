@@ -5,18 +5,18 @@ import Link from "next/link";
 import {
   Facebook,
   Instagram,
-  Twitter,
   Phone,
   Mail,
   ChevronDown,
 } from "lucide-react";
 import { FaWhatsapp, FaTiktok } from "react-icons/fa";
+import { FaXTwitter } from "react-icons/fa6";
 
 const SOCIAL_LINKS = {
   facebook: "#",
   instagram: "#",
   twitter: "#",
-  tiktok: "#", // Paste TikTok page link here later
+  tiktok: "#",
 };
 
 const ADMIN_CONTACTS = [
@@ -53,6 +53,7 @@ export default function Footer() {
     <footer className="mt-14 bg-[#0a0a0a] text-white">
       <div className="mx-auto max-w-6xl px-4 py-12">
         <div className="grid gap-10 md:grid-cols-4">
+          {/* BRAND */}
           <div>
             <p className="text-lg font-extrabold tracking-tight text-white">
               House-In
@@ -71,268 +72,115 @@ export default function Footer() {
               </p>
             </div>
 
+            {/* SOCIAL ICONS */}
             <div className="mt-5 flex items-center gap-3">
-              <a
-                href={SOCIAL_LINKS.facebook}
-                className="rounded-xl bg-[#151515] p-2 text-gray-300 transition hover:text-white"
-                aria-label="Facebook"
-                target="_blank"
-                rel="noreferrer"
-              >
+              <a href={SOCIAL_LINKS.facebook} className="rounded-xl bg-[#151515] p-2 text-gray-300 hover:text-white" target="_blank">
                 <Facebook size={18} />
               </a>
 
-              <a
-                href={SOCIAL_LINKS.instagram}
-                className="rounded-xl bg-[#151515] p-2 text-gray-300 transition hover:text-white"
-                aria-label="Instagram"
-                target="_blank"
-                rel="noreferrer"
-              >
+              <a href={SOCIAL_LINKS.instagram} className="rounded-xl bg-[#151515] p-2 text-gray-300 hover:text-white" target="_blank">
                 <Instagram size={18} />
               </a>
 
-              <a
-                href={SOCIAL_LINKS.twitter}
-                className="rounded-xl bg-[#151515] p-2 text-gray-300 transition hover:text-white"
-                aria-label="Twitter"
-                target="_blank"
-                rel="noreferrer"
-              >
-                <Twitter size={18} />
+              {/* X (Twitter) */}
+              <a href={SOCIAL_LINKS.twitter} className="rounded-xl bg-[#151515] p-2 text-gray-300 hover:text-white" target="_blank">
+                <FaXTwitter size={18} />
               </a>
 
-              <a
-                href={SOCIAL_LINKS.tiktok}
-                className="rounded-xl bg-[#151515] p-2 text-gray-300 transition hover:text-white"
-                aria-label="TikTok"
-                target="_blank"
-                rel="noreferrer"
-              >
+              <a href={SOCIAL_LINKS.tiktok} className="rounded-xl bg-[#151515] p-2 text-gray-300 hover:text-white" target="_blank">
                 <FaTiktok size={18} />
               </a>
             </div>
           </div>
 
+          {/* EXPLORE */}
           <div>
-            <p className="text-xs font-extrabold uppercase tracking-widest text-gray-400">
-              Explore
-            </p>
+            <p className="text-xs uppercase tracking-widest text-gray-400">Explore</p>
             <ul className="mt-4 space-y-3 text-sm">
-              <li>
-                <Link href="/for-sale" className="text-gray-400 transition hover:text-white">
-                  For Sale
-                </Link>
-              </li>
-              <li>
-                <Link href="/for-rent" className="text-gray-400 transition hover:text-white">
-                  For Rent
-                </Link>
-              </li>
-              <li>
-                <Link href="/shortlet" className="text-gray-400 transition hover:text-white">
-                  Shortlet
-                </Link>
-              </li>
-              <li>
-                <Link href="/requests" className="text-gray-400 transition hover:text-white">
-                  Requests
-                </Link>
-              </li>
+              <li><Link href="/for-sale">For Sale</Link></li>
+              <li><Link href="/for-rent">For Rent</Link></li>
+              <li><Link href="/shortlet">Shortlet</Link></li>
+              <li><Link href="/requests">Requests</Link></li>
             </ul>
           </div>
 
+          {/* COMPANY */}
           <div>
-            <p className="text-xs font-extrabold uppercase tracking-widest text-gray-400">
-              Company
-            </p>
+            <p className="text-xs uppercase tracking-widest text-gray-400">Company</p>
             <ul className="mt-4 space-y-3 text-sm">
-              <li>
-                <Link href="/contact" className="text-gray-400 transition hover:text-white">
-                  Contact
-                </Link>
-              </li>
-              <li>
-                <Link href="/safety" className="text-gray-400 transition hover:text-white">
-                  Safety Tips
-                </Link>
-              </li>
-              <li>
-                <Link href="/terms" className="text-gray-400 transition hover:text-white">
-                  Terms
-                </Link>
-              </li>
-              <li>
-                <Link href="/privacy" className="text-gray-400 transition hover:text-white">
-                  Privacy
-                </Link>
-              </li>
+              <li><Link href="/contact">Contact</Link></li>
+              <li><Link href="/safety">Safety Tips</Link></li>
+              <li><Link href="/terms">Terms</Link></li>
+              <li><Link href="/privacy">Privacy</Link></li>
             </ul>
           </div>
 
+          {/* CONTACT */}
           <div>
-            <p className="text-xs font-extrabold uppercase tracking-widest text-gray-400">
-              Contact
-            </p>
+            <p className="text-xs uppercase tracking-widest text-gray-400">Contact</p>
 
             <ul className="mt-4 space-y-3 text-sm text-gray-400">
               <li>
                 Email:{" "}
-                <a
-                  href={buildMailtoLink("contact@house-in.online")}
-                  className="transition hover:text-white hover:underline"
-                >
+                <a href={buildMailtoLink("contact@house-in.online")} className="hover:underline">
                   contact@house-in.online
                 </a>
               </li>
 
-              <li className="leading-6">
+              <li>
                 Phone:{" "}
-                <a
-                  href="tel:+23408075990912"
-                  className="transition hover:text-white hover:underline"
-                >
-                  +23408075990912
-                </a>
-                <span className="mx-2 text-gray-600">•</span>
-                <a
-                  href="tel:+23408088769717"
-                  className="transition hover:text-white hover:underline"
-                >
-                  +23408088769717
-                </a>
+                <a href="tel:+23408075990912">+23408075990912</a> •{" "}
+                <a href="tel:+23408088769717">+23408088769717</a>
               </li>
 
               <li>Hours: Mon–Sat, 9am–6pm</li>
             </ul>
 
+            {/* QUICK ACTIONS */}
             <div className="mt-5 flex flex-col gap-3">
-              <Link
-                href="/add-property"
-                className="inline-flex items-center justify-center rounded-xl px-4 py-2 text-xs font-extrabold uppercase tracking-widest transition"
-                style={{
-                  backgroundColor: "#ffffff",
-                  color: "#000000",
-                  textDecoration: "none",
-                }}
-              >
-                <span style={{ color: "#000000" }}>Add Property</span>
+              <Link href="/add-property" className="bg-white text-black rounded-xl px-4 py-2 text-center font-bold">
+                Add Property
               </Link>
 
-              <div className="relative">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setShowWhatsappOptions((prev) => !prev);
-                    setShowCallOptions(false);
-                    setShowEmailOptions(false);
-                  }}
-                  className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-gray-700 px-4 py-2 text-[10px] font-semibold uppercase tracking-wide text-white transition hover:bg-[#151515]"
-                >
-                  <FaWhatsapp size={13} />
-                  WhatsApp
-                  <ChevronDown size={13} />
-                </button>
+              {/* WhatsApp */}
+              <button onClick={() => setShowWhatsappOptions(!showWhatsappOptions)} className="border px-4 py-2 rounded-xl text-xs">
+                WhatsApp
+              </button>
+              {showWhatsappOptions &&
+                ADMIN_CONTACTS.map((a) => (
+                  <a key={a.label} href={buildWhatsappLink(a.whatsapp)} target="_blank">
+                    {a.label}
+                  </a>
+                ))}
 
-                {showWhatsappOptions && (
-                  <div className="mt-2 rounded-2xl border border-gray-800 bg-[#121212] p-2 shadow-xl">
-                    {ADMIN_CONTACTS.map((admin) => (
-                      <a
-                        key={admin.label}
-                        href={buildWhatsappLink(admin.whatsapp)}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="flex items-center justify-between rounded-xl px-3 py-3 text-sm text-gray-300 transition hover:bg-[#1b1b1b] hover:text-white"
-                      >
-                        <span>{admin.label}</span>
-                        <FaWhatsapp size={14} />
-                      </a>
-                    ))}
-                  </div>
-                )}
-              </div>
+              {/* Call */}
+              <button onClick={() => setShowCallOptions(!showCallOptions)} className="border px-4 py-2 rounded-xl text-xs">
+                Call
+              </button>
+              {showCallOptions &&
+                ADMIN_CONTACTS.map((a) => (
+                  <a key={a.label} href={`tel:${a.phone}`}>
+                    {a.label}
+                  </a>
+                ))}
 
-              <div className="relative">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setShowCallOptions((prev) => !prev);
-                    setShowWhatsappOptions(false);
-                    setShowEmailOptions(false);
-                  }}
-                  className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-gray-700 px-4 py-2 text-[10px] font-semibold uppercase tracking-wide text-white transition hover:bg-[#151515]"
-                >
-                  <Phone size={13} />
-                  Call
-                  <ChevronDown size={13} />
-                </button>
-
-                {showCallOptions && (
-                  <div className="mt-2 rounded-2xl border border-gray-800 bg-[#121212] p-2 shadow-xl">
-                    {ADMIN_CONTACTS.map((admin) => (
-                      <a
-                        key={admin.label}
-                        href={`tel:${admin.phone}`}
-                        className="flex items-center justify-between rounded-xl px-3 py-3 text-sm text-gray-300 transition hover:bg-[#1b1b1b] hover:text-white"
-                      >
-                        <span>{admin.label}</span>
-                        <Phone size={14} />
-                      </a>
-                    ))}
-                  </div>
-                )}
-              </div>
-
-              <div className="relative">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setShowEmailOptions((prev) => !prev);
-                    setShowWhatsappOptions(false);
-                    setShowCallOptions(false);
-                  }}
-                  className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-gray-700 px-4 py-2 text-[10px] font-semibold uppercase tracking-wide text-white transition hover:bg-[#151515]"
-                >
-                  <Mail size={13} />
-                  Email
-                  <ChevronDown size={13} />
-                </button>
-
-                {showEmailOptions && (
-                  <div className="mt-2 rounded-2xl border border-gray-800 bg-[#121212] p-2 shadow-xl">
-                    {ADMIN_CONTACTS.map((admin) => (
-                      <a
-                        key={admin.label}
-                        href={buildMailtoLink(admin.email)}
-                        className="flex items-center justify-between rounded-xl px-3 py-3 text-sm text-gray-300 transition hover:bg-[#1b1b1b] hover:text-white"
-                      >
-                        <span>{admin.label}</span>
-                        <Mail size={14} />
-                      </a>
-                    ))}
-                  </div>
-                )}
-              </div>
+              {/* Email */}
+              <button onClick={() => setShowEmailOptions(!showEmailOptions)} className="border px-4 py-2 rounded-xl text-xs">
+                Email
+              </button>
+              {showEmailOptions &&
+                ADMIN_CONTACTS.map((a) => (
+                  <a key={a.label} href={buildMailtoLink(a.email)}>
+                    {a.label}
+                  </a>
+                ))}
             </div>
           </div>
         </div>
 
-        <div className="mt-10 rounded-2xl border border-gray-800 bg-[#111111] p-4">
-          <p className="text-xs leading-6 text-gray-400">
-            <span className="font-semibold text-white">Disclaimer:</span>{" "}
-            House-In is a property discovery and advertising platform. While we
-            strive to maintain quality and accurate listings, users are strongly
-            advised to independently verify property details, ownership,
-            documentation, pricing, and transaction terms before making any
-            payment, commitment, or legal decision.
-          </p>
-        </div>
-
-        <div className="mt-12 border-t border-gray-800 pt-6 text-sm text-gray-500 sm:flex sm:items-center sm:justify-between">
-          <p>© {new Date().getFullYear()} House-In. All rights reserved.</p>
-          <p className="text-xs">
-            Built for Nigeria • Property approval workflow enabled
-          </p>
+        {/* FOOT NOTE */}
+        <div className="mt-10 border-t border-gray-800 pt-6 text-sm text-gray-500">
+          © {new Date().getFullYear()} House-In. All rights reserved.
         </div>
       </div>
     </footer>

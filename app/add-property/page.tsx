@@ -34,7 +34,7 @@ type PropertyForm = {
 };
 
 const MAX_TOTAL_IMAGES = 10;
-const MAX_VIDEO_DURATION_SECONDS = 45;
+const VIDEO_TRIM_SECONDS = 60;
 
 const FEATURED_STATES = [
   "Lagos",
@@ -250,7 +250,9 @@ export default function AddPropertyPage() {
     const nextTotal = selectedImages.length + files.length;
 
     if (nextTotal > MAX_TOTAL_IMAGES) {
-      setMessage(`You can upload a maximum of ${MAX_TOTAL_IMAGES} images in total.`);
+      setMessage(
+        `You can upload a maximum of ${MAX_TOTAL_IMAGES} images in total.`
+      );
       setMessageType("error");
       e.target.value = "";
       return;
@@ -262,7 +264,7 @@ export default function AddPropertyPage() {
     e.target.value = "";
   }
 
-  async function handleVideoChange(e: ChangeEvent<HTMLInputElement>) {
+  function handleVideoChange(e: ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0] || null;
 
     if (!file) {
@@ -270,36 +272,11 @@ export default function AddPropertyPage() {
       return;
     }
 
-    const objectUrl = URL.createObjectURL(file);
-
-    const isWithinDuration = await new Promise<boolean>((resolve) => {
-      const video = document.createElement("video");
-      video.preload = "metadata";
-      video.src = objectUrl;
-
-      video.onloadedmetadata = () => {
-        const duration = video.duration;
-        resolve(duration <= MAX_VIDEO_DURATION_SECONDS);
-      };
-
-      video.onerror = () => resolve(false);
-    });
-
-    URL.revokeObjectURL(objectUrl);
-
-    if (!isWithinDuration) {
-      setSelectedVideo(null);
-      setMessage(
-        `Only videos of ${MAX_VIDEO_DURATION_SECONDS} seconds or less are allowed.`
-      );
-      setMessageType("error");
-      e.target.value = "";
-      return;
-    }
-
     setSelectedVideo(file);
-    setMessage("");
-    setMessageType("");
+    setMessage(
+      `Video selected. It will be automatically trimmed to the first ${VIDEO_TRIM_SECONDS} seconds after submission.`
+    );
+    setMessageType("success");
   }
 
   function removeImage(index: number) {
@@ -323,7 +300,9 @@ export default function AddPropertyPage() {
     }
 
     if (selectedImages.length > MAX_TOTAL_IMAGES) {
-      setMessage(`You can upload a maximum of ${MAX_TOTAL_IMAGES} images in total.`);
+      setMessage(
+        `You can upload a maximum of ${MAX_TOTAL_IMAGES} images in total.`
+      );
       setMessageType("error");
       return;
     }
@@ -475,14 +454,17 @@ export default function AddPropertyPage() {
             </h1>
             <p className="mt-2 max-w-2xl text-sm leading-6 text-[var(--color-text-muted)]">
               Create a new property listing with up to 10 images, one optional
-              video of not more than 45 seconds, and structured location details
-              for properties across Nigeria.
+              video that will be automatically trimmed to the first{" "}
+              {VIDEO_TRIM_SECONDS} seconds, and structured location details for
+              properties across Nigeria.
             </p>
           </div>
 
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
             <div className="rounded-xl border border-[var(--color-border)] bg-white px-4 py-2 text-sm text-[var(--color-text-main)]">
-              {user ? `${user.full_name} • ${roleLabel}` : "Authenticated session"}
+              {user
+                ? `${user.full_name} • ${roleLabel}`
+                : "Authenticated session"}
             </div>
 
             <button
@@ -575,7 +557,9 @@ export default function AddPropertyPage() {
                     disabled={form.priceOnRequest}
                     className="h-12 w-full rounded-xl border border-[var(--color-border)] px-4 outline-none transition disabled:cursor-not-allowed disabled:bg-gray-100 focus:border-[var(--color-primary-dark)] focus:ring-2 focus:ring-[var(--color-primary)]/20"
                     placeholder={
-                      form.priceOnRequest ? "Call for Price enabled" : "e.g. 25000000"
+                      form.priceOnRequest
+                        ? "Call for Price enabled"
+                        : "e.g. 25000000"
                     }
                   />
                 </div>
@@ -724,7 +708,8 @@ export default function AddPropertyPage() {
                     ))}
                   </select>
                   <p className="mt-2 text-xs text-[var(--color-text-muted)]">
-                    Choose from featured states or select Other to open the full list.
+                    Choose from featured states or select Other to open the full
+                    list.
                   </p>
                 </div>
 
@@ -802,7 +787,8 @@ export default function AddPropertyPage() {
                     className="block w-full text-sm text-[var(--color-text-main)]"
                   />
                   <p className="mt-2 text-xs text-[var(--color-text-muted)]">
-                    Upload up to {MAX_TOTAL_IMAGES} images in total, including the main image.
+                    Upload up to {MAX_TOTAL_IMAGES} images in total, including
+                    the main image.
                   </p>
                 </div>
 
@@ -841,9 +827,9 @@ export default function AddPropertyPage() {
                     className="block w-full text-sm text-[var(--color-text-main)]"
                   />
                   <p className="mt-2 text-xs text-[var(--color-text-muted)]">
-                    Optional video upload. Only the first 45 seconds is allowed,
-                    so please upload a clip that is 45 seconds or less.
-                  </p>
+  Videos longer than 1 minute will be automatically trimmed to the first 60 seconds after upload.
+</p>
+                  
                 </div>
 
                 {videoPreview && (
@@ -866,8 +852,9 @@ export default function AddPropertyPage() {
 
             <div className="mt-5 space-y-4 text-sm leading-6 text-[var(--color-text-muted)]">
               <p>
-                Make sure your title is clear, your location is accurate, and your
-                description highlights the strongest selling points of the property.
+                Make sure your title is clear, your location is accurate, and
+                your description highlights the strongest selling points of the
+                property.
               </p>
 
               <p>
@@ -882,7 +869,8 @@ export default function AddPropertyPage() {
 
               <p>
                 You can upload up to {MAX_TOTAL_IMAGES} images and one optional
-                video of not more than {MAX_VIDEO_DURATION_SECONDS} seconds.
+                video. Uploaded videos will be automatically trimmed to the first{" "}
+                {VIDEO_TRIM_SECONDS} seconds.
               </p>
             </div>
 

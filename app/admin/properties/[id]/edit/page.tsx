@@ -1,10 +1,8 @@
 "use client";
 
-import { ChangeEvent, FormEvent, useEffect, useMemo, useRef, useState } from "react";
+import { ChangeEvent, FormEvent, useEffect, useMemo, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { X, Scissors } from "lucide-react";
-import { FFmpeg } from "@ffmpeg/ffmpeg";
-import { fetchFile, toBlobURL } from "@ffmpeg/util";
+import { X } from "lucide-react";
 
 type PropertyStatus = "pending" | "approved" | "rejected";
 
@@ -58,6 +56,8 @@ type PropertyForm = {
   status: PropertyStatus;
 };
 
+const VIDEO_TRIM_SECONDS = 60;
+
 function isPriceOnRequest(value: unknown) {
   return (
     value === true ||
@@ -67,11 +67,6 @@ function isPriceOnRequest(value: unknown) {
   );
 }
 
-function getExtension(filename: string) {
-  const match = filename.match(/\.[^.]+$/);
-  return match ? match[0].toLowerCase() : ".mp4";
-}
-
 export default function AdminEditPropertyPage() {
   const router = useRouter();
   const params = useParams();
@@ -79,8 +74,6 @@ export default function AdminEditPropertyPage() {
 
   const API =
     process.env.NEXT_PUBLIC_API_BASE_URL || "https://api.house-in.online";
-
-  const ffmpegRef = useRef<FFmpeg | null>(null);
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -114,12 +107,6 @@ export default function AdminEditPropertyPage() {
   const [videoPreview, setVideoPreview] = useState("");
 
   const [deletingImageId, setDeletingImageId] = useState<number | null>(null);
-  const [trimStart, setTrimStart] = useState("0");
-  const [trimEnd, setTrimEnd] = useState("");
-  const [videoDuration, setVideoDuration] = useState(0);
-  const [ffmpegReady, setFfmpegReady] = useState(false);
-  const [loadingCurrentVideo, setLoadingCurrentVideo] = useState(false);
-  const [trimmingVideo, setTrimmingVideo] = useState(false);
 
   const [message, setMessage] = useState("");
   const [messageType, setMessageType] = useState<"success" | "error" | "">("");
@@ -224,12 +211,6 @@ export default function AdminEditPropertyPage() {
     return () => URL.revokeObjectURL(url);
   }, [selectedVideo]);
 
-  useEffect(() => {
-    if (videoDuration > 0 && !trimEnd) {
-      setTrimEnd(String(Math.floor(videoDuration)));
-    }
-  }, [videoDuration, trimEnd]);
-
   const existingImage = useMemo(() => property?.image_url || "", [property]);
 
   function handleChange(
@@ -266,9 +247,13 @@ export default function AdminEditPropertyPage() {
   function handleVideoChange(e: ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0] || null;
     setSelectedVideo(file);
-    setTrimStart("0");
-    setTrimEnd("");
-    setVideoDuration(0);
+
+    if (file) {
+      setMessage(
+        `Video selected. It will be automatically trimmed to the first ${VIDEO_TRIM_SECONDS} seconds after saving.`
+      );
+      setMessageType("success");
+    }
   }
 
   async function deleteExistingImage(imageId: number) {
@@ -334,156 +319,6 @@ export default function AdminEditPropertyPage() {
       setMessageType("error");
     } finally {
       setDeletingImageId(null);
-    }
-  }
-
-  async function loadFfmpeg() {
-    if (ffmpegRef.current) return ffmpegRef.current;
-
-    const baseURL =
-      "https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.6/dist/umd";
-    const ffmpeg = new FFmpeg();
-
-    await ffmpeg.load({
-      coreURL: await toBlobURL(
-        `${baseURL}/ffmpeg-core.js`,
-        "text/javascript"
-      ),
-      wasmURL: await toBlobURL(
-        `${baseURL}/ffmpeg-core.wasm`,
-        "application/wasm"
-      ),
-    });
-
-    ffmpegRef.current = ffmpeg;
-    setFfmpegReady(true);
-    return ffmpeg;
-  }
-
-  async function loadCurrentVideoIntoEditor() {
-    if (!property?.video_url) {
-      setMessage("No existing property video found.");
-      setMessageType("error");
-      return;
-    }
-
-    setLoadingCurrentVideo(true);
-    setMessage("");
-    setMessageType("");
-
-    try {
-      const response = await fetch(property.video_url);
-      if (!response.ok) {
-        throw new Error("Could not load the current property video.");
-      }
-
-      const blob = await response.blob();
-      const ext = getExtension(property.video_url);
-      const file = new File([blob], `current-property-video${ext}`, {
-        type: blob.type || "video/mp4",
-      });
-
-      setSelectedVideo(file);
-      setTrimStart("0");
-      setTrimEnd("");
-      setVideoDuration(0);
-      setMessage("Current property video loaded. You can trim it now.");
-      setMessageType("success");
-    } catch (error) {
-      console.error(error);
-      setMessage(
-        error instanceof Error
-          ? error.message
-          : "Could not load the current property video"
-      );
-      setMessageType("error");
-    } finally {
-      setLoadingCurrentVideo(false);
-    }
-  }
-
-  async function trimSelectedVideo() {
-    if (!selectedVideo) {
-      setMessage("Please select or load a video first before trimming.");
-      setMessageType("error");
-      return;
-    }
-
-    const start = Number(trimStart);
-    const end = Number(trimEnd);
-
-    if (Number.isNaN(start) || Number.isNaN(end)) {
-      setMessage("Trim start and end must be valid numbers.");
-      setMessageType("error");
-      return;
-    }
-
-    if (start < 0 || end <= start) {
-      setMessage("Trim end must be greater than trim start.");
-      setMessageType("error");
-      return;
-    }
-
-    if (videoDuration > 0 && end > videoDuration) {
-      setMessage("Trim end cannot be greater than the video duration.");
-      setMessageType("error");
-      return;
-    }
-
-    setTrimmingVideo(true);
-    setMessage("");
-    setMessageType("");
-
-    try {
-      const ffmpeg = await loadFfmpeg();
-
-      const inputExt = getExtension(selectedVideo.name);
-      const inputName = `input${inputExt}`;
-      const outputName = `trimmed${inputExt}`;
-
-      await ffmpeg.writeFile(inputName, await fetchFile(selectedVideo));
-      await ffmpeg.exec([
-        "-ss",
-        String(start),
-        "-to",
-        String(end),
-        "-i",
-        inputName,
-        "-c",
-        "copy",
-        outputName,
-      ]);
-
-      const data = await ffmpeg.readFile(outputName);
-
-      if (typeof data === "string") {
-        throw new Error("Unexpected text output while trimming video.");
-      }
-
-      const outputBytes = data as unknown as Uint8Array;
-      const copiedBytes = new Uint8Array(outputBytes);
-
-      const trimmedBlob = new Blob([copiedBytes], {
-        type: selectedVideo.type || "video/mp4",
-      });
-
-      const trimmedFile = new File(
-        [trimmedBlob],
-        `trimmed-${selectedVideo.name.replace(/\.[^.]+$/, "")}${inputExt}`,
-        {
-          type: selectedVideo.type || "video/mp4",
-        }
-      );
-
-      setSelectedVideo(trimmedFile);
-      setMessage("Video trimmed successfully. Save changes to upload it.");
-      setMessageType("success");
-    } catch (error) {
-      console.error(error);
-      setMessage("Video trimming failed. Please try a shorter clip.");
-      setMessageType("error");
-    } finally {
-      setTrimmingVideo(false);
     }
   }
 
@@ -597,7 +432,9 @@ export default function AdminEditPropertyPage() {
               Edit Property
             </h1>
             <p className="mt-2 max-w-2xl text-sm leading-6 text-[var(--color-text-muted)]">
-              Update property details, replace media, trim the video, and manage listing status.
+              Update property details, replace media, manage listing status, and
+              upload videos that will be automatically trimmed to the first{" "}
+              {VIDEO_TRIM_SECONDS} seconds.
             </p>
           </div>
 
@@ -897,7 +734,9 @@ export default function AdminEditPropertyPage() {
                       </button>
 
                       <div className="bg-white px-3 py-2 text-xs font-semibold text-[var(--color-text-main)]">
-                        {index === 0 ? "Current primary image" : `Existing image ${index + 1}`}
+                        {index === 0
+                          ? "Current primary image"
+                          : `Existing image ${index + 1}`}
                       </div>
                     </div>
                   ))}
@@ -937,7 +776,8 @@ export default function AdminEditPropertyPage() {
                   className="block w-full rounded-xl border border-[var(--color-border)] px-4 py-3 text-sm"
                 />
                 <p className="mt-2 text-xs text-[var(--color-text-muted)]">
-                  Upload one or multiple images. You can remove any selected one individually before saving.
+                  Upload one or multiple images. You can remove any selected one
+                  individually before saving.
                 </p>
               </div>
 
@@ -965,7 +805,9 @@ export default function AdminEditPropertyPage() {
                         </button>
 
                         <div className="bg-white px-3 py-2 text-xs font-semibold text-[var(--color-text-main)]">
-                          {index === 0 ? "Primary new image" : `New image ${index + 1}`}
+                          {index === 0
+                            ? "Primary new image"
+                            : `New image ${index + 1}`}
                         </div>
                       </div>
                     ))}
@@ -979,28 +821,11 @@ export default function AdminEditPropertyPage() {
                 <h2 className="text-lg font-semibold text-[var(--color-text-main)]">
                   Video
                 </h2>
-
-                {property?.video_url && !selectedVideo && (
-                  <button
-                    type="button"
-                    onClick={loadCurrentVideoIntoEditor}
-                    disabled={loadingCurrentVideo}
-                    className="rounded-xl border border-[var(--color-border)] px-3 py-2 text-xs font-semibold text-[var(--color-text-main)] transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-70"
-                  >
-                    {loadingCurrentVideo ? "Loading..." : "Load Current Video"}
-                  </button>
-                )}
               </div>
 
               {property?.video_url && !videoPreview && (
                 <div className="mt-5 overflow-hidden rounded-2xl border border-[var(--color-border)] bg-black">
-                  <video
-                    controls
-                    className="w-full"
-                    onLoadedMetadata={(e) =>
-                      setVideoDuration(e.currentTarget.duration || 0)
-                    }
-                  >
+                  <video controls className="w-full">
                     <source src={property.video_url} />
                   </video>
                 </div>
@@ -1016,84 +841,19 @@ export default function AdminEditPropertyPage() {
                   onChange={handleVideoChange}
                   className="block w-full rounded-xl border border-[var(--color-border)] px-4 py-3 text-sm"
                 />
+                <p className="mt-2 text-xs text-[var(--color-text-muted)]">
+                  Longer videos are accepted. After saving, the system will
+                  automatically keep only the first {VIDEO_TRIM_SECONDS} seconds.
+                </p>
               </div>
 
               {videoPreview && (
                 <div className="mt-5 overflow-hidden rounded-2xl border border-[var(--color-border)] bg-black">
-                  <video
-                    controls
-                    className="w-full"
-                    onLoadedMetadata={(e) =>
-                      setVideoDuration(e.currentTarget.duration || 0)
-                    }
-                  >
+                  <video controls className="w-full">
                     <source src={videoPreview} />
                   </video>
                 </div>
               )}
-
-              <div className="mt-5 rounded-2xl border border-[var(--color-border)] bg-[#f8fafc] p-4">
-                <div className="flex items-center gap-2">
-                  <Scissors size={16} className="text-[var(--color-primary-dark)]" />
-                  <h3 className="text-sm font-semibold text-[var(--color-text-main)]">
-                    Trim Video Before Saving
-                  </h3>
-                </div>
-
-                <p className="mt-2 text-xs leading-6 text-[var(--color-text-muted)]">
-                  Select or load a video first, choose the start and end time in seconds,
-                  then trim it. After trimming, click Save Changes to upload the trimmed version.
-                </p>
-
-                <div className="mt-4 grid gap-3 sm:grid-cols-2">
-                  <div>
-                    <label className="mb-2 block text-xs font-medium text-[var(--color-text-main)]">
-                      Start Time (seconds)
-                    </label>
-                    <input
-                      type="number"
-                      min="0"
-                      step="0.1"
-                      value={trimStart}
-                      onChange={(e) => setTrimStart(e.target.value)}
-                      className="h-11 w-full rounded-xl border border-[var(--color-border)] px-4 outline-none transition focus:border-[var(--color-primary-dark)] focus:ring-2 focus:ring-[var(--color-primary)]/20"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="mb-2 block text-xs font-medium text-[var(--color-text-main)]">
-                      End Time (seconds)
-                    </label>
-                    <input
-                      type="number"
-                      min="0"
-                      step="0.1"
-                      value={trimEnd}
-                      onChange={(e) => setTrimEnd(e.target.value)}
-                      className="h-11 w-full rounded-xl border border-[var(--color-border)] px-4 outline-none transition focus:border-[var(--color-primary-dark)] focus:ring-2 focus:ring-[var(--color-primary)]/20"
-                    />
-                  </div>
-                </div>
-
-                <div className="mt-3 text-xs text-[var(--color-text-muted)]">
-                  {videoDuration > 0
-                    ? `Detected video duration: ${videoDuration.toFixed(1)} seconds`
-                    : "Video duration will appear after the video loads."}
-                </div>
-
-                <button
-                  type="button"
-                  onClick={trimSelectedVideo}
-                  disabled={trimmingVideo}
-                  className="mt-4 inline-flex items-center justify-center rounded-xl bg-[var(--color-primary-dark)] px-4 py-2 text-sm font-semibold text-white transition hover:opacity-95 disabled:cursor-not-allowed disabled:opacity-70"
-                >
-                  {trimmingVideo
-                    ? ffmpegReady
-                      ? "Trimming Video..."
-                      : "Preparing Trimmer..."
-                    : "Trim Selected Video"}
-                </button>
-              </div>
             </section>
 
             <section className="rounded-3xl border border-[var(--color-border)] bg-white p-5 shadow-sm sm:p-6">
