@@ -138,9 +138,12 @@ export default function Footer() {
 
             {/* QUICK ACTIONS */}
             <div className="mt-5 flex flex-col gap-3">
-              <Link href="/add-property" className="bg-white text-black rounded-xl px-4 py-2 text-center font-bold">
-                Add Property
-              </Link>
+             <Link
+  href="/add-property"
+  className="bg-white !text-black rounded-xl px-4 py-2 text-center font-bold hover:bg-gray-200 transition"
+>
+  Add Property
+</Link>
 
               {/* WhatsApp */}
               <button onClick={() => setShowWhatsappOptions(!showWhatsappOptions)} className="border px-4 py-2 rounded-xl text-xs">
