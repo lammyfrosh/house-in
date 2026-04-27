@@ -9,6 +9,7 @@ import {
   Info,
   MessageCircle,
   PlusCircle,
+  RefreshCw,
   XCircle,
 } from "lucide-react";
 
@@ -216,6 +217,26 @@ export default function DashboardPage() {
                 <MessageCircle size={16} />
                 WhatsApp Admin
               </button>
+            </div>
+          </div>
+        </div>
+
+        <div className="mt-6 rounded-3xl border border-red-200 bg-red-50 p-5 shadow-sm">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
+            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-red-100 text-red-600">
+              <RefreshCw size={20} />
+            </div>
+
+            <div>
+              <h2 className="text-base font-semibold text-[var(--color-text-main)]">
+                Listing Renewal Notice
+              </h2>
+              <p className="mt-1 text-sm leading-6 text-[var(--color-text-muted)]">
+                To keep House-In listings fresh, accurate, and helpful for
+                property seekers, properties that have stayed on the platform
+                for up to two months may need to be uploaded again if they are
+                still available.
+              </p>
             </div>
           </div>
         </div>

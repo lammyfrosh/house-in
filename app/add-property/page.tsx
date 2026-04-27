@@ -2,7 +2,7 @@
 
 import { ChangeEvent, FormEvent, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { X } from "lucide-react";
+import { Loader2, X } from "lucide-react";
 
 type User = {
   id: number;
@@ -140,6 +140,7 @@ export default function AddPropertyPage() {
     normalizedRole === "super_admin";
 
   const dashboardHref = isAdmin ? "/admin" : "/dashboard";
+  const isProcessingVideo = saving && Boolean(selectedVideo);
 
   useEffect(() => {
     async function checkAuth() {
@@ -488,6 +489,24 @@ export default function AddPropertyPage() {
           </div>
         )}
 
+        {isProcessingVideo && (
+          <div className="mt-5 rounded-2xl border border-blue-100 bg-blue-50 px-4 py-4 text-sm text-blue-800 shadow-sm">
+            <div className="flex items-start gap-3">
+              <Loader2 className="mt-0.5 h-5 w-5 shrink-0 animate-spin" />
+              <div>
+                <p className="font-semibold">
+                  Uploading property and processing video...
+                </p>
+                <p className="mt-1 leading-6 text-blue-700">
+                  Please keep this page open. Videos may take a little longer
+                  while the system prepares the first {VIDEO_TRIM_SECONDS}{" "}
+                  seconds for your listing.
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
         <form
           onSubmit={handleSubmit}
           className="mt-8 grid gap-8 xl:grid-cols-[1.1fr_0.9fr]"
@@ -784,7 +803,8 @@ export default function AddPropertyPage() {
                     accept="image/*"
                     multiple
                     onChange={handleImagesChange}
-                    className="block w-full text-sm text-[var(--color-text-main)]"
+                    disabled={saving}
+                    className="block w-full text-sm text-[var(--color-text-main)] disabled:cursor-not-allowed disabled:opacity-60"
                   />
                   <p className="mt-2 text-xs text-[var(--color-text-muted)]">
                     Upload up to {MAX_TOTAL_IMAGES} images in total, including
@@ -807,7 +827,8 @@ export default function AddPropertyPage() {
                         <button
                           type="button"
                           onClick={() => removeImage(index)}
-                          className="absolute right-3 top-3 inline-flex h-8 w-8 items-center justify-center rounded-full bg-black/70 text-white transition hover:bg-black"
+                          disabled={saving}
+                          className="absolute right-3 top-3 inline-flex h-8 w-8 items-center justify-center rounded-full bg-black/70 text-white transition hover:bg-black disabled:cursor-not-allowed disabled:opacity-60"
                         >
                           <X size={16} />
                         </button>
@@ -824,12 +845,13 @@ export default function AddPropertyPage() {
                     type="file"
                     accept="video/*"
                     onChange={handleVideoChange}
-                    className="block w-full text-sm text-[var(--color-text-main)]"
+                    disabled={saving}
+                    className="block w-full text-sm text-[var(--color-text-main)] disabled:cursor-not-allowed disabled:opacity-60"
                   />
                   <p className="mt-2 text-xs text-[var(--color-text-muted)]">
-  Videos longer than 1 minute will be automatically trimmed to the first 60 seconds after upload.
-</p>
-                  
+                    Videos longer than 1 minute will be automatically trimmed to
+                    the first 60 seconds after upload.
+                  </p>
                 </div>
 
                 {videoPreview && (
@@ -879,8 +901,23 @@ export default function AddPropertyPage() {
               disabled={saving}
               className="mt-8 inline-flex w-full items-center justify-center rounded-2xl bg-[var(--color-primary-dark)] px-5 py-3 text-sm font-semibold text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
             >
-              {saving ? "Submitting Property..." : "Submit Property"}
+              {saving ? (
+                <span className="inline-flex items-center gap-2">
+                  <Loader2 size={16} className="animate-spin" />
+                  {selectedVideo
+                    ? "Uploading and processing video..."
+                    : "Submitting Property..."}
+                </span>
+              ) : (
+                "Submit Property"
+              )}
             </button>
+
+            {isProcessingVideo && (
+              <p className="mt-3 text-center text-xs leading-5 text-[var(--color-text-muted)]">
+                This may take a little longer because a video is being prepared.
+              </p>
+            )}
           </aside>
         </form>
       </div>

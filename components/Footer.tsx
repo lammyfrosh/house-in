@@ -14,9 +14,9 @@ import { FaXTwitter } from "react-icons/fa6";
 
 const SOCIAL_LINKS = {
   facebook: "#",
-  instagram: "#",
-  twitter: "#",
-  tiktok: "#",
+  instagram: "https://www.instagram.com/houseinpropertyhub/",
+  twitter: "https://x.com/houseinproperty",
+  tiktok: "https://www.tiktok.com/@houseinpropertyhub?lang=en",
 };
 
 const ADMIN_CONTACTS = [
