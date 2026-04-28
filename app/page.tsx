@@ -142,7 +142,7 @@ export default async function Home() {
 
   return (
     <main>
-      <section className="relative min-h-[560px] overflow-hidden md:min-h-[980px]">
+      <section className="relative overflow-hidden bg-[var(--color-primary-dark)] lg:min-h-[980px]">
         <Image
           src="/hero-v2.jpg"
           alt="Organised residential estate view"
@@ -154,81 +154,81 @@ export default async function Home() {
         <div className="absolute inset-0 bg-gradient-to-r from-black/75 via-black/55 to-black/30" />
         <div className="absolute inset-0 bg-[var(--color-primary-dark)]/28" />
 
-        <div className="relative z-10 mx-auto flex min-h-[560px] max-w-6xl flex-col px-4 pt-5 md:min-h-[980px] md:pt-28">
+        <div className="relative z-10 mx-auto flex min-h-[calc(100svh-138px)] max-w-6xl flex-col justify-start px-4 pb-5 pt-5 sm:min-h-[calc(100svh-150px)] lg:min-h-[980px] lg:pt-28">
           <div className="max-w-3xl">
-          <a
-  href="/house-in-app.apk"
-  download="House-In-App.apk"
-  className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-4 py-2 text-[10px] font-medium tracking-wide text-white backdrop-blur-md transition hover:bg-white/15 md:text-xs"
->
-  <Download size={14} />
-  CLICK HERE TO DOWNLOAD HOUSE-IN APP
-</a>
+            <a
+              href="/house-in-app.apk"
+              download="House-In-App.apk"
+              className="inline-flex max-w-full items-center gap-2 rounded-full border border-white/15 bg-white/10 px-4 py-2 text-[10px] font-semibold tracking-wide text-white backdrop-blur-md transition hover:bg-white/15 sm:text-xs"
+            >
+              <Download size={14} />
+              <span className="truncate">
+                CLICK HERE TO DOWNLOAD HOUSE-IN APP
+              </span>
+            </a>
 
-            <h1 className="hidden sm:block mt-3 max-w-[900px] text-[28px] font-semibold leading-tight text-white drop-shadow-sm sm:text-4xl md:mt-6 md:text-7xl md:leading-[1.04]">
+            <h1 className="mt-5 hidden max-w-[900px] text-[28px] font-semibold leading-tight text-white drop-shadow-sm lg:block lg:text-7xl lg:leading-[1.04]">
               Find Property the Smart Way in Nigeria
             </h1>
 
-            <p className="mt-3 hidden max-w-2xl text-sm leading-6 text-white/90 drop-shadow sm:block sm:text-base md:mt-5 md:text-xl md:leading-8">
+            <p className="mt-5 hidden max-w-2xl text-xl leading-8 text-white/90 drop-shadow lg:block">
               Discover houses, apartments, land, and shortlet listings across
               selected states in Nigeria — with a platform designed to make your
               search easier, faster, and more reliable.
             </p>
           </div>
-        </div>
 
-        <div className="absolute inset-x-0 bottom-2 z-20 md:bottom-14">
-          <div className="mx-auto max-w-6xl px-4">
-            <div className="rounded-[24px] border border-white/30 bg-white/95 p-3 shadow-2xl backdrop-blur-md md:rounded-[30px] md:p-5">
-              <div className="grid gap-3 md:grid-cols-3 md:gap-4">
-                <Link
-                  href="/search?purpose=sale"
-                  className="group cursor-pointer rounded-3xl bg-[var(--color-primary-dark)] px-4 py-4 text-white transition-all duration-300 hover:-translate-y-1 hover:shadow-xl md:px-6 md:py-8"
-                >
-                  <div className="mb-3 inline-flex rounded-2xl bg-white/15 p-3 text-white md:mb-5">
-                    <Building2 size={18} className="md:hidden" />
-                    <Building2 size={22} className="hidden md:block" />
-                  </div>
-                  <p className="text-lg font-bold text-white md:text-2xl">
-                    For Sale
-                  </p>
-                  <p className="mt-2 text-[11px] leading-5 text-white/85 md:mt-3 md:text-sm md:leading-6">
-                    Explore curated sale listings across prime locations.
-                  </p>
-                </Link>
+          <div className="mt-4 lg:absolute lg:inset-x-0 lg:bottom-14 lg:mt-0">
+            <div className="mx-auto max-w-6xl lg:px-4">
+              <div className="rounded-[26px] border border-white/30 bg-white/95 p-3 shadow-2xl backdrop-blur-md lg:rounded-[30px] lg:p-5">
+                <div className="grid gap-2 sm:grid-cols-3 lg:gap-4">
+                  <Link
+                    href="/search?purpose=sale"
+                    className="group cursor-pointer rounded-3xl bg-[var(--color-primary-dark)] px-4 py-3 text-white transition-all duration-300 hover:-translate-y-1 hover:shadow-xl lg:px-6 lg:py-8"
+                  >
+                    <div className="mb-2 inline-flex rounded-2xl bg-white/15 p-2.5 text-white lg:mb-5 lg:p-3">
+                      <Building2 size={18} />
+                    </div>
+                    <p className="text-base font-bold text-white lg:text-2xl">
+                      For Sale
+                    </p>
+                    <p className="mt-1 text-[11px] leading-4 text-white/85 sm:line-clamp-2 lg:mt-3 lg:text-sm lg:leading-6">
+                      Explore curated sale listings across prime locations.
+                    </p>
+                  </Link>
 
-                <Link
-                  href="/search?purpose=rent"
-                  className="group cursor-pointer rounded-3xl bg-[var(--color-primary-dark)] px-4 py-4 text-white transition-all duration-300 hover:-translate-y-1 hover:shadow-xl md:px-6 md:py-8"
-                >
-                  <div className="mb-3 inline-flex rounded-2xl bg-white/15 p-3 text-white md:mb-5">
-                    <House size={18} className="md:hidden" />
-                    <House size={22} className="hidden md:block" />
-                  </div>
-                  <p className="text-lg font-bold text-white md:text-2xl">
-                    For Rent
-                  </p>
-                  <p className="mt-2 text-[11px] leading-5 text-white/85 md:mt-3 md:text-sm md:leading-6">
-                    Discover rental properties with better clarity and faster
-                    access.
-                  </p>
-                </Link>
+                  <Link
+                    href="/search?purpose=rent"
+                    className="group cursor-pointer rounded-3xl bg-[var(--color-primary-dark)] px-4 py-3 text-white transition-all duration-300 hover:-translate-y-1 hover:shadow-xl lg:px-6 lg:py-8"
+                  >
+                    <div className="mb-2 inline-flex rounded-2xl bg-white/15 p-2.5 text-white lg:mb-5 lg:p-3">
+                      <House size={18} />
+                    </div>
+                    <p className="text-base font-bold text-white lg:text-2xl">
+                      For Rent
+                    </p>
+                    <p className="mt-1 text-[11px] leading-4 text-white/85 sm:line-clamp-2 lg:mt-3 lg:text-sm lg:leading-6">
+                      Discover rental properties with better clarity and faster
+                      access.
+                    </p>
+                  </Link>
 
-                <Link
-                  href="/search?purpose=shortlet"
-                  className="group cursor-pointer rounded-3xl bg-[var(--color-primary-dark)] px-4 py-4 text-white transition-all duration-300 hover:-translate-y-1 hover:shadow-xl md:px-6 md:py-8"
-                >
-                  <div className="mb-3 inline-flex rounded-2xl bg-white/15 p-3 text-white md:mb-5">
-                    <BadgeCheck size={18} className="md:hidden" />
-                    <BadgeCheck size={22} className="hidden md:block" />
-                  </div>
-                  <p className="text-lg font-bold text-white md:text-2xl">
-                    Shortlet
-                  </p>
-                  <p className="mt-2 text-[11px] leading-5 text-white/85 md:mt-3 md:text-sm md:leading-6">
-                    Find flexible short-stay options for comfort and convenience.
-                  </p>
-                </Link>
+                  <Link
+                    href="/search?purpose=shortlet"
+                    className="group cursor-pointer rounded-3xl bg-[var(--color-primary-dark)] px-4 py-3 text-white transition-all duration-300 hover:-translate-y-1 hover:shadow-xl lg:px-6 lg:py-8"
+                  >
+                    <div className="mb-2 inline-flex rounded-2xl bg-white/15 p-2.5 text-white lg:mb-5 lg:p-3">
+                      <BadgeCheck size={18} />
+                    </div>
+                    <p className="text-base font-bold text-white lg:text-2xl">
+                      Shortlet
+                    </p>
+                    <p className="mt-1 text-[11px] leading-4 text-white/85 sm:line-clamp-2 lg:mt-3 lg:text-sm lg:leading-6">
+                      Find flexible short-stay options for comfort and
+                      convenience.
+                    </p>
+                  </Link>
+                </div>
               </div>
             </div>
           </div>
@@ -488,7 +488,10 @@ export default async function Home() {
                   <div className="rounded-xl bg-[var(--color-primary)]/30 p-2 text-[var(--color-primary-dark)]">
                     <Globe2 size={18} />
                   </div>
-                  <ChevronDown className="mt-1 text-[var(--color-text-muted)] transition group-open:rotate-180" size={18} />
+                  <ChevronDown
+                    className="mt-1 text-[var(--color-text-muted)] transition group-open:rotate-180"
+                    size={18}
+                  />
                 </div>
               </summary>
 
@@ -496,7 +499,9 @@ export default async function Home() {
                 {OTHER_STATES.map((state) => (
                   <Link
                     key={state}
-                    href={`/search?state=other&otherState=${encodeURIComponent(state)}`}
+                    href={`/search?state=other&otherState=${encodeURIComponent(
+                      state
+                    )}`}
                     className="rounded-xl bg-white px-3 py-2 text-sm text-[var(--color-text-main)] transition hover:bg-[var(--color-primary)]/10 hover:text-[var(--color-primary-dark)]"
                   >
                     {state}
