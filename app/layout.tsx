@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import Script from "next/script";
 import "./globals.css";
 import LayoutShell from "../components/LayoutShell";
+import Providers from "./providers";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -116,7 +117,9 @@ export default function RootLayout({
           </>
         )}
 
-        <LayoutShell>{children}</LayoutShell>
+        <Providers>
+  <LayoutShell>{children}</LayoutShell>
+</Providers>
       </body>
     </html>
   );

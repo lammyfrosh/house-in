@@ -3,6 +3,8 @@
 import { FormEvent, useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import dynamic from "next/dynamic";
+import type { CredentialResponse } from "@react-oauth/google";
 import {
   Eye,
   EyeOff,
@@ -20,6 +22,18 @@ type RegisteredUser = {
   role: string;
 };
 
+const GoogleAuthButton = dynamic(
+  () => import("@/components/auth/GoogleAuthButton"),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="flex h-11 w-full items-center justify-center rounded-full border border-[var(--color-border)] bg-white text-sm font-semibold text-[var(--color-text-muted)]">
+        Loading Google...
+      </div>
+    ),
+  }
+);
+
 export default function RegisterPage() {
   const router = useRouter();
   const API = "https://api.house-in.online";
@@ -29,6 +43,7 @@ export default function RegisterPage() {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
   const [error, setError] = useState("");
 
   useEffect(() => {
@@ -51,6 +66,23 @@ export default function RegisterPage() {
       localStorage.removeItem("housein_user");
     }
   }, [router]);
+
+  function redirectUserByRole(user: RegisteredUser) {
+    const role = String(user?.role || "").toLowerCase().trim();
+
+    if (role === "admin" || role === "superadmin" || role === "super_admin") {
+      router.push("/admin");
+    } else {
+      router.push("/dashboard");
+    }
+  }
+
+  function saveAuthSession(token: string, user: RegisteredUser) {
+    localStorage.setItem("housein_token", token);
+    localStorage.setItem("housein_user", JSON.stringify(user));
+    window.dispatchEvent(new Event("housein-auth-changed"));
+    redirectUserByRole(user);
+  }
 
   async function handleRegister(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -76,16 +108,50 @@ export default function RegisterPage() {
         throw new Error(data.message || "Registration failed");
       }
 
-      localStorage.setItem("housein_token", data.token);
-      localStorage.setItem("housein_user", JSON.stringify(data.user));
-      window.dispatchEvent(new Event("housein-auth-changed"));
-
-      router.push("/dashboard");
+      saveAuthSession(data.token, data.user);
     } catch (err) {
       console.error(err);
       setError(err instanceof Error ? err.message : "Could not create account");
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function handleGoogleSuccess(credentialResponse: CredentialResponse) {
+    setGoogleLoading(true);
+    setError("");
+
+    try {
+      const credential = credentialResponse.credential;
+
+      if (!credential) {
+        throw new Error("Google sign-in failed. Please try again.");
+      }
+
+      const res = await fetch(`${API}/api/auth/google`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ credential }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.message || "Google sign-in failed");
+      }
+
+      saveAuthSession(data.token, data.user);
+    } catch (err) {
+      console.error(err);
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Could not continue with Google. Please try again."
+      );
+    } finally {
+      setGoogleLoading(false);
     }
   }
 
@@ -128,7 +194,32 @@ export default function RegisterPage() {
               </div>
             )}
 
-            <form onSubmit={handleRegister} className="mt-6 space-y-5">
+            <div className="mt-6">
+              <div className="rounded-xl border border-[var(--color-border)] bg-white p-2">
+              <GoogleAuthButton
+  onSuccess={handleGoogleSuccess}
+  onError={() => {
+    setError("Google sign-in was cancelled or failed.");
+  }}
+/>
+              </div>
+
+              {googleLoading && (
+                <p className="mt-2 text-center text-xs font-medium text-[var(--color-text-muted)]">
+                  Connecting to Google...
+                </p>
+              )}
+            </div>
+
+            <div className="my-6 flex items-center gap-3">
+              <div className="h-px flex-1 bg-[var(--color-border)]" />
+              <span className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--color-text-muted)]">
+                Or register with email
+              </span>
+              <div className="h-px flex-1 bg-[var(--color-border)]" />
+            </div>
+
+            <form onSubmit={handleRegister} className="space-y-5">
               <div>
                 <label className="mb-2 block text-sm font-semibold text-[var(--color-text-main)]">
                   Full Name
@@ -189,7 +280,7 @@ export default function RegisterPage() {
 
               <button
                 type="submit"
-                disabled={loading}
+                disabled={loading || googleLoading}
                 className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[var(--color-primary-dark)] px-4 py-3 text-sm font-semibold text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-70"
               >
                 {loading ? "Creating account..." : "Create Account"}

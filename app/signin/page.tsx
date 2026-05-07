@@ -3,6 +3,7 @@
 import { FormEvent, useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { GoogleLogin, CredentialResponse } from "@react-oauth/google";
 import { Eye, EyeOff, Lock, Mail, ArrowRight, ShieldCheck } from "lucide-react";
 
 type LoginUser = {
@@ -20,6 +21,7 @@ export default function SignInPage() {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
   const [error, setError] = useState("");
 
   useEffect(() => {
@@ -30,18 +32,33 @@ export default function SignInPage() {
 
     try {
       const user: LoginUser = JSON.parse(storedUser);
-      const role = String(user?.role || "").toLowerCase().trim();
-
-      if (role === "admin" || role === "superadmin" || role === "super_admin") {
-        router.replace("/admin");
-      } else {
-        router.replace("/dashboard");
-      }
+      redirectUserByRole(user, true);
     } catch {
       localStorage.removeItem("housein_token");
       localStorage.removeItem("housein_user");
     }
   }, [router]);
+
+  function redirectUserByRole(user: LoginUser, replace = false) {
+    const role = String(user?.role || "").toLowerCase().trim();
+    const destination =
+      role === "admin" || role === "superadmin" || role === "super_admin"
+        ? "/admin"
+        : "/dashboard";
+
+    if (replace) {
+      router.replace(destination);
+    } else {
+      router.push(destination);
+    }
+  }
+
+  function saveAuthSession(token: string, user: LoginUser) {
+    localStorage.setItem("housein_token", token);
+    localStorage.setItem("housein_user", JSON.stringify(user));
+    window.dispatchEvent(new Event("housein-auth-changed"));
+    redirectUserByRole(user);
+  }
 
   async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -66,22 +83,50 @@ export default function SignInPage() {
         throw new Error(data.message || "Login failed");
       }
 
-      localStorage.setItem("housein_token", data.token);
-      localStorage.setItem("housein_user", JSON.stringify(data.user));
-      window.dispatchEvent(new Event("housein-auth-changed"));
-
-      const role = String(data.user?.role || "").toLowerCase().trim();
-
-      if (role === "admin" || role === "superadmin" || role === "super_admin") {
-        router.push("/admin");
-      } else {
-        router.push("/dashboard");
-      }
+      saveAuthSession(data.token, data.user);
     } catch (err) {
       console.error(err);
       setError(err instanceof Error ? err.message : "Could not sign in");
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function handleGoogleSuccess(credentialResponse: CredentialResponse) {
+    setGoogleLoading(true);
+    setError("");
+
+    try {
+      const credential = credentialResponse.credential;
+
+      if (!credential) {
+        throw new Error("Google sign-in failed. Please try again.");
+      }
+
+      const res = await fetch(`${API}/api/auth/google`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ credential }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.message || "Google sign-in failed");
+      }
+
+      saveAuthSession(data.token, data.user);
+    } catch (err) {
+      console.error(err);
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Could not continue with Google. Please try again."
+      );
+    } finally {
+      setGoogleLoading(false);
     }
   }
 
@@ -123,7 +168,37 @@ export default function SignInPage() {
               </div>
             )}
 
-            <form onSubmit={handleSubmit} className="mt-6 space-y-5">
+            <div className="mt-6">
+              <div className="rounded-xl border border-[var(--color-border)] bg-white p-2">
+                <GoogleLogin
+                  onSuccess={handleGoogleSuccess}
+                  onError={() => {
+                    setError("Google sign-in was cancelled or failed.");
+                  }}
+                  theme="outline"
+                  size="large"
+                  text="continue_with"
+                  shape="pill"
+                  width="100%"
+                />
+              </div>
+
+              {googleLoading && (
+                <p className="mt-2 text-center text-xs font-medium text-[var(--color-text-muted)]">
+                  Connecting to Google...
+                </p>
+              )}
+            </div>
+
+            <div className="my-6 flex items-center gap-3">
+              <div className="h-px flex-1 bg-[var(--color-border)]" />
+              <span className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--color-text-muted)]">
+                Or sign in with email
+              </span>
+              <div className="h-px flex-1 bg-[var(--color-border)]" />
+            </div>
+
+            <form onSubmit={handleSubmit} className="space-y-5">
               <div>
                 <label className="mb-2 block text-sm font-semibold text-[var(--color-text-main)]">
                   Email Address
@@ -177,7 +252,7 @@ export default function SignInPage() {
 
               <button
                 type="submit"
-                disabled={loading}
+                disabled={loading || googleLoading}
                 className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[var(--color-primary-dark)] px-4 py-3 text-sm font-semibold text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-70"
               >
                 {loading ? "Signing in..." : "Sign In"}
