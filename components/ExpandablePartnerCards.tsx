@@ -1,21 +1,93 @@
 "use client";
 
 import { useState } from "react";
-import { Building2, ChevronDown, Scale, ShieldCheck } from "lucide-react";
+import {
+  Building2,
+  ChevronDown,
+  ExternalLink,
+  Newspaper,
+  Scale,
+  ShieldCheck,
+} from "lucide-react";
+import type { IndustryUpdate } from "@/lib/api";
 
-type PartnerItem = {
-  id: number;
-  name: string;
-  logo_url: string;
-  website?: string | null;
-};
+function formatDate(value?: string) {
+  if (!value) return "Recent update";
+
+  try {
+    return new Intl.DateTimeFormat("en-NG", {
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+    }).format(new Date(value));
+  } catch {
+    return "Recent update";
+  }
+}
+
+function getFallbackImage(category: "builder" | "legal") {
+  return category === "builder"
+    ? "/hero-v2.jpg"
+    : "/placeholder-property.jpg";
+}
+
+function UpdatePreviewCard({ update }: { update: IndustryUpdate }) {
+  const imageUrl = update.image_url || getFallbackImage(update.category);
+
+  return (
+    <a
+      href={update.source_url}
+      target="_blank"
+      rel="noreferrer"
+      className="group block overflow-hidden rounded-3xl border border-[var(--color-border)] bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-[var(--color-primary)] hover:shadow-md"
+    >
+      <div className="relative h-44 w-full overflow-hidden bg-[#f8fafc]">
+        <img
+          src={imageUrl}
+          alt={update.title}
+          className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
+        />
+
+        <div className="absolute left-3 top-3 rounded-full bg-white/95 px-3 py-1 text-[10px] font-extrabold uppercase tracking-wider text-[var(--color-primary-dark)] shadow-sm">
+          {update.category === "builder" ? "Builder Update" : "Legal Insight"}
+        </div>
+      </div>
+
+      <div className="p-5">
+        <div className="mb-3 flex items-center justify-between gap-3 text-xs text-[var(--color-text-muted)]">
+          <span>{formatDate(update.created_at)}</span>
+
+          {update.source_name ? (
+            <span className="line-clamp-1 font-medium">
+              {update.source_name}
+            </span>
+          ) : null}
+        </div>
+
+        <h3 className="line-clamp-2 text-base font-bold leading-6 text-[var(--color-text-main)] transition group-hover:text-[var(--color-primary-dark)]">
+          {update.title}
+        </h3>
+
+        <p className="mt-2 line-clamp-3 text-sm leading-6 text-[var(--color-text-muted)]">
+          {update.description ||
+            "Read this useful property industry update from the original source."}
+        </p>
+
+        <div className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-[var(--color-primary-dark)]">
+          Read article
+          <ExternalLink size={15} />
+        </div>
+      </div>
+    </a>
+  );
+}
 
 export default function ExpandablePartnerCards({
-  builders,
-  legalProviders,
+  builderUpdates,
+  legalUpdates,
 }: {
-  builders: PartnerItem[];
-  legalProviders: PartnerItem[];
+  builderUpdates: IndustryUpdate[];
+  legalUpdates: IndustryUpdate[];
 }) {
   const [openBuilders, setOpenBuilders] = useState(false);
   const [openLegal, setOpenLegal] = useState(false);
@@ -23,22 +95,25 @@ export default function ExpandablePartnerCards({
   const cards = [
     {
       key: "builders" as const,
-      title: "Builders",
-      subtitle: "Trusted builder brands featured on House-In.",
+      title: "Builder Updates",
+      subtitle:
+        "Useful building, construction, and development updates from trusted online sources.",
       icon: Building2,
-      items: builders,
+      items: builderUpdates.slice(0, 3),
       isOpen: openBuilders,
       onToggle: () => setOpenBuilders((prev) => !prev),
+      emptyText: "No builder updates available right now.",
     },
     {
       key: "legal" as const,
-      title: "Legal Service Providers",
+      title: "Legal Property Insights",
       subtitle:
-        "Recognised legal service providers available within the House-In ecosystem.",
+        "Helpful legal updates around property documents, due diligence, and land verification.",
       icon: Scale,
-      items: legalProviders,
+      items: legalUpdates.slice(0, 3),
       isOpen: openLegal,
       onToggle: () => setOpenLegal((prev) => !prev),
+      emptyText: "No legal property updates available right now.",
     },
   ];
 
@@ -53,13 +128,16 @@ export default function ExpandablePartnerCards({
 
             <div>
               <p className="text-xs font-extrabold uppercase tracking-[0.22em] text-[var(--color-primary-dark)]">
-                House-In Network
+                House-In Updates
               </p>
+
               <h2 className="mt-2 text-2xl font-bold text-[var(--color-text-main)] md:text-3xl">
-                Explore trusted professionals in the ecosystem
+                Industry Updates & Trusted Insights
               </h2>
+
               <p className="mt-3 max-w-3xl text-sm leading-7 text-[var(--color-text-muted)] md:text-base">
-                Explore verified builders and legal partners within the House-In network.
+                Explore useful property, building, and legal updates curated to
+                help users make better property decisions.
               </p>
             </div>
           </div>
@@ -88,7 +166,8 @@ export default function ExpandablePartnerCards({
                       <h3 className="text-2xl font-semibold text-[var(--color-text-main)]">
                         {card.title}
                       </h3>
-                      <p className="mt-1 text-sm text-[var(--color-text-muted)]">
+
+                      <p className="mt-1 text-sm leading-6 text-[var(--color-text-muted)]">
                         {card.subtitle}
                       </p>
                     </div>
@@ -112,40 +191,20 @@ export default function ExpandablePartnerCards({
                     <div className="border-t border-[var(--color-border)] px-6 pb-6 pt-5">
                       {card.items.length === 0 ? (
                         <div className="rounded-2xl border border-dashed border-[var(--color-border)] bg-[#f8fafc] p-6 text-sm text-[var(--color-text-muted)]">
-                          No items available right now.
+                          <div className="mb-3 inline-flex rounded-2xl bg-white p-3 text-[var(--color-primary-dark)] shadow-sm">
+                            <Newspaper size={18} />
+                          </div>
+
+                          <p>{card.emptyText}</p>
                         </div>
                       ) : (
-                        <div className="grid gap-4 sm:grid-cols-2">
-                          {card.items.map((item) => {
-                            const content = (
-                              <div className="group flex h-full flex-col items-center justify-center rounded-2xl border border-[var(--color-border)] bg-white p-5 text-center shadow-sm transition hover:-translate-y-1 hover:border-[var(--color-primary)] hover:shadow-md">
-                                <div className="flex h-24 w-full items-center justify-center rounded-2xl bg-[#f8fafc] p-4">
-                                  <img
-                                    src={item.logo_url}
-                                    alt={item.name}
-                                    className="max-h-full max-w-full object-contain"
-                                  />
-                                </div>
-
-                                <p className="mt-4 text-sm font-semibold text-[var(--color-text-main)]">
-                                  {item.name}
-                                </p>
-                              </div>
-                            );
-
-                            return item.website ? (
-                              <a
-                                key={item.id}
-                                href={item.website}
-                                target="_blank"
-                                rel="noreferrer"
-                              >
-                                {content}
-                              </a>
-                            ) : (
-                              <div key={item.id}>{content}</div>
-                            );
-                          })}
+                        <div className="grid gap-4">
+                          {card.items.map((update) => (
+                            <UpdatePreviewCard
+                              key={update.id}
+                              update={update}
+                            />
+                          ))}
                         </div>
                       )}
                     </div>

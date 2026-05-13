@@ -121,3 +121,51 @@ export async function getLegalProviders(): Promise<PartnerItem[]> {
 
   return data.legalProviders || [];
 }
+export type IndustryUpdate = {
+  id: number;
+  category: "builder" | "legal";
+  title: string;
+  description?: string | null;
+  image_url?: string | null;
+  source_url: string;
+  source_name?: string | null;
+  status?: "draft" | "published";
+  created_at?: string;
+  updated_at?: string;
+};
+
+export async function getIndustryUpdates(
+  category?: "builder" | "legal",
+  limit = 3
+): Promise<IndustryUpdate[]> {
+  const params = new URLSearchParams();
+
+  if (category) {
+    params.set("category", category);
+  }
+
+  params.set("limit", String(limit));
+
+  const res = await fetch(
+    `${API_BASE_URL}/api/industry-updates?${params.toString()}`,
+    {
+      cache: "no-store",
+    }
+  );
+
+  const data = await res.json();
+
+  if (!res.ok) {
+    throw new Error(data.message || "Failed to fetch industry updates");
+  }
+
+  return data.updates || [];
+}
+
+export async function getBuilderUpdates(): Promise<IndustryUpdate[]> {
+  return getIndustryUpdates("builder", 3);
+}
+
+export async function getLegalUpdates(): Promise<IndustryUpdate[]> {
+  return getIndustryUpdates("legal", 3);
+}

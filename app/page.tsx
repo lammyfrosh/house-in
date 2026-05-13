@@ -14,10 +14,10 @@ import {
 } from "lucide-react";
 import {
   getApprovedProperties,
-  getBuilders,
-  getLegalProviders,
+  getBuilderUpdates,
+  getLegalUpdates,
   Property,
-  PartnerItem,
+  IndustryUpdate,
 } from "@/lib/api";
 import PropertyCard from "@/components/PropertyCard";
 import ExpandablePartnerCards from "@/components/ExpandablePartnerCards";
@@ -109,9 +109,9 @@ export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
 export default async function Home() {
-  let properties: Property[] = [];
-  let builders: PartnerItem[] = [];
-  let legalProviders: PartnerItem[] = [];
+let properties: Property[] = [];
+let builderUpdates: IndustryUpdate[] = [];
+let legalUpdates: IndustryUpdate[] = [];
 
   try {
     properties = await getApprovedProperties();
@@ -120,20 +120,19 @@ export default async function Home() {
     properties = [];
   }
 
-  try {
-    builders = await getBuilders();
-  } catch (error) {
-    console.error("Homepage builders fetch failed:", error);
-    builders = [];
-  }
+ try {
+  builderUpdates = await getBuilderUpdates();
+} catch (error) {
+  console.error("Homepage builder updates fetch failed:", error);
+  builderUpdates = [];
+}
 
-  try {
-    legalProviders = await getLegalProviders();
-  } catch (error) {
-    console.error("Homepage legal providers fetch failed:", error);
-    legalProviders = [];
-  }
-
+try {
+  legalUpdates = await getLegalUpdates();
+} catch (error) {
+  console.error("Homepage legal updates fetch failed:", error);
+  legalUpdates = [];
+}
   const featured = [
     ...properties.filter((p) => p.purpose === "rent").slice(0, 2),
     ...properties.filter((p) => p.purpose === "sale").slice(0, 2),
@@ -634,11 +633,10 @@ export default async function Home() {
           </div>
         </div>
       </section>
-
-      <ExpandablePartnerCards
-        builders={builders}
-        legalProviders={legalProviders}
-      />
+<ExpandablePartnerCards
+  builderUpdates={builderUpdates}
+  legalUpdates={legalUpdates}
+/>
     </main>
   );
 }

@@ -2,45 +2,88 @@
 
 import { ChangeEvent, FormEvent, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Pencil, Plus, Trash2, X } from "lucide-react";
+import {
+  ExternalLink,
+  Loader2,
+  Pencil,
+  Plus,
+  RefreshCw,
+  Trash2,
+  X,
+} from "lucide-react";
 
-type LegalProvider = {
+type IndustryUpdate = {
   id: number;
-  name: string;
-  logo_url: string;
-  website?: string | null;
+  category: "builder" | "legal";
+  title: string;
+  description?: string | null;
+  image_url?: string | null;
+  source_url: string;
+  source_name?: string | null;
+  status?: "draft" | "published";
   created_at?: string;
+  updated_at?: string;
 };
 
 type FormState = {
-  name: string;
-  website: string;
+  title: string;
+  description: string;
+  image_url: string;
+  source_url: string;
+  source_name: string;
+  status: "draft" | "published";
 };
+
+const CATEGORY = "legal" as const;
+const PAGE_TITLE = "Manage Legal Property Updates";
+const ADD_TITLE = "Add Legal Property Update";
+const EDIT_TITLE = "Edit Legal Property Update";
+const EMPTY_TEXT = "No legal property updates added yet.";
+const LOAD_ERROR = "Could not load legal property updates.";
+const SAVE_ERROR = "Could not save legal property update.";
+
+const emptyForm: FormState = {
+  title: "",
+  description: "",
+  image_url: "",
+  source_url: "",
+  source_name: "",
+  status: "published",
+};
+
+function formatDate(value?: string) {
+  if (!value) return "Recently added";
+
+  try {
+    return new Intl.DateTimeFormat("en-NG", {
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+    }).format(new Date(value));
+  } catch {
+    return "Recently added";
+  }
+}
 
 export default function AdminLegalProvidersPage() {
   const router = useRouter();
   const API =
     process.env.NEXT_PUBLIC_API_BASE_URL || "https://api.house-in.online";
 
-  const [legalProviders, setLegalProviders] = useState<LegalProvider[]>([]);
+  const [updates, setUpdates] = useState<IndustryUpdate[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [generatingPreview, setGeneratingPreview] = useState(false);
   const [deletingId, setDeletingId] = useState<number | null>(null);
   const [editingId, setEditingId] = useState<number | null>(null);
 
-  const [form, setForm] = useState<FormState>({
-    name: "",
-    website: "",
-  });
-
-  const [selectedLogo, setSelectedLogo] = useState<File | null>(null);
-  const [logoPreview, setLogoPreview] = useState("");
+  const [form, setForm] = useState<FormState>(emptyForm);
 
   const [message, setMessage] = useState("");
   const [messageType, setMessageType] = useState<"success" | "error" | "">("");
 
   useEffect(() => {
-    async function loadLegalProviders() {
+    async function loadUpdates() {
       const token = localStorage.getItem("housein_token");
 
       if (!token) {
@@ -49,54 +92,42 @@ export default function AdminLegalProvidersPage() {
       }
 
       try {
-        const res = await fetch(`${API}/api/partners/legal-providers`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
+        const res = await fetch(
+          `${API}/api/industry-updates?category=${CATEGORY}&limit=50&includeDrafts=true`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
 
         const data = await res.json();
 
         if (!res.ok) {
-          throw new Error(data.message || "Could not load legal providers");
+          throw new Error(data.message || LOAD_ERROR);
         }
 
-        setLegalProviders(data.legalProviders || []);
+        setUpdates(data.updates || []);
       } catch (error) {
         console.error(error);
-        setMessage("Could not load legal service providers.");
+        setMessage(LOAD_ERROR);
         setMessageType("error");
       } finally {
         setLoading(false);
       }
     }
 
-    loadLegalProviders();
+    loadUpdates();
   }, [API, router]);
 
-  useEffect(() => {
-    if (!selectedLogo) {
-      setLogoPreview("");
-      return;
-    }
-
-    const url = URL.createObjectURL(selectedLogo);
-    setLogoPreview(url);
-
-    return () => URL.revokeObjectURL(url);
-  }, [selectedLogo]);
-
   function resetForm() {
-    setForm({
-      name: "",
-      website: "",
-    });
-    setSelectedLogo(null);
-    setLogoPreview("");
+    setForm(emptyForm);
     setEditingId(null);
   }
 
-  function handleChange(e: ChangeEvent<HTMLInputElement>) {
+  function handleChange(
+    e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+  ) {
     const { name, value } = e.target;
 
     setForm((prev) => ({
@@ -105,39 +136,99 @@ export default function AdminLegalProvidersPage() {
     }));
   }
 
-  function handleLogoChange(e: ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0] || null;
-    setSelectedLogo(file);
+  function startEdit(update: IndustryUpdate) {
+    setEditingId(update.id);
+
+    setForm({
+      title: update.title || "",
+      description: update.description || "",
+      image_url: update.image_url || "",
+      source_url: update.source_url || "",
+      source_name: update.source_name || "",
+      status: update.status === "draft" ? "draft" : "published",
+    });
+
+    window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
-  function startEdit(item: LegalProvider) {
-    setEditingId(item.id);
-    setForm({
-      name: item.name || "",
-      website: item.website || "",
-    });
-    setSelectedLogo(null);
-    setLogoPreview(item.logo_url || "");
-    window.scrollTo({ top: 0, behavior: "smooth" });
+  async function generatePreview() {
+    const token = localStorage.getItem("housein_token");
+
+    if (!token) {
+      router.push("/signin");
+      return;
+    }
+
+    if (!form.source_url.trim()) {
+      setMessage("Paste the article link first.");
+      setMessageType("error");
+      return;
+    }
+
+    setGeneratingPreview(true);
+    setMessage("");
+    setMessageType("");
+
+    try {
+      const res = await fetch(`${API}/api/industry-updates/preview`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          url: form.source_url.trim(),
+        }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.message || "Could not generate preview");
+      }
+
+      const preview = data.preview || {};
+
+      setForm((prev) => ({
+        ...prev,
+        title: preview.title || prev.title,
+        description: preview.description || prev.description,
+        image_url: preview.image_url || prev.image_url,
+        source_url: preview.source_url || prev.source_url,
+        source_name: preview.source_name || prev.source_name,
+      }));
+
+      setMessage("Preview generated successfully. You can edit before saving.");
+      setMessageType("success");
+    } catch (error) {
+      console.error(error);
+      setMessage(
+        error instanceof Error ? error.message : "Could not generate preview"
+      );
+      setMessageType("error");
+    } finally {
+      setGeneratingPreview(false);
+    }
   }
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
 
     const token = localStorage.getItem("housein_token");
+
     if (!token) {
       router.push("/signin");
       return;
     }
 
-    if (!form.name.trim()) {
-      setMessage("Legal provider name is required.");
+    if (!form.source_url.trim()) {
+      setMessage("Article link is required.");
       setMessageType("error");
       return;
     }
 
-    if (!editingId && !selectedLogo) {
-      setMessage("Legal provider logo is required.");
+    if (!form.title.trim()) {
+      setMessage("Article title is required. Generate preview or type it manually.");
       setMessageType("error");
       return;
     }
@@ -147,102 +238,101 @@ export default function AdminLegalProvidersPage() {
     setMessageType("");
 
     try {
-      const formData = new FormData();
-      formData.append("name", form.name.trim());
-      formData.append("website", form.website.trim());
-
-      if (selectedLogo) {
-        formData.append("logo", selectedLogo);
-      }
+      const payload = {
+        category: CATEGORY,
+        title: form.title.trim(),
+        description: form.description.trim(),
+        image_url: form.image_url.trim(),
+        source_url: form.source_url.trim(),
+        source_name: form.source_name.trim(),
+        status: form.status,
+      };
 
       const url = editingId
-        ? `${API}/api/partners/legal-providers/${editingId}`
-        : `${API}/api/partners/legal-providers`;
+        ? `${API}/api/industry-updates/${editingId}`
+        : `${API}/api/industry-updates`;
 
       const method = editingId ? "PUT" : "POST";
 
       const res = await fetch(url, {
         method,
         headers: {
+          "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: formData,
+        body: JSON.stringify(payload),
       });
 
       const data = await res.json();
 
       if (!res.ok) {
-        throw new Error(data.message || "Could not save legal provider");
+        throw new Error(data.message || SAVE_ERROR);
       }
 
-      if (editingId && data.legalProvider) {
-        setLegalProviders((prev) =>
-          prev.map((item) => (item.id === editingId ? data.legalProvider : item))
+      if (editingId && data.update) {
+        setUpdates((prev) =>
+          prev.map((item) => (item.id === editingId ? data.update : item))
         );
-        setMessage("Legal provider updated successfully.");
-      } else if (data.legalProvider) {
-        setLegalProviders((prev) => [data.legalProvider, ...prev]);
-        setMessage("Legal provider added successfully.");
+        setMessage("Update saved successfully.");
+      } else if (data.update) {
+        setUpdates((prev) => [data.update, ...prev]);
+        setMessage("Update added successfully.");
       }
 
       setMessageType("success");
       resetForm();
     } catch (error) {
       console.error(error);
-      setMessage(
-        error instanceof Error ? error.message : "Could not save legal provider"
-      );
+      setMessage(error instanceof Error ? error.message : SAVE_ERROR);
       setMessageType("error");
     } finally {
       setSaving(false);
     }
   }
 
-  async function deleteLegalProvider(item: LegalProvider) {
+  async function deleteUpdate(update: IndustryUpdate) {
     const token = localStorage.getItem("housein_token");
+
     if (!token) {
       router.push("/signin");
       return;
     }
 
     const confirmed = window.confirm(
-      `Delete ${item.name}? This will remove the legal provider from the homepage.`
+      `Delete "${update.title}"? This will remove the update from the homepage.`
     );
 
     if (!confirmed) return;
 
-    setDeletingId(item.id);
+    setDeletingId(update.id);
     setMessage("");
     setMessageType("");
 
     try {
-      const res = await fetch(
-        `${API}/api/partners/legal-providers/${item.id}`,
-        {
-          method: "DELETE",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      const res = await fetch(`${API}/api/industry-updates/${update.id}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
 
       const data = await res.json();
 
       if (!res.ok) {
-        throw new Error(data.message || "Could not delete legal provider");
+        throw new Error(data.message || "Could not delete update");
       }
 
-      setLegalProviders((prev) => prev.filter((entry) => entry.id !== item.id));
-      setMessage("Legal provider deleted successfully.");
+      setUpdates((prev) => prev.filter((item) => item.id !== update.id));
+      setMessage("Update deleted successfully.");
       setMessageType("success");
 
-      if (editingId === item.id) {
+      if (editingId === update.id) {
         resetForm();
       }
     } catch (error) {
       console.error(error);
       setMessage(
-        error instanceof Error ? error.message : "Could not delete legal provider"
+        error instanceof Error ? error.message : "Could not delete update"
       );
       setMessageType("error");
     } finally {
@@ -257,11 +347,14 @@ export default function AdminLegalProvidersPage() {
           <p className="text-xs font-extrabold uppercase tracking-[0.25em] text-[var(--color-primary-dark)]">
             Home Page Content
           </p>
+
           <h1 className="mt-2 text-3xl font-bold tracking-tight text-[var(--color-text-main)] sm:text-4xl">
-            Legal Service Providers
+            {PAGE_TITLE}
           </h1>
+
           <p className="mt-2 max-w-2xl text-sm leading-6 text-[var(--color-text-muted)]">
-            Add, edit, and remove legal service providers that should appear on the home page.
+            Paste an article link, generate a WhatsApp-style preview, review it,
+            then publish it to the home page.
           </p>
         </div>
 
@@ -289,7 +382,7 @@ export default function AdminLegalProvidersPage() {
         <section className="rounded-3xl border border-[var(--color-border)] bg-white p-5 shadow-sm sm:p-6">
           <div className="flex items-center justify-between gap-3">
             <h2 className="text-lg font-semibold text-[var(--color-text-main)]">
-              {editingId ? "Edit Legal Provider" : "Add Legal Provider"}
+              {editingId ? EDIT_TITLE : ADD_TITLE}
             </h2>
 
             {editingId && (
@@ -307,51 +400,130 @@ export default function AdminLegalProvidersPage() {
           <form onSubmit={handleSubmit} className="mt-5 space-y-5">
             <div>
               <label className="mb-2 block text-sm font-medium text-[var(--color-text-main)]">
-                Legal Provider Name
+                Article Link
               </label>
-              <input
-                name="name"
-                value={form.name}
-                onChange={handleChange}
-                className="h-12 w-full rounded-xl border border-[var(--color-border)] px-4 outline-none transition focus:border-[var(--color-primary-dark)] focus:ring-2 focus:ring-[var(--color-primary)]/20"
-                placeholder="e.g. Aluko & Oyebode"
-              />
-            </div>
 
-            <div>
-              <label className="mb-2 block text-sm font-medium text-[var(--color-text-main)]">
-                Website
-              </label>
-              <input
-                name="website"
-                value={form.website}
-                onChange={handleChange}
-                className="h-12 w-full rounded-xl border border-[var(--color-border)] px-4 outline-none transition focus:border-[var(--color-primary-dark)] focus:ring-2 focus:ring-[var(--color-primary)]/20"
-                placeholder="https://example.com"
-              />
-            </div>
-
-            <div>
-              <label className="mb-2 block text-sm font-medium text-[var(--color-text-main)]">
-                Logo
-              </label>
-              <input
-                type="file"
-                accept="image/*"
-                onChange={handleLogoChange}
-                className="block w-full rounded-xl border border-[var(--color-border)] px-4 py-3 text-sm"
-              />
-            </div>
-
-            {logoPreview && (
-              <div className="overflow-hidden rounded-2xl border border-[var(--color-border)] bg-[#f8fafc] p-4">
-                <img
-                  src={logoPreview}
-                  alt="Legal provider logo preview"
-                  className="h-24 max-w-full object-contain"
+              <div className="grid gap-3 sm:grid-cols-[1fr_auto]">
+                <input
+                  name="source_url"
+                  value={form.source_url}
+                  onChange={handleChange}
+                  className="h-12 w-full rounded-xl border border-[var(--color-border)] px-4 outline-none transition focus:border-[var(--color-primary-dark)] focus:ring-2 focus:ring-[var(--color-primary)]/20"
+                  placeholder="https://example.com/original-article"
                 />
+
+                <button
+                  type="button"
+                  onClick={generatePreview}
+                  disabled={generatingPreview}
+                  className="inline-flex h-12 items-center justify-center gap-2 rounded-xl border border-[var(--color-border)] px-4 text-sm font-semibold text-[var(--color-text-main)] transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-70"
+                >
+                  {generatingPreview ? (
+                    <Loader2 className="animate-spin" size={16} />
+                  ) : (
+                    <RefreshCw size={16} />
+                  )}
+                  {generatingPreview ? "Generating..." : "Generate Preview"}
+                </button>
               </div>
-            )}
+            </div>
+
+            {form.image_url || form.title || form.description ? (
+              <div className="overflow-hidden rounded-3xl border border-[var(--color-border)] bg-[#f8fafc]">
+                {form.image_url ? (
+                  <img
+                    src={form.image_url}
+                    alt="Preview thumbnail"
+                    className="h-52 w-full object-cover"
+                    onError={(e) => {
+                      e.currentTarget.style.display = "none";
+                    }}
+                  />
+                ) : null}
+
+                <div className="p-4">
+                  <p className="text-xs font-bold uppercase tracking-wider text-[var(--color-primary-dark)]">
+                    {form.source_name || "Preview"}
+                  </p>
+
+                  <h3 className="mt-2 text-lg font-bold text-[var(--color-text-main)]">
+                    {form.title || "Article title will appear here"}
+                  </h3>
+
+                  <p className="mt-2 text-sm leading-6 text-[var(--color-text-muted)]">
+                    {form.description || "Article description will appear here."}
+                  </p>
+                </div>
+              </div>
+            ) : null}
+
+            <div>
+              <label className="mb-2 block text-sm font-medium text-[var(--color-text-main)]">
+                Article Title
+              </label>
+              <input
+                name="title"
+                value={form.title}
+                onChange={handleChange}
+                className="h-12 w-full rounded-xl border border-[var(--color-border)] px-4 outline-none transition focus:border-[var(--color-primary-dark)] focus:ring-2 focus:ring-[var(--color-primary)]/20"
+                placeholder="Generated automatically, but editable"
+              />
+            </div>
+
+            <div>
+              <label className="mb-2 block text-sm font-medium text-[var(--color-text-main)]">
+                Source Name
+              </label>
+              <input
+                name="source_name"
+                value={form.source_name}
+                onChange={handleChange}
+                className="h-12 w-full rounded-xl border border-[var(--color-border)] px-4 outline-none transition focus:border-[var(--color-primary-dark)] focus:ring-2 focus:ring-[var(--color-primary)]/20"
+                placeholder="Generated automatically, but editable"
+              />
+            </div>
+
+            <div>
+              <label className="mb-2 block text-sm font-medium text-[var(--color-text-main)]">
+                Image URL
+              </label>
+              <input
+                name="image_url"
+                value={form.image_url}
+                onChange={handleChange}
+                className="h-12 w-full rounded-xl border border-[var(--color-border)] px-4 outline-none transition focus:border-[var(--color-primary-dark)] focus:ring-2 focus:ring-[var(--color-primary)]/20"
+                placeholder="Generated automatically, but editable"
+              />
+            </div>
+
+            <div>
+              <label className="mb-2 block text-sm font-medium text-[var(--color-text-main)]">
+                Short Description
+              </label>
+              <textarea
+                name="description"
+                value={form.description}
+                onChange={handleChange}
+                rows={5}
+                className="w-full resize-none rounded-xl border border-[var(--color-border)] px-4 py-3 outline-none transition focus:border-[var(--color-primary-dark)] focus:ring-2 focus:ring-[var(--color-primary)]/20"
+                placeholder="Generated automatically, but editable"
+              />
+            </div>
+
+            <div>
+              <label className="mb-2 block text-sm font-medium text-[var(--color-text-main)]">
+                Status
+              </label>
+              <select
+                name="status"
+                value={form.status}
+                onChange={handleChange}
+                className="h-12 w-full rounded-xl border border-[var(--color-border)] bg-white px-4 outline-none transition focus:border-[var(--color-primary-dark)] focus:ring-2 focus:ring-[var(--color-primary)]/20"
+              >
+                <option value="published">Published</option>
+                <option value="draft">Draft</option>
+              </select>
+            </div>
 
             <button
               type="submit"
@@ -361,57 +533,94 @@ export default function AdminLegalProvidersPage() {
               <Plus size={16} />
               {saving
                 ? editingId
-                  ? "Updating Legal Provider..."
-                  : "Adding Legal Provider..."
+                  ? "Updating..."
+                  : "Adding..."
                 : editingId
-                ? "Update Legal Provider"
-                : "Add Legal Provider"}
+                ? "Update"
+                : "Publish Update"}
             </button>
           </form>
         </section>
 
         <section className="rounded-3xl border border-[var(--color-border)] bg-white p-5 shadow-sm sm:p-6">
           <h2 className="text-lg font-semibold text-[var(--color-text-main)]">
-            Existing Legal Providers
+            Existing Updates
           </h2>
 
           <div className="mt-5 space-y-4">
             {loading ? (
               <div className="rounded-2xl border border-[var(--color-border)] bg-[#f8fafc] p-4 text-sm text-[var(--color-text-muted)]">
-                Loading legal providers...
+                Loading updates...
               </div>
-            ) : legalProviders.length === 0 ? (
+            ) : updates.length === 0 ? (
               <div className="rounded-2xl border border-[var(--color-border)] bg-[#f8fafc] p-4 text-sm text-[var(--color-text-muted)]">
-                No legal providers added yet.
+                {EMPTY_TEXT}
               </div>
             ) : (
-              legalProviders.map((item) => (
+              updates.map((update) => (
                 <div
-                  key={item.id}
-                  className="flex flex-col gap-4 rounded-2xl border border-[var(--color-border)] bg-[#fcfcfd] p-4 sm:flex-row sm:items-center sm:justify-between"
+                  key={update.id}
+                  className="overflow-hidden rounded-2xl border border-[var(--color-border)] bg-[#fcfcfd]"
                 >
-                  <div className="flex min-w-0 items-center gap-4">
-                    <div className="flex h-16 w-24 shrink-0 items-center justify-center rounded-xl border border-[var(--color-border)] bg-white p-3">
-                      <img
-                        src={item.logo_url}
-                        alt={item.name}
-                        className="max-h-full max-w-full object-contain"
-                      />
+                  <div className="grid gap-4 p-4 sm:grid-cols-[150px_1fr]">
+                    <div className="h-32 overflow-hidden rounded-xl border border-[var(--color-border)] bg-white">
+                      {update.image_url ? (
+                        <img
+                          src={update.image_url}
+                          alt={update.title}
+                          className="h-full w-full object-cover"
+                        />
+                      ) : (
+                        <div className="flex h-full w-full items-center justify-center px-3 text-center text-xs text-[var(--color-text-muted)]">
+                          No image
+                        </div>
+                      )}
                     </div>
 
                     <div className="min-w-0">
-                      <p className="font-semibold text-[var(--color-text-main)]">
-                        {item.name}
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span
+                          className={`rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-wider ${
+                            update.status === "draft"
+                              ? "bg-yellow-50 text-yellow-700"
+                              : "bg-green-50 text-green-700"
+                          }`}
+                        >
+                          {update.status || "published"}
+                        </span>
+
+                        <span className="text-xs text-[var(--color-text-muted)]">
+                          {formatDate(update.created_at)}
+                        </span>
+                      </div>
+
+                      <p className="mt-2 font-semibold text-[var(--color-text-main)]">
+                        {update.title}
                       </p>
-                      <p className="mt-1 text-sm text-[var(--color-text-muted)]">
-                        {item.website || "No website added"}
+
+                      <p className="mt-1 line-clamp-2 text-sm leading-6 text-[var(--color-text-muted)]">
+                        {update.description || "No description added"}
                       </p>
+
+                      <div className="mt-2 flex flex-wrap items-center gap-2 text-xs text-[var(--color-text-muted)]">
+                        <span>{update.source_name || "No source name"}</span>
+
+                        <a
+                          href={update.source_url}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="inline-flex items-center gap-1 font-semibold text-[var(--color-primary-dark)] hover:underline"
+                        >
+                          Open article
+                          <ExternalLink size={12} />
+                        </a>
+                      </div>
                     </div>
                   </div>
 
-                  <div className="flex gap-2">
+                  <div className="flex flex-wrap justify-end gap-2 border-t border-[var(--color-border)] bg-white px-4 py-3">
                     <button
-                      onClick={() => startEdit(item)}
+                      onClick={() => startEdit(update)}
                       className="inline-flex items-center gap-2 rounded-xl border border-[var(--color-border)] px-3 py-2 text-sm font-semibold text-[var(--color-text-main)] hover:bg-gray-50"
                     >
                       <Pencil size={14} />
@@ -419,12 +628,12 @@ export default function AdminLegalProvidersPage() {
                     </button>
 
                     <button
-                      onClick={() => deleteLegalProvider(item)}
-                      disabled={deletingId === item.id}
+                      onClick={() => deleteUpdate(update)}
+                      disabled={deletingId === update.id}
                       className="inline-flex items-center gap-2 rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm font-semibold text-red-700 hover:bg-red-100 disabled:cursor-not-allowed disabled:opacity-70"
                     >
                       <Trash2 size={14} />
-                      {deletingId === item.id ? "Deleting..." : "Delete"}
+                      {deletingId === update.id ? "Deleting..." : "Delete"}
                     </button>
                   </div>
                 </div>
