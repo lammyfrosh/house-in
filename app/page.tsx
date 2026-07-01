@@ -248,17 +248,17 @@ export default async function Home() {
               </select>
 
               <select
-                name="otherState"
-                className="h-12 rounded-xl border border-[var(--color-border)] bg-white px-3 transition outline-none focus:border-[var(--color-primary-dark)] focus:ring-2 focus:ring-[var(--color-primary)]/20 md:col-span-3"
-                defaultValue=""
-              >
-                <option value="">Other States</option>
-                {OTHER_STATES.map((s) => (
-                  <option key={s} value={s}>
-                    {s}
-                  </option>
-                ))}
-              </select>
+  name="otherState"
+  className="h-12 rounded-xl border border-[var(--color-border)] bg-white px-3 transition outline-none focus:border-[var(--color-primary-dark)] focus:ring-2 focus:ring-[var(--color-primary)]/20 md:col-span-3"
+  defaultValue=""
+>
+  <option value="">Select Other State</option>
+  {OTHER_STATES.map((s) => (
+    <option key={s} value={s}>
+      {s}
+    </option>
+  ))}
+</select>
 
               <input
                 name="area"

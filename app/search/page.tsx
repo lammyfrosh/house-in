@@ -38,6 +38,15 @@ const STATE_CENTERS: Record<string, { lat: number; lng: number }> = {
   Enugu: { lat: 6.5244, lng: 7.5086 },
   Imo: { lat: 5.572, lng: 7.0588 },
   Abia: { lat: 5.4527, lng: 7.5248 },
+  Oyo: { lat: 7.3775, lng: 3.947 },
+  Ogun: { lat: 6.998, lng: 3.4737 },
+  Osun: { lat: 7.5629, lng: 4.52 },
+  Ondo: { lat: 7.25, lng: 5.195 },
+  Ekiti: { lat: 7.719, lng: 5.311 },
+  Kwara: { lat: 8.9669, lng: 4.3874 },
+  Kogi: { lat: 7.8007, lng: 6.7399 },
+  Kaduna: { lat: 10.5105, lng: 7.4165 },
+  Kano: { lat: 12.0022, lng: 8.592 },
 };
 
 function getCoords(area: string, city: string, state: string) {
@@ -51,11 +60,14 @@ function getCoords(area: string, city: string, state: string) {
   return { lat: 6.5244, lng: 3.3792 };
 }
 
+function getEffectiveState(summary: SearchSummary) {
+  return norm(summary.state || "") === "other"
+    ? summary.otherState || ""
+    : summary.state || summary.otherState || "";
+}
+
 function propertyMatchesFilters(property: Property, summary: SearchSummary) {
-  const effectiveState =
-    norm(summary.state || "") === "other"
-      ? summary.otherState || ""
-      : summary.state || "";
+  const effectiveState = getEffectiveState(summary);
 
   const propertyState = norm(property.state);
   const propertyArea = norm(property.area);
@@ -158,10 +170,7 @@ export default async function SearchPage({
     };
   });
 
-  const effectiveState =
-    norm(summary.state || "") === "other"
-      ? summary.otherState || ""
-      : summary.state || "";
+  const effectiveState = getEffectiveState(summary);
 
   const defaultCenter =
     effectiveState && STATE_CENTERS[effectiveState]

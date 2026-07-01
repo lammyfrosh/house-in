@@ -18,6 +18,46 @@ const FEATURED_STATES = [
   "Abia",
 ];
 
+const ALL_NIGERIA_STATES = [
+  "Abia",
+  "Adamawa",
+  "Akwa Ibom",
+  "Anambra",
+  "Bauchi",
+  "Bayelsa",
+  "Benue",
+  "Borno",
+  "Cross River",
+  "Delta",
+  "Ebonyi",
+  "Edo",
+  "Ekiti",
+  "Enugu",
+  "FCT",
+  "Gombe",
+  "Imo",
+  "Jigawa",
+  "Kaduna",
+  "Kano",
+  "Katsina",
+  "Kebbi",
+  "Kogi",
+  "Kwara",
+  "Lagos",
+  "Nasarawa",
+  "Niger",
+  "Ogun",
+  "Ondo",
+  "Osun",
+  "Oyo",
+  "Plateau",
+  "Rivers",
+  "Sokoto",
+  "Taraba",
+  "Yobe",
+  "Zamfara",
+];
+
 function norm(value: string) {
   return String(value || "").trim().toLowerCase();
 }
@@ -75,9 +115,9 @@ export default function HomeFeaturedProperties({
             <div className="mt-6 flex flex-col gap-3 sm:flex-row">
               <Link
                 href={searchHref}
-                className="inline-flex items-center justify-center gap-2 rounded-2xl bg-white px-5 py-3 text-sm font-bold text-[var(--color-primary-dark)] transition hover:-translate-y-0.5 hover:shadow-md"
+                className="inline-flex items-center justify-center gap-2 rounded-2xl bg-white px-5 py-3 text-sm font-bold text-[#0f766e] transition hover:-translate-y-0.5 hover:bg-white/95 hover:shadow-md"
               >
-                View matching search
+                <span>View matching search</span>
                 <ArrowRight size={16} />
               </Link>
 
@@ -113,7 +153,7 @@ export default function HomeFeaturedProperties({
                 className="h-12 rounded-2xl border border-[var(--color-border)] bg-white px-4 text-sm font-semibold text-[var(--color-text-main)] outline-none transition focus:border-[var(--color-primary-dark)] focus:ring-2 focus:ring-[var(--color-primary)]/20 md:min-w-[220px]"
               >
                 <option value="">All Featured States</option>
-                {FEATURED_STATES.map((state) => (
+                {ALL_NIGERIA_STATES.map((state) => (
                   <option key={state} value={state}>
                     {state}
                   </option>

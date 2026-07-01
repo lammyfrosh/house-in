@@ -177,13 +177,13 @@ export default function SearchResultsMapClient({
       const propertyState = String(property.state || "").trim();
       const propertyBedrooms = Number(property.bedrooms || 0);
 
-      if (filters.state) {
-        if (filters.state === "other") {
-          if (!filters.otherState) return false;
-          if (norm(propertyState) !== norm(filters.otherState)) return false;
-        } else {
-          if (norm(propertyState) !== norm(filters.state)) return false;
-        }
+      const effectiveState =
+        filters.state === "other"
+          ? filters.otherState
+          : filters.state || filters.otherState;
+
+      if (effectiveState) {
+        if (norm(propertyState) !== norm(effectiveState)) return false;
       }
 
       if (
@@ -263,6 +263,10 @@ export default function SearchResultsMapClient({
 
       if (key === "state" && value !== "other") {
         next.otherState = "";
+      }
+
+      if (key === "otherState" && value) {
+        next.state = "";
       }
 
       if (key === "beds" && value !== "other") {
@@ -371,12 +375,7 @@ export default function SearchResultsMapClient({
                   <select
                     value={filters.otherState}
                     onChange={(e) => updateFilter("otherState", e.target.value)}
-                    disabled={filters.state !== "other"}
-                    className={`h-12 rounded-xl border px-4 text-sm outline-none ${
-                      filters.state === "other"
-                        ? "border-[var(--color-border)] bg-white focus:border-[var(--color-primary-dark)]"
-                        : "cursor-not-allowed border-gray-200 bg-gray-100 text-gray-400"
-                    }`}
+                    className="h-12 rounded-xl border border-[var(--color-border)] bg-white px-4 text-sm outline-none focus:border-[var(--color-primary-dark)]"
                   >
                     <option value="">Other States</option>
                     {OTHER_STATES.map((state) => (
