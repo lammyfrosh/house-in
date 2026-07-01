@@ -7,7 +7,6 @@ import {
   Building2,
   House,
   BadgeCheck,
-  ArrowRight,
   Download,
   Globe2,
   ChevronDown,
@@ -19,8 +18,8 @@ import {
   Property,
   IndustryUpdate,
 } from "@/lib/api";
-import PropertyCard from "@/components/PropertyCard";
 import ExpandablePartnerCards from "@/components/ExpandablePartnerCards";
+import HomeFeaturedProperties from "@/components/HomeFeaturedProperties";
 
 const FEATURED_STATES = [
   "Lagos",
@@ -109,9 +108,9 @@ export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
 export default async function Home() {
-let properties: Property[] = [];
-let builderUpdates: IndustryUpdate[] = [];
-let legalUpdates: IndustryUpdate[] = [];
+  let properties: Property[] = [];
+  let builderUpdates: IndustryUpdate[] = [];
+  let legalUpdates: IndustryUpdate[] = [];
 
   try {
     properties = await getApprovedProperties();
@@ -120,24 +119,19 @@ let legalUpdates: IndustryUpdate[] = [];
     properties = [];
   }
 
- try {
-  builderUpdates = await getBuilderUpdates();
-} catch (error) {
-  console.error("Homepage builder updates fetch failed:", error);
-  builderUpdates = [];
-}
+  try {
+    builderUpdates = await getBuilderUpdates();
+  } catch (error) {
+    console.error("Homepage builder updates fetch failed:", error);
+    builderUpdates = [];
+  }
 
-try {
-  legalUpdates = await getLegalUpdates();
-} catch (error) {
-  console.error("Homepage legal updates fetch failed:", error);
-  legalUpdates = [];
-}
-  const featured = [
-    ...properties.filter((p) => p.purpose === "rent").slice(0, 2),
-    ...properties.filter((p) => p.purpose === "sale").slice(0, 2),
-    ...properties.filter((p) => p.purpose === "shortlet").slice(0, 2),
-  ].slice(0, 6);
+  try {
+    legalUpdates = await getLegalUpdates();
+  } catch (error) {
+    console.error("Homepage legal updates fetch failed:", error);
+    legalUpdates = [];
+  }
 
   return (
     <main>
@@ -234,6 +228,7 @@ try {
         </div>
       </section>
 
+      {/* Homepage search form */}
       <section className="bg-[#eef2f5] py-10 md:py-12">
         <div className="mx-auto max-w-6xl px-4">
           <div className="rounded-3xl border border-[var(--color-border)] bg-[#f7f8fa] p-4 shadow-sm md:p-6">
@@ -309,14 +304,14 @@ try {
                   defaultValue=""
                 >
                   <option value="">Beds</option>
-                  <option value="1">1</option>
-                  <option value="2">2</option>
-                  <option value="3">3</option>
-                  <option value="4">4</option>
-                  <option value="5">5</option>
-                  <option value="6">6</option>
-                  <option value="7">7</option>
-                  <option value="8">8</option>
+                  <option value="1">1+</option>
+                  <option value="2">2+</option>
+                  <option value="3">3+</option>
+                  <option value="4">4+</option>
+                  <option value="5">5+</option>
+                  <option value="6">6+</option>
+                  <option value="7">7+</option>
+                  <option value="8">8+</option>
                   <option value="other">Other</option>
                 </select>
 
@@ -393,44 +388,7 @@ try {
         </div>
       </section>
 
-      <section className="mx-auto max-w-6xl px-4 py-14">
-        <div className="mb-5 flex items-center justify-between">
-          <div>
-            <h2 className="text-2xl font-semibold text-[var(--color-text-main)]">
-              Featured Properties
-            </h2>
-            <p className="mt-1 text-sm text-[var(--color-text-muted)]">
-              A handpicked mix of sale, rent, and shortlet listings across key
-              locations.
-            </p>
-          </div>
-
-          <Link
-            href="/search"
-            className="inline-flex items-center gap-1 text-sm font-medium text-[var(--color-primary-dark)] transition hover:underline"
-          >
-            View all <ArrowRight size={16} />
-          </Link>
-        </div>
-
-        {featured.length === 0 ? (
-          <div className="rounded-3xl border border-[var(--color-border)] bg-white p-8 text-center shadow-sm">
-            <h3 className="text-xl font-bold text-[var(--color-text-main)]">
-              Featured listings are temporarily unavailable
-            </h3>
-            <p className="mt-2 text-sm text-[var(--color-text-muted)]">
-              The website is still live. Property data will appear here once the
-              backend connection responds successfully.
-            </p>
-          </div>
-        ) : (
-          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            {featured.map((p) => (
-              <PropertyCard key={p.id} p={p} />
-            ))}
-          </div>
-        )}
-      </section>
+      <HomeFeaturedProperties properties={properties} />
 
       <section className="bg-white">
         <div className="mx-auto max-w-6xl px-4 py-14">
@@ -633,10 +591,11 @@ try {
           </div>
         </div>
       </section>
-<ExpandablePartnerCards
-  builderUpdates={builderUpdates}
-  legalUpdates={legalUpdates}
-/>
+
+      <ExpandablePartnerCards
+        builderUpdates={builderUpdates}
+        legalUpdates={legalUpdates}
+      />
     </main>
   );
 }

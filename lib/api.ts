@@ -32,12 +32,39 @@ export type Property = {
   listedAtText?: string;
 };
 
+export type PropertyFilters = {
+  state?: string;
+  otherState?: string;
+  area?: string;
+  purpose?: string;
+  propertyType?: string;
+  beds?: string;
+  otherBeds?: string;
+  baths?: string;
+  minPrice?: string | number;
+  maxPrice?: string | number;
+  featured?: string | number | boolean;
+};
+
 export type PartnerItem = {
   id: number;
   name: string;
   logo_url: string;
   website?: string | null;
   created_at?: string;
+};
+
+export type IndustryUpdate = {
+  id: number;
+  category: "builder" | "legal";
+  title: string;
+  description?: string | null;
+  image_url?: string | null;
+  source_url: string;
+  source_name?: string | null;
+  status?: "draft" | "published";
+  created_at?: string;
+  updated_at?: string;
 };
 
 function normalizeProperty(property: Property): Property {
@@ -57,8 +84,26 @@ function normalizeProperty(property: Property): Property {
   };
 }
 
-export async function getApprovedProperties(): Promise<Property[]> {
-  const res = await fetch(`${API_BASE_URL}/api/properties`, {
+function buildPropertyQuery(filters?: PropertyFilters) {
+  const params = new URLSearchParams();
+
+  if (!filters) return "";
+
+  Object.entries(filters).forEach(([key, value]) => {
+    if (value === undefined || value === null || value === "") return;
+    params.set(key, String(value));
+  });
+
+  const query = params.toString();
+  return query ? `?${query}` : "";
+}
+
+export async function getApprovedProperties(
+  filters?: PropertyFilters
+): Promise<Property[]> {
+  const query = buildPropertyQuery(filters);
+
+  const res = await fetch(`${API_BASE_URL}/api/properties${query}`, {
     cache: "no-store",
   });
 
@@ -121,18 +166,6 @@ export async function getLegalProviders(): Promise<PartnerItem[]> {
 
   return data.legalProviders || [];
 }
-export type IndustryUpdate = {
-  id: number;
-  category: "builder" | "legal";
-  title: string;
-  description?: string | null;
-  image_url?: string | null;
-  source_url: string;
-  source_name?: string | null;
-  status?: "draft" | "published";
-  created_at?: string;
-  updated_at?: string;
-};
 
 export async function getIndustryUpdates(
   category?: "builder" | "legal",

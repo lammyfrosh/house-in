@@ -2,7 +2,7 @@ import SearchResultsMapClient, {
   type MapProperty,
   type SearchSummary,
 } from "@/components/SearchResultsMapClient";
-import { getApprovedProperties } from "@/lib/api";
+import { getApprovedProperties, type Property } from "@/lib/api";
 
 function asString(v: string | string[] | undefined) {
   return Array.isArray(v) ? v[0] ?? "" : v ?? "";
@@ -30,6 +30,7 @@ const AREA_COORDS: Record<string, { lat: number; lng: number }> = {
 const STATE_CENTERS: Record<string, { lat: number; lng: number }> = {
   Lagos: { lat: 6.5244, lng: 3.3792 },
   Abuja: { lat: 9.0765, lng: 7.3986 },
+  FCT: { lat: 9.0765, lng: 7.3986 },
   Rivers: { lat: 4.8156, lng: 7.0498 },
   Edo: { lat: 6.335, lng: 5.6037 },
   Delta: { lat: 5.704, lng: 5.9339 },
@@ -50,6 +51,54 @@ function getCoords(area: string, city: string, state: string) {
   return { lat: 6.5244, lng: 3.3792 };
 }
 
+function propertyMatchesFilters(property: Property, summary: SearchSummary) {
+  const effectiveState =
+    norm(summary.state || "") === "other"
+      ? summary.otherState || ""
+      : summary.state || "";
+
+  const propertyState = norm(property.state);
+  const propertyArea = norm(property.area);
+  const propertyCity = norm(property.city);
+  const propertyPurpose = norm(property.purpose);
+  const propertyType = norm(property.property_type || property.propertyType || "");
+  const bedrooms = Number(property.bedrooms || 0);
+  const bathrooms = Number(property.bathrooms || 0);
+  const price = Number(property.price || 0);
+
+  if (effectiveState && propertyState !== norm(effectiveState)) return false;
+
+  if (
+    summary.area &&
+    !propertyArea.includes(norm(summary.area)) &&
+    !propertyCity.includes(norm(summary.area)) &&
+    !propertyState.includes(norm(summary.area))
+  ) {
+    return false;
+  }
+
+  if (summary.purpose && propertyPurpose !== norm(summary.purpose)) return false;
+
+  if (summary.propertyType && propertyType !== norm(summary.propertyType)) {
+    return false;
+  }
+
+  const effectiveBeds =
+    norm(summary.beds || "") === "other"
+      ? summary.otherBeds || ""
+      : summary.beds || "";
+
+  if (effectiveBeds && bedrooms < Number(effectiveBeds)) return false;
+
+  if (summary.baths && bathrooms < Number(summary.baths)) return false;
+
+  if (summary.minPrice && price < summary.minPrice) return false;
+
+  if (summary.maxPrice && price > summary.maxPrice) return false;
+
+  return true;
+}
+
 export default async function SearchPage({
   searchParams,
 }: {
@@ -59,18 +108,35 @@ export default async function SearchPage({
 
   const summary: SearchSummary = {
     state: asString(sp.state),
+    otherState: asString(sp.otherState),
     area: asString(sp.area),
     purpose: asString(sp.purpose),
     propertyType: asString(sp.propertyType),
     beds: asString(sp.beds),
+    otherBeds: asString(sp.otherBeds),
     baths: asString(sp.baths),
     minPrice: Number(asString(sp.minPrice) || 0),
     maxPrice: Number(asString(sp.maxPrice) || 0),
   };
 
-  const properties = await getApprovedProperties();
+  const properties = await getApprovedProperties({
+    state: summary.state,
+    otherState: summary.otherState,
+    area: summary.area,
+    purpose: summary.purpose,
+    propertyType: summary.propertyType,
+    beds: summary.beds,
+    otherBeds: summary.otherBeds,
+    baths: summary.baths,
+    minPrice: summary.minPrice || "",
+    maxPrice: summary.maxPrice || "",
+  });
 
-  const results: MapProperty[] = properties.map((p) => {
+  const filteredProperties = properties.filter((property) =>
+    propertyMatchesFilters(property, summary)
+  );
+
+  const results: MapProperty[] = filteredProperties.map((p) => {
     const coords = getCoords(p.area, p.city, p.state);
 
     return {
@@ -92,10 +158,20 @@ export default async function SearchPage({
     };
   });
 
+  const effectiveState =
+    norm(summary.state || "") === "other"
+      ? summary.otherState || ""
+      : summary.state || "";
+
+  const defaultCenter =
+    effectiveState && STATE_CENTERS[effectiveState]
+      ? STATE_CENTERS[effectiveState]
+      : { lat: 6.5244, lng: 3.3792 };
+
   return (
     <SearchResultsMapClient
       results={results}
-      defaultCenter={{ lat: 6.5244, lng: 3.3792 }}
+      defaultCenter={defaultCenter}
       searchSummary={summary}
     />
   );

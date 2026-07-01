@@ -211,13 +211,13 @@ export default function SearchResultsMapClient({
       if (filters.beds) {
         if (filters.beds === "other") {
           if (filters.otherBeds) {
-            if (propertyBedrooms !== Number(filters.otherBeds)) {
+            if (propertyBedrooms < Number(filters.otherBeds)) {
               return false;
             }
           } else if (propertyBedrooms <= 8) {
             return false;
           }
-        } else if (propertyBedrooms !== Number(filters.beds)) {
+        } else if (propertyBedrooms < Number(filters.beds)) {
           return false;
         }
       }
@@ -247,6 +247,7 @@ export default function SearchResultsMapClient({
     const stillExists = filteredResults.find(
       (p) => p.id === selectedProperty?.id
     );
+
     if (!stillExists) {
       setSelectedProperty(filteredResults[0]);
     }
@@ -317,9 +318,9 @@ export default function SearchResultsMapClient({
                   </h1>
 
                   <p className="mt-3 text-sm leading-7 text-[var(--color-text-muted)]">
-                    Filter listings and browse matching properties beside the map.
-                    Hover on desktop or tap on mobile to update the map to the
-                    selected property area.
+                    Filter listings and browse matching properties beside the
+                    map. Hover on desktop or tap on mobile to update the map to
+                    the selected property area.
                   </p>
                 </div>
 
@@ -405,7 +406,9 @@ export default function SearchResultsMapClient({
 
                   <select
                     value={filters.propertyType}
-                    onChange={(e) => updateFilter("propertyType", e.target.value)}
+                    onChange={(e) =>
+                      updateFilter("propertyType", e.target.value)
+                    }
                     className="h-12 rounded-xl border border-[var(--color-border)] bg-white px-4 text-sm outline-none focus:border-[var(--color-primary-dark)]"
                   >
                     <option value="">All Types</option>
@@ -424,7 +427,7 @@ export default function SearchResultsMapClient({
                     <option value="">Any Bedrooms</option>
                     {BED_OPTIONS.map((bed) => (
                       <option key={bed} value={bed}>
-                        {bed}
+                        {bed}+
                       </option>
                     ))}
                     <option value="other">Other</option>
